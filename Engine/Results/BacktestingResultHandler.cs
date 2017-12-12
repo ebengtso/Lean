@@ -54,7 +54,7 @@ namespace QuantConnect.Lean.Engine.Results
         private ConcurrentQueue<Packet> _messages;
         private ConcurrentDictionary<string, Chart> _charts;
         private bool _isActive = true;
-        private object _chartLock = new Object();
+        protected object _chartLock = new Object();
         private object _runtimeLock = new Object();
         private readonly Dictionary<string, string> _runtimeStatistics = new Dictionary<string, string>();
         private double _daysProcessed = 0;
