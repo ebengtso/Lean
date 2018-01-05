@@ -57,13 +57,15 @@ namespace QuantConnect.Lean.Engine.Alphas
         private readonly ConcurrentDictionary<Symbol, int> _dailyAlphaCountPerSymbol = new ConcurrentDictionary<Symbol, int>();
         private readonly ConcurrentDictionary<Symbol, int> _alphaCountPerSymbol = new ConcurrentDictionary<Symbol, int>();
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Gets a flag indicating if this handler's thread is still running and processing messages
+        /// </summary>
         public bool IsActive => !_cancellationTokenSource?.IsCancellationRequested ?? false;
 
         /// <summary>
         /// Gets the current alpha runtime statistics
         /// </summary>
-        public AlphaRuntimeStatistics RuntimeStatistics { get; } = new AlphaRuntimeStatistics();
+        public AlphaRuntimeStatistics RuntimeStatistics { get; private set; }
 
         /// <summary>
         /// Gets or sets the runtime statistics updated. This is responsible for estimating alpha value as
@@ -111,7 +113,13 @@ namespace QuantConnect.Lean.Engine.Alphas
         /// </summary>
         protected AlphaManager AlphaManager { get; private set; }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Initializes this alpha handler to accept alphas from the specified algorithm
+        /// </summary>
+        /// <param name="job">The algorithm job</param>
+        /// <param name="algorithm">The algorithm instance</param>
+        /// <param name="messagingHandler">Handler used for sending alphas</param>
+        /// <param name="api">Api instance</param>
         public virtual void Initialize(AlgorithmNodePacket job, IAlgorithm algorithm, IMessagingHandler messagingHandler, IApi api)
         {
             // initializing these properties just in case, doens't hurt to have them populated
@@ -125,6 +133,7 @@ namespace QuantConnect.Lean.Engine.Alphas
             }
 
             AlphaManager = CreateAlphaManager();
+            RuntimeStatistics = new AlphaRuntimeStatistics();
 
             // wire events to update runtime statistics at key moments in alpha life cycle (new/period end/analysis end)
             AlphaManager.AlphaReceived += (sender, context) => StatisticsUpdater.OnAlphaReceived(RuntimeStatistics, context);
@@ -153,7 +162,11 @@ namespace QuantConnect.Lean.Engine.Alphas
             //Algorithm.AddChart(_dailyAlphaCountPerSymbolChart);
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Invoked after the algorithm's Initialize method was called allowing the alpha handler to check
+        /// other things, such as sampling period for backtests
+        /// </summary>
+        /// <param name="algorithm">The algorithm instance</param>
         public void OnAfterAlgorithmInitialized(IAlgorithm algorithm)
         {
             if (_isNotFrameworkAlgorithm)
@@ -177,7 +190,9 @@ namespace QuantConnect.Lean.Engine.Alphas
             }
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Performs processing in sync with the algorithm's time loop to provide consisten reading of data
+        /// </summary>
         public virtual void ProcessSynchronousEvents()
         {
             if (_isNotFrameworkAlgorithm)
@@ -235,7 +250,9 @@ namespace QuantConnect.Lean.Engine.Alphas
             }
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Thread entry point for asynchronous processing
+        /// </summary>
         public virtual void Run()
         {
             if (_isNotFrameworkAlgorithm)
@@ -267,7 +284,9 @@ namespace QuantConnect.Lean.Engine.Alphas
             Log.Trace("DefaultAlphaHandler.Run(): Ending Thread...");
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Stops processing in the <see cref="IAlphaHandler.Run"/> method
+        /// </summary>
         public void Exit()
         {
             if (_isNotFrameworkAlgorithm)
@@ -278,11 +297,8 @@ namespace QuantConnect.Lean.Engine.Alphas
             Log.Trace("DefaultAlphaHandler.Run(): Exiting Thread...");
 
             // send final alpha scoring updates before we exit
-            _messages.Enqueue(new AlphaPacket
-            {
-                AlgorithmId = AlgorithmId,
-                Alphas = AlphaManager.GetUpdatedContexts().Select(context => context.Alpha).ToList()
-            });
+            var alphas = AlphaManager.GetUpdatedContexts().Select(context => context.Alpha).ToList();
+            _messages.Enqueue(new AlphaResultPacket(AlgorithmId, Job.UserId, alphas));
 
             _cancellationTokenSource.Cancel(false);
         }
@@ -311,7 +327,7 @@ namespace QuantConnect.Lean.Engine.Alphas
                 var alphas = AlphaManager.GetUpdatedContexts().Select(context => context.Alpha).ToList();
                 if (alphas.Count > 0)
                 {
-                    _messages.Enqueue(new AlphaPacket
+                    _messages.Enqueue(new AlphaResultPacket
                     {
                         AlgorithmId = AlgorithmId,
                         Alphas = alphas
@@ -344,7 +360,7 @@ namespace QuantConnect.Lean.Engine.Alphas
         protected void OnAlphasGenerated(AlphaCollection collection)
         {
             // send message for newly created alphas
-            Packet packet = new AlphaPacket(AlgorithmId, collection.Alphas);
+            Packet packet = new AlphaResultPacket(AlgorithmId, Job.UserId, collection.Alphas);
             _messages.Enqueue(packet);
 
             AlphaManager.AddAlphas(collection);
