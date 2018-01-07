@@ -36,8 +36,8 @@ namespace QuantConnect.Brokerages.Bitfinex
     /// </summary>
     public partial class BitfinexBrokerage : BaseWebsocketsBrokerage, IDataQueueHandler, IGetTick
     {
-        #region Declarations
 
+        #region Declarations
         private readonly object _fillLock = new object();
         private const string Buy = "buy";
         private const string Sell = "sell";
@@ -48,7 +48,6 @@ namespace QuantConnect.Brokerages.Bitfinex
         private const string Limit = "limit";
         private const string Stop = "stop";
         private const string Usd = "usd";
-        private readonly string _wallet;
         private readonly object _lockerConnectionMonitor = new object();
         private DateTime _lastHeartbeatUtcTime = DateTime.UtcNow;
         private readonly IAlgorithm _algorithm;
@@ -67,7 +66,7 @@ namespace QuantConnect.Brokerages.Bitfinex
         /// Stores fill messages
         /// </summary>
         public ConcurrentDictionary<int, BitfinexFill> FillSplit { get; set; }
-
+ 
         private enum ChannelCode
         {
             pubticker = 0,
@@ -90,12 +89,9 @@ namespace QuantConnect.Brokerages.Bitfinex
             : base(url, websocket, restClient, apiKey, apiSecret, QuantConnect.Market.Bitfinex, "bitfinex")
         {
             WebSocket = websocket;
-            WebSocket.Initialize(url);
-            ApiKey = apiKey;
-            ApiSecret = apiSecret;
+
             _algorithm = algorithm;
             FillSplit = new ConcurrentDictionary<int, BitfinexFill>();
-            _wallet = _algorithm.BrokerageModel.AccountType == AccountType.Margin ? "trading" : "exchange";
 
             WebSocket.Open += (s, e) => { Authenticate(); };
         }
@@ -110,6 +106,9 @@ namespace QuantConnect.Brokerages.Bitfinex
         /// <returns></returns>
         public override bool PlaceOrder(Order order)
         {
+
+            LockStream();
+
             var quantity = order.Quantity;
             FillSplit.TryAdd(order.Id, new BitfinexFill(order));
 
@@ -129,8 +128,10 @@ namespace QuantConnect.Brokerages.Bitfinex
             }
 
             var result = PlaceOrder(order, crossOrder);
-
             order.Quantity = quantity;
+
+            UnlockStream();
+
             return result;
         }
 
@@ -160,33 +161,16 @@ namespace QuantConnect.Brokerages.Bitfinex
                 }
                 else
                 {
-                    Order caching = null;
-                    if (order.Type == OrderType.Market)
+                    if (order.Type == OrderType.Market || order.Type == OrderType.Limit || order.Type == OrderType.StopMarket)
                     {
-                        caching = new MarketOrder();
-                    }
-                    else if (order.Type == OrderType.Limit)
-                    {
-                        caching = new LimitOrder();
-                    }
-                    else if (order.Type == OrderType.StopMarket)
-                    {
-                        caching = new StopMarketOrder();
                     }
                     else
                     {
                         throw new Exception("BitfinexBrokerage.PlaceOrder(): Unsupported order type was encountered: " + order.Type);
                     }
 
-                    caching.Id = order.Id;
-                    caching.BrokerId = new List<string> { placing.OrderId.ToString() };
-                    caching.Price = order.Price;
-                    caching.Quantity = totalQuantity;
-                    caching.Status = OrderStatus.Submitted;
-                    caching.Symbol = order.Symbol;
-                    caching.Time = order.Time;
-
-                    CachedOrderIDs.TryAdd(order.Id, caching);
+                    order.BrokerId = new List<string> { placing.OrderId.ToString() };
+                    CachedOrderIDs.TryAdd(order.Id, order);
                 }
                 if (crossOrder != null && crossOrder.Status != OrderStatus.Submitted)
                 {
@@ -196,7 +180,7 @@ namespace QuantConnect.Brokerages.Bitfinex
                 }
 
                 OnOrderEvent(new OrderEvent(order, DateTime.UtcNow, 0, "Bitfinex Order Event") { Status = OrderStatus.Submitted });
-                Log.Trace("BitfinexBrokerage.PlaceOrder(): Order completed successfully orderid:" + order.Id);
+                Log.Trace("BitfinexBrokerage.PlaceOrder(): Order completed successfully orderId:" + order.Id);
             }
             else
             {
@@ -240,9 +224,9 @@ namespace QuantConnect.Brokerages.Bitfinex
 
                 foreach (var id in order.BrokerId)
                 {
-                    var cancelPost = new OrderStatusPost
+                    var cancelPost = new OrderIdPost
                     {
-                        OrderId = order.Id
+                        OrderId = Convert.ToInt64(id)
                     };
 
                     var response = ExecutePost(OrderCancelRequestUrl, cancelPost);
@@ -373,7 +357,7 @@ namespace QuantConnect.Brokerages.Bitfinex
 
                 foreach (var item in getting)
                 {
-                    if (item.Type == _wallet && item.Amount > 0)
+                    if (item.Type == GetWallet() && item.Amount > 0)
                     {
                         if (item.Currency.Equals(Usd, StringComparison.InvariantCultureIgnoreCase))
                         {
@@ -492,9 +476,10 @@ namespace QuantConnect.Brokerages.Bitfinex
 
         private IRestResponse ExecutePost(string resource, object data)
         {
-            if (data.GetType().BaseType == typeof(PostBase))
+            if (data.GetType().BaseType == typeof(PostBase) || data.GetType() == typeof(PostBase))
             {
-                ((PostBase)data).Nonce = Time.DateTimeToUnixTimeStamp(DateTime.UtcNow);
+                ((PostBase)data).Nonce = Time.DateTimeToUnixTimeStamp(DateTime.UtcNow).ToString();
+                ((PostBase)data).Request = resource;
             }
 
             var json = JsonConvert.SerializeObject(data);
@@ -525,5 +510,11 @@ namespace QuantConnect.Brokerages.Bitfinex
                 return null;
             }
         }
+
+        private string GetWallet()
+        {
+            return _algorithm.BrokerageModel.AccountType == AccountType.Margin ? "trading" : "exchange";
+        }
+
     }
 }
