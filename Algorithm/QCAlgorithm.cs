@@ -121,7 +121,7 @@ namespace QuantConnect.Algorithm
             SubscriptionManager = new SubscriptionManager(Settings, _timeKeeper);
 
             Securities = new SecurityManager(_timeKeeper);
-            Transactions = new SecurityTransactionManager(Securities);
+            Transactions = new SecurityTransactionManager(this, Securities);
             Portfolio = new SecurityPortfolioManager(Securities, Transactions, DefaultOrderProperties);
             BrokerageModel = new DefaultBrokerageModel();
             Notify = new NotificationManager(false); // Notification manager defaults to disabled.
@@ -504,7 +504,7 @@ namespace QuantConnect.Algorithm
             // if the benchmark hasn't been set yet, set it
             if (Benchmark == null)
             {
-                if (_benchmarkSymbol != null && _benchmarkSymbol != QuantConnect.Symbol.Empty)
+                if (_benchmarkSymbol != null)
                 {
                     // if the requested benchmark symbol wasn't already added, then add it now
                     // we do a simple compare here for simplicity, also it avoids confusion over
@@ -562,6 +562,13 @@ namespace QuantConnect.Algorithm
                     equity.VolatilityModel = new StandardDeviationOfReturnsVolatilityModel(periods);
                 }
             }
+        }
+
+        /// <summary>
+        /// Called when the algorithm has completed initialization and warm up.
+        /// </summary>
+        public virtual void OnWarmupFinished()
+        {
         }
 
         /// <summary>
