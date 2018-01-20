@@ -46,6 +46,7 @@
     <Compile Include="OandaDataProvider.cs" />
     <Compile Include="Downloader.cs" />
     <Compile Include="OandaAPI.cs" />
+    <Compile Include="LeanDataFix.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Newtonsoft.Json">

@@ -5,6 +5,7 @@ using QuantConnect.Interfaces;
 using QuantConnect.Logging;
 using QuantConnect.Util;
 using QuantConnect.Securities;
+using OandaDataProvider;
 
 namespace QuantConnect.Lean.Engine.DataFeeds
 {
@@ -45,14 +46,14 @@ namespace QuantConnect.Lean.Engine.DataFeeds
             DateTime date;
             Resolution resolution;
 
-            if (LeanData.TryParsePath(key, out symbol, out date, out resolution))
+            if (LeanDataFix.TryParsePath(key, out symbol, out date, out resolution))
             {
                 Log.Trace("OandaDataProvider.Fetch(): Attempting to get data from Oanda.com's data library for symbol({0}), resolution({1}) and date({2}).",
                     symbol.Value,
                     resolution,
                     date.Date.ToShortDateString());
 
-                var downloadSuccessful = _api.DownloadData(symbol, resolution, date, date.AddDays(1));
+                var downloadSuccessful = _api.DownloadData(symbol, resolution, date);
 
                 if (downloadSuccessful)
                 {
@@ -71,5 +72,6 @@ namespace QuantConnect.Lean.Engine.DataFeeds
 
             return null;
         }
+
     }
 }

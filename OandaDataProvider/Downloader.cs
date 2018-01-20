@@ -4,6 +4,7 @@ using System.IO.Compression;
 using System.Linq;
 using Newtonsoft.Json.Linq;
 using QuantConnect;
+using QuantConnect.Logging;
 using QuantConnect.Util;
 using RestSharp;
 
@@ -24,7 +25,7 @@ namespace QuantConnect.Lean.Engine.DataFeeds
             _token = token;
             _dataPath = dataPath;
         }
-        public bool DownloadData(Symbol symbol, Resolution resolution, DateTime date, DateTime todate)
+        public bool DownloadData(Symbol symbol, Resolution resolution, DateTime date)
         {
             string r = "S5";
             string filename = "";
@@ -55,9 +56,10 @@ namespace QuantConnect.Lean.Engine.DataFeeds
             var auth = "Bearer " + _token;
             client.Timeout = 120000;
             string s = string.Format("{0}_{1}",symbol.ID.Symbol.Substring(0,symbol.ID.Symbol.Length-3),symbol.ID.Symbol.Substring(symbol.ID.Symbol.Length - 3));
-            string url = string.Format(_url, s, _price, ToUnixTimestamp(date), ToUnixTimestamp(todate), r);
+            DateTime todate = date.ToUniversalTime().AddDays(1);
+            string url = string.Format(_url, s, _price, ToUnixTimestamp(date.ToUniversalTime()), ToUnixTimestamp(todate), r);
             client.BaseUrl = new Uri(url);
-
+            Log.Trace(string.Format("Downloading {0}", url));
             var request = new RestRequest();
             request.AddHeader("content-type", "application/json");
             request.AddHeader("Authorization", auth);
@@ -112,7 +114,7 @@ namespace QuantConnect.Lean.Engine.DataFeeds
             Instrument ins = Instrument.FromJson(json);
             foreach (Candle candle in ins.Candles)
             {
-                content = content + string.Format(row, new object[] { (candle.Time-date).TotalMilliseconds, candle.Bid.O, candle.Bid.H, candle.Bid.L, candle.Bid.C, candle.Volume, candle.Ask.O, candle.Ask.H, candle.Ask.L, candle.Ask.C, candle.Volume }) + Environment.NewLine;
+                content = content + string.Format(row, new object[] { (candle.Time.ToUniversalTime()-date.ToUniversalTime()).TotalMilliseconds, candle.Bid.O, candle.Bid.H, candle.Bid.L, candle.Bid.C, candle.Volume, candle.Ask.O, candle.Ask.H, candle.Ask.L, candle.Ask.C, candle.Volume }) + Environment.NewLine;
             }
             return content;
         }
@@ -128,7 +130,7 @@ namespace QuantConnect.Lean.Engine.DataFeeds
             var d = new Downloader();
             d.Initialize("token here", "../");
             var symbol = QuantConnect.Symbol.Create("JP225USD", SecurityType.Cfd, Market.Oanda);
-            d.DownloadData(symbol, Resolution.Minute, new DateTime(2018, 1, 17, 0, 0, 0, 0, System.DateTimeKind.Utc),new DateTime(2018, 1, 18, 0, 0, 0, 0, System.DateTimeKind.Utc));
+            d.DownloadData(symbol, Resolution.Minute, new DateTime(2018, 1, 17, 0, 0, 0, 0, System.DateTimeKind.Utc));
         }
     }
 
