@@ -67,13 +67,14 @@ namespace QuantConnect.Lean.Engine.DataFeeds
             long earlyBirdTicks;
             var changes = SecurityChanges.None;
             var data = new List<DataFeedPacket>();
+            // NOTE: Tight coupling in UniverseSelection.ApplyUniverseSelection
             var universeData = new Dictionary<Universe, BaseDataCollection>();
+            var universeDataForTimeSliceCreate = new Dictionary<Universe, BaseDataCollection>();
 
             SecurityChanges newChanges;
             do
             {
                 earlyBirdTicks = MaxDateTimeTicks;
-                universeData.Clear();
                 newChanges = SecurityChanges.None;
                 foreach (var subscription in subscriptions)
                 {
@@ -166,14 +167,16 @@ namespace QuantConnect.Lean.Engine.DataFeeds
                 {
                     var universe = kvp.Key;
                     var baseDataCollection = kvp.Value;
+                    universeDataForTimeSliceCreate[universe] = baseDataCollection;
                     newChanges += _universeSelection.ApplyUniverseSelection(universe, _frontier, baseDataCollection);
                 }
+                universeData.Clear();;
 
                 changes += newChanges;
             }
             while (newChanges != SecurityChanges.None);
 
-            var timeSlice = TimeSlice.Create(_frontier, _sliceTimeZone, _cashBook, data, changes);
+            var timeSlice = TimeSlice.Create(_frontier, _sliceTimeZone, _cashBook, data, changes, universeDataForTimeSliceCreate);
 
             // next frontier time
             _frontier = new DateTime(Math.Max(earlyBirdTicks, _frontier.Ticks), DateTimeKind.Utc);

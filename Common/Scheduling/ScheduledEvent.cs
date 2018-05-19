@@ -110,9 +110,7 @@ namespace QuantConnect.Scheduling
         /// <param name="callback">Delegate to be called each time an event passes</param>
         public ScheduledEvent(string name, IEnumerator<DateTime> orderedEventUtcTimes, Action<string, DateTime> callback = null)
         {
-            // make the event name unique
-            _name = name + "-" + Guid.NewGuid().ToString("N");
-
+            _name = name;
             _callback = callback;
             _orderedEventUtcTimes = orderedEventUtcTimes;
 
@@ -120,6 +118,23 @@ namespace QuantConnect.Scheduling
             _endOfScheduledEvents = !_orderedEventUtcTimes.MoveNext();
 
             Enabled = true;
+        }
+
+        /// <summary>Serves as the default hash function. </summary>
+        /// <returns>A hash code for the current object.</returns>
+        /// <filterpriority>2</filterpriority>
+        public override int GetHashCode()
+        {
+            return Name.GetHashCode();
+        }
+
+        /// <summary>Determines whether the specified object is equal to the current object.</summary>
+        /// <returns>true if the specified object  is equal to the current object; otherwise, false.</returns>
+        /// <param name="obj">The object to compare with the current object. </param>
+        /// <filterpriority>2</filterpriority>
+        public override bool Equals(object obj)
+        {
+            return !ReferenceEquals(null, obj) && ReferenceEquals(this, obj);
         }
 
         /// <summary>
@@ -248,7 +263,7 @@ namespace QuantConnect.Scheduling
 
                 // This scheduled event failed, so don't repeat the same event
                 _needsMoveNext = true;
-                throw new ScheduledEventException(ex.ToString());
+                throw new ScheduledEventException(_name, ex.Message, ex);
             }
         }
     }
@@ -259,17 +274,19 @@ namespace QuantConnect.Scheduling
     public class ScheduledEventException : Exception
     {
         /// <summary>
-        /// Exception message
+        /// Gets the name of the scheduled event
         /// </summary>
-        public string ScheduledEventExceptionMessage { get; }
+        public string ScheduledEventName { get; }
 
         /// <summary>
         /// ScheduledEventException constructor
         /// </summary>
-        /// <param name="exceptionMessage">The exception as a string</param>
-        public ScheduledEventException(string exceptionMessage) : base(exceptionMessage)
+        /// <param name="name">The name of the scheduled event</param>
+        /// <param name="message">The exception as a string</param>
+        /// <param name="innerException">The exception that is the cause of the current exception</param>
+        public ScheduledEventException(string name, string message, Exception innerException) : base(message, innerException)
         {
-            ScheduledEventExceptionMessage = exceptionMessage;
+            ScheduledEventName = name;
         }
     }
 }

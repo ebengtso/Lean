@@ -34,6 +34,8 @@ namespace QuantConnect.Algorithm
 {
     public partial class QCAlgorithm
     {
+        private readonly Dictionary<IntPtr, PythonActivator> _pythonActivators = new Dictionary<IntPtr, PythonActivator>();
+
         public PandasConverter PandasConverter { get; private set; }
 
         /// <summary>
@@ -315,46 +317,38 @@ namespace QuantConnect.Algorithm
         /// <param name="selector">Selects a value from the BaseData send into the indicator, if null defaults to a cast (x => (T)x)</param>
         public void RegisterIndicator(Symbol symbol, PyObject indicator, IDataConsolidator consolidator, PyObject selector = null)
         {
-            object managedObject = null;
+            IndicatorBase<IndicatorDataPoint> indicatorDataPoint;
+            IndicatorBase<IBaseDataBar> indicatorDataBar;
+            IndicatorBase<TradeBar> indicatorTradeBar;
+
+            if (indicator.TryConvert(out indicatorDataPoint))
+            {
+                Func<IBaseData, decimal> func = null;
+                selector?.TryConvert(out func);
+                RegisterIndicator(symbol, indicatorDataPoint, consolidator, func);
+                return;
+            }
+            else if (indicator.TryConvert(out indicatorDataBar))
+            {
+                Func<IBaseData, IBaseDataBar> func = null;
+                selector?.TryConvert(out func);
+                RegisterIndicator(symbol, indicatorDataBar, consolidator, func);
+                return;
+            }
+            else if (indicator.TryConvert(out indicatorTradeBar))
+            {
+                Func<IBaseData, TradeBar> func = null;
+                selector?.TryConvert(out func);
+                RegisterIndicator(symbol, indicatorTradeBar, consolidator, func);
+                return;
+            }
 
             using (Py.GIL())
             {
-                var pythonType = indicator.GetPythonType();
-                if (pythonType.Repr().Contains("QuantConnect"))
+                if (!indicator.HasAttr("Update"))
                 {
-                    managedObject = indicator.AsManagedObject(pythonType.As<Type>());
+                    throw new ArgumentException($"QCAlgorithm.RegisterIndicator(): Update method must be defined. Please checkout {indicator}");
                 }
-                else if (!indicator.HasAttr("Update"))
-                {
-                    throw new ArgumentException($"Update method must be defined. Please checkout {indicator}");
-                }
-            }
-
-            // Lean indicators are directed to other RegisterIndicator overloads
-            if (managedObject != null)
-            {
-                var indicatorDataPoint = managedObject as Indicator;
-                if (indicatorDataPoint != null)
-                {
-                    var managedSelector = (Func<IBaseData, decimal>)selector?.AsManagedObject(typeof(Func<IBaseData, decimal>));
-                    RegisterIndicator(symbol, indicatorDataPoint, consolidator, managedSelector);
-                }
-
-                var indicatorDataBar = managedObject as BarIndicator;
-                if (indicatorDataBar != null)
-                {
-                    var managedSelector = (Func<IBaseData, IBaseDataBar>)selector?.AsManagedObject(typeof(Func<IBaseData, IBaseDataBar>));
-                    RegisterIndicator(symbol, indicatorDataBar, consolidator, managedSelector);
-                }
-
-                var indicatorTradeBar = managedObject as TradeBarIndicator;
-                if (indicatorTradeBar != null)
-                {
-                    var managedSelector = (Func<IBaseData, TradeBar>)selector?.AsManagedObject(typeof(Func<IBaseData, TradeBar>));
-                    RegisterIndicator(symbol, indicatorTradeBar, consolidator, managedSelector);
-                }
-
-                return;
             }
 
             // register the consolidator for automatic updates via SubscriptionManager
@@ -368,6 +362,39 @@ namespace QuantConnect.Algorithm
                     indicator.InvokeMethod("Update", new[] { consolidated.ToPython() });
                 }
             };
+        }
+
+        /// <summary>
+        /// Plot a chart using string series name, with value.
+        /// </summary>
+        /// <param name="series">Name of the plot series</param>
+        /// <param name="pyObject">PyObject with the value to plot</param>
+        /// <seealso cref="Plot(string,decimal)"/>
+        public void Plot(string series, PyObject pyObject)
+        {
+            IIndicator<IndicatorDataPoint> indicator;
+
+            using (Py.GIL())
+            {
+                var pythonType = pyObject.GetPythonType();
+
+                try
+                {
+                    var type = pythonType.As<Type>();
+                    indicator = pyObject.AsManagedObject(type) as IIndicator<IndicatorDataPoint>;
+
+                    if (indicator == null)
+                    {
+                        throw new ArgumentException();
+                    }
+                }
+                catch
+                {
+                    throw new ArgumentException($"QCAlgorithm.Plot(): The last argument should be a QuantConnect Indicator object, {pythonType.Repr()} was provided.");
+                }
+            }
+
+            Plot(series, indicator.Current.Value);
         }
 
         /// <summary>
@@ -496,8 +523,6 @@ namespace QuantConnect.Algorithm
         public PyObject History(PyObject tickers, int periods, Resolution? resolution = null)
         {
             var symbols = GetSymbolsFromPyObject(tickers);
-            if (symbols == null) return null;
-
             return PandasConverter.GetDataFrame(History(symbols, periods, resolution));
         }
 
@@ -512,8 +537,6 @@ namespace QuantConnect.Algorithm
         public PyObject History(PyObject tickers, TimeSpan span, Resolution? resolution = null)
         {
             var symbols = GetSymbolsFromPyObject(tickers);
-            if (symbols == null) return null;
-
             return PandasConverter.GetDataFrame(History(symbols, span, resolution));
         }
 
@@ -528,8 +551,6 @@ namespace QuantConnect.Algorithm
         public PyObject History(PyObject tickers, DateTime start, DateTime end, Resolution? resolution = null)
         {
             var symbols = GetSymbolsFromPyObject(tickers);
-            if (symbols == null) return null;
-
             return PandasConverter.GetDataFrame(History(symbols, start, end, resolution));
         }
 
@@ -545,7 +566,6 @@ namespace QuantConnect.Algorithm
         public PyObject History(PyObject type, PyObject tickers, DateTime start, DateTime end, Resolution? resolution = null)
         {
             var symbols = GetSymbolsFromPyObject(tickers);
-            if (symbols == null) return null;
 
             var requests = symbols.Select(x =>
             {
@@ -573,7 +593,6 @@ namespace QuantConnect.Algorithm
         public PyObject History(PyObject type, PyObject tickers, int periods, Resolution? resolution = null)
         {
             var symbols = GetSymbolsFromPyObject(tickers);
-            if (symbols == null) return null;
 
             var requests = symbols.Select(x =>
             {
@@ -746,35 +765,34 @@ namespace QuantConnect.Algorithm
         }
 
         /// <summary>
-        /// Gets the symbols/string from a PyObject
+        /// Gets Enumerable of <see cref="Symbol"/> from a PyObject
         /// </summary>
-        /// <param name="pyObject">PyObject containing symbols</param>
-        /// <returns>List of symbols</returns>
-        public List<Symbol> GetSymbolsFromPyObject(PyObject pyObject)
+        /// <param name="pyObject">PyObject containing Symbol or Array of Symbol</param>
+        /// <returns>Enumerable of Symbol</returns>
+        private IEnumerable<Symbol> GetSymbolsFromPyObject(PyObject pyObject)
         {
-            using (Py.GIL())
+            Symbol symbol;
+            Symbol[] symbols;
+
+            if (pyObject.TryConvert(out symbol))
             {
-                // If not a PyList, convert it into one
-                if (!PyList.IsListType(pyObject))
+                if (symbol == null) throw new ArgumentException(_symbolEmptyErrorMessage);
+                yield return symbol;
+            }
+            else if (pyObject.TryConvert(out symbols))
+            {
+                foreach (var s in symbols)
                 {
-                    var tmp = new PyList();
-                    tmp.Append(pyObject);
-                    pyObject = tmp;
+                    if (s == null) throw new ArgumentException(_symbolEmptyErrorMessage);
+                    yield return s;
                 }
-
-                var symbols = new List<Symbol>();
-                foreach (PyObject item in pyObject)
+            }
+            else
+            {
+                using (Py.GIL())
                 {
-                    var symbol = (Symbol)item.AsManagedObject(typeof(Symbol));
-
-                    if (string.IsNullOrWhiteSpace(symbol.Value))
-                    {
-                        continue;
-                    }
-
-                    symbols.Add(symbol);
+                    throw new ArgumentException($"Argument type should be Symbol or a list of Symbol. Object: {pyObject}.");
                 }
-                return symbols.Count == 0 ? null : symbols;
             }
         }
 
@@ -869,22 +887,27 @@ namespace QuantConnect.Algorithm
         /// <returns>Type object</returns>
         private Type CreateType(PyObject type)
         {
-            using (Py.GIL())
+            PythonActivator pythonType;
+            if (!_pythonActivators.TryGetValue(type.Handle, out pythonType))
             {
-                var an = new AssemblyName(type.Repr().Split('.')[1].Replace("\'>", ""));
-                var assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(an, AssemblyBuilderAccess.Run);
-                var moduleBuilder = assemblyBuilder.DefineDynamicModule("MainModule");
-                return moduleBuilder.DefineType(an.Name,
-                        TypeAttributes.Public |
-                        TypeAttributes.Class |
-                        TypeAttributes.AutoClass |
-                        TypeAttributes.AnsiClass |
-                        TypeAttributes.BeforeFieldInit |
-                        TypeAttributes.AutoLayout,
-                        // If the type has IsAuthCodeSet member, it is a PythonQuandl
-                        type.HasAttr("IsAuthCodeSet") ? typeof(PythonQuandl) : typeof(PythonData))
-                    .CreateType();
+                AssemblyName an;
+                using (Py.GIL())
+                {
+                    an = new AssemblyName(type.Repr().Split('\'')[1]);
+                }
+                var typeBuilder = AppDomain.CurrentDomain
+                    .DefineDynamicAssembly(an, AssemblyBuilderAccess.Run)
+                    .DefineDynamicModule("MainModule")
+                    .DefineType(an.Name, TypeAttributes.Class, typeof(DynamicData));
+
+                pythonType = new PythonActivator(typeBuilder.CreateType(), type);
+
+                ObjectActivator.AddActivator(pythonType.Type, pythonType.Factory);
+
+                // Save to prevent future additions
+                _pythonActivators.Add(type.Handle, pythonType);
             }
+            return pythonType.Type;
         }
     }
 }

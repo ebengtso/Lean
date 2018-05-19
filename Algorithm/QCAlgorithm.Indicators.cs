@@ -630,8 +630,7 @@ namespace QuantConnect.Algorithm
         /// <param name="resolution">The resolution</param>
         /// <param name="selector">Selects a value from the BaseData to send into the indicator, if null defaults to the Value property of BaseData (x => x.Value)</param>
         /// <returns>The moving average convergence divergence between the fast and slow averages</returns>
-        [Obsolete("MACD Default MovingAverageType will change 2018-03-01 from MovingAverageType.Simple to MovingAverageType.Exponential")] 
-        public MovingAverageConvergenceDivergence MACD(Symbol symbol, int fastPeriod, int slowPeriod, int signalPeriod, MovingAverageType type = MovingAverageType.Simple, Resolution? resolution = null, Func<IBaseData, decimal> selector = null)
+        public MovingAverageConvergenceDivergence MACD(Symbol symbol, int fastPeriod, int slowPeriod, int signalPeriod, MovingAverageType type = MovingAverageType.Exponential, Resolution? resolution = null, Func<IBaseData, decimal> selector = null)
         {
             var name = CreateIndicatorName(symbol, string.Format("MACD({0},{1})", fastPeriod, slowPeriod), resolution);
             var macd = new MovingAverageConvergenceDivergence(name, fastPeriod, slowPeriod, signalPeriod, type);
@@ -978,6 +977,7 @@ namespace QuantConnect.Algorithm
         /// <param name="resolution">The resolution</param>
         /// <param name="selector">Selects a value from the BaseData to send into the indicator, if null defaults to the Value property of BaseData (x => x.Value)</param>
         /// <returns>The RelativeStrengthIndex indicator for the requested symbol over the specified period</returns>
+        [Obsolete("The default MovingAverageType for the RSI helper method is changing to Wilders. If you depend on using Simple, please ensure you specify it as a parameter and not rely on the default value.")]
         public RelativeStrengthIndex RSI(Symbol symbol, int period, MovingAverageType movingAverageType = MovingAverageType.Simple, Resolution? resolution = null, Func<IBaseData, decimal> selector = null)
         {
             var name = CreateIndicatorName(symbol, "RSI" + period, resolution);
@@ -1213,6 +1213,20 @@ namespace QuantConnect.Algorithm
         }
 
         /// <summary>
+        /// Creates the canonical VWAP indicator that resets each day. The indicator will be automatically
+        /// updated on the security's configured resolution.
+        /// </summary>
+        /// <param name="symbol">The symbol whose VWAP we want</param>
+        /// <returns>The IntradayVWAP for the specified symbol</returns>
+        public IntradayVwap VWAP(Symbol symbol)
+        {
+            var name = CreateIndicatorName(symbol, "VWAP", null);
+            var vwap = new IntradayVwap(name);
+            RegisterIndicator(symbol, vwap);
+            return vwap;
+        }
+
+        /// <summary>
         /// Creates a new Williams %R indicator. This will compute the percentage change of
         /// the current closing price in relation to the high and low of the past N periods.
         /// The indicator will be automatically updated on the given resolution.
@@ -1228,6 +1242,24 @@ namespace QuantConnect.Algorithm
             var williamspercentr = new WilliamsPercentR(name, period);
             RegisterIndicator(symbol, williamspercentr, resolution, selector);
             return williamspercentr;
+        }
+
+        /// <summary>
+        /// Creates a WilderMovingAverage indicator for the symbol.
+        /// The indicator will be automatically updated on the given resolution.
+        /// </summary>
+        /// <param name="symbol">The symbol whose WMA we want</param>
+        /// <param name="period">The period of the WMA</param>
+        /// <param name="resolution">The resolution</param>
+        /// <param name="selector">Selects a value from the BaseData to send into the indicator, if null defaults to the Value property of BaseData (x => x.Value)</param>
+        /// <returns>The WilderMovingAverage for the given parameters</returns>
+        /// <remarks>WWMA for Welles Wilder Moving Average</remarks>
+        public WilderMovingAverage WWMA(Symbol symbol, int period, Resolution? resolution = null, Func<IBaseData, decimal> selector = null)
+        {
+            string name = CreateIndicatorName(symbol, "WWMA" + period, resolution);
+            var wwma = new WilderMovingAverage(name, period);
+            RegisterIndicator(symbol, wwma, resolution, selector);
+            return wwma;
         }
 
         /// <summary>

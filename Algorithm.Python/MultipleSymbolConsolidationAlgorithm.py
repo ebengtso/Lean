@@ -46,8 +46,8 @@ class MultipleSymbolConsolidationAlgorithm(QCAlgorithm):
         # Contains all of our forex symbols
         ForexSymbols =["EURUSD", "USDJPY", "EURGBP", "EURCHF", "USDCAD", "USDCHF", "AUDUSD","NZDUSD"]
         
-        self.SetStartDate(2014, 12, 01)
-        self.SetEndDate(2015, 02, 01)
+        self.SetStartDate(2014, 12, 1)
+        self.SetEndDate(2015, 2, 1)
         
         # initialize our equity data
         for symbol in EquitySymbols:
@@ -60,7 +60,7 @@ class MultipleSymbolConsolidationAlgorithm(QCAlgorithm):
             self.Data[symbol] = SymbolData(forex.Symbol, BarPeriod, RollingWindowSize)
 
         # loop through all our symbols and request data subscriptions and initialize indicator
-        for symbol, symbolData in self.Data.iteritems():
+        for symbol, symbolData in self.Data.items():
             # define the indicator
             symbolData.SMA = SimpleMovingAverage(self.CreateIndicatorName(symbol, "SMA" + str(SimpleMovingAveragePeriod), Resolution.Minute), SimpleMovingAveragePeriod)
             # define a consolidator to consolidate data for this symbol on the requested period

@@ -46,7 +46,7 @@ namespace QuantConnect.Lean.Engine.Setup
         /// <summary>
         /// Internal errors list from running the setup proceedures.
         /// </summary>
-        public List<string> Errors
+        public List<Exception> Errors
         {
             get;
             set;
@@ -106,7 +106,7 @@ namespace QuantConnect.Lean.Engine.Setup
         /// </summary>
         public BacktestingSetupHandler()
         {
-            Errors = new List<string>();
+            Errors = new List<Exception>();
         }
 
         /// <summary>
@@ -115,7 +115,7 @@ namespace QuantConnect.Lean.Engine.Setup
         /// <param name="assemblyPath">The path to the assembly's location</param>
         /// <param name="algorithmNodePacket">Details of the task required</param>
         /// <returns>A new instance of IAlgorithm, or throws an exception if there was an error</returns>
-        public IAlgorithm CreateAlgorithmInstance(AlgorithmNodePacket algorithmNodePacket, string assemblyPath)
+        public virtual IAlgorithm CreateAlgorithmInstance(AlgorithmNodePacket algorithmNodePacket, string assemblyPath)
         {
             string error;
             IAlgorithm algorithm;
@@ -164,7 +164,7 @@ namespace QuantConnect.Lean.Engine.Setup
 
             if (algorithm == null)
             {
-                Errors.Add("Could not create instance of algorithm");
+                Errors.Add(new AlgorithmSetupException("Could not create instance of algorithm"));
                 return false;
             }
 
@@ -173,7 +173,7 @@ namespace QuantConnect.Lean.Engine.Setup
             //Make sure the algorithm start date ok.
             if (job.PeriodStart == default(DateTime))
             {
-                Errors.Add("Algorithm start date was never set");
+                Errors.Add(new AlgorithmSetupException("Algorithm start date was never set"));
                 return false;
             }
 
@@ -202,11 +202,14 @@ namespace QuantConnect.Lean.Engine.Setup
 
                     //Initialise the algorithm, get the required data:
                     algorithm.Initialize();
+
+                    // finalize initialization
+                    algorithm.PostInitialize();
                 }
                 catch (Exception err)
                 {
                     Log.Error(err);
-                    Errors.Add("Failed to initialize algorithm: Initialize(): " + err);
+                    Errors.Add(new AlgorithmSetupException("During the algorithm initialization, the following exception has occurred: ", err));
                 }
             }, controls.RamAllocation);
 
@@ -216,8 +219,6 @@ namespace QuantConnect.Lean.Engine.Setup
             // TODO: Refactor the BacktestResultHandler to use algorithm not job to set times
             job.PeriodStart = algorithm.StartDate;
             job.PeriodFinish = algorithm.EndDate;
-
-            algorithm.PostInitialize();
 
             //Calculate the max runtime for the strategy
             _maxRuntime = GetMaximumRuntime(job.PeriodStart, job.PeriodFinish, algorithm.SubscriptionManager, algorithm.UniverseManager, baseJob.Controls);

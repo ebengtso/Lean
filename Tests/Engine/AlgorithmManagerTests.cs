@@ -62,6 +62,8 @@ namespace QuantConnect.Tests.Engine
             var token = new CancellationToken();
 
             algorithm.Initialize();
+            algorithm.PostInitialize();
+
             results.Initialize(job, new QuantConnect.Messaging.Messaging(), new Api.Api(), feed, new BacktestingSetupHandler(), transactions);
             results.SetAlgorithm(algorithm);
             transactions.Initialize(algorithm, new BacktestingBrokerage(algorithm), results);
@@ -116,7 +118,7 @@ namespace QuantConnect.Tests.Engine
                 do
                 {
                     var slice = new Slice(default(DateTime), _data, bars, quotes, ticks, options, futures, splits, dividends, delistings, symbolChanges);
-                    var timeSlice = new TimeSlice(_frontierUtc, _data.Count, slice, dataFeedPackets, securitiesUpdateData, _consolidatorUpdateData, customData, changes);
+                    var timeSlice = new TimeSlice(_frontierUtc, _data.Count, slice, dataFeedPackets, securitiesUpdateData, _consolidatorUpdateData, customData, changes, new Dictionary<Universe, BaseDataCollection>());
                     yield return timeSlice;
                     _frontierUtc += FrontierStepSize;
                 }
@@ -358,7 +360,7 @@ namespace QuantConnect.Tests.Engine
             {
             }
 
-            public void Remove(string name)
+            public void Remove(ScheduledEvent scheduledEvent)
             {
             }
 

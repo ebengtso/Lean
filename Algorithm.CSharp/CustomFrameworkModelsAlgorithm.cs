@@ -22,6 +22,7 @@ using QuantConnect.Algorithm.Framework.Portfolio;
 using QuantConnect.Algorithm.Framework.Selection;
 using QuantConnect.Data.Fundamental;
 using QuantConnect.Data.UniverseSelection;
+using QuantConnect.Indicators;
 using QuantConnect.Orders;
 
 namespace QuantConnect.Algorithm.CSharp
@@ -41,9 +42,14 @@ namespace QuantConnect.Algorithm.CSharp
             SetEndDate(2013, 10, 11);    //Set End Date
             SetCash(100000);             //Set Strategy Cash
 
-            PortfolioSelection = new CustomFundamentalPortfolioSelectionModel();
-            Alpha = new MacdAlphaModel(TimeSpan.FromMinutes(10), TimeSpan.FromMinutes(30), 0.01m);
-            PortfolioConstruction = new SimplePortfolioConstructionModel();
+            SetUniverseSelection(new CustomFundamentalUniverseSelectionModel());
+            SetAlpha(new MacdAlphaModel(
+                fastPeriod: 10,
+                slowPeriod: 30,
+                signalPeriod: 12,
+                movingAverageType: MovingAverageType.Simple
+            ));
+            SetPortfolioConstruction(new EqualWeightingPortfolioConstructionModel());
         }
 
         public override void OnOrderEvent(OrderEvent orderEvent)
@@ -55,12 +61,12 @@ namespace QuantConnect.Algorithm.CSharp
         }
 
         /// <summary>
-        /// Defines a custom <see cref="FundamentalPortfolioSelectionModel"/> that takes the top 100 by
+        /// Defines a custom <see cref="FundamentalUniverseSelectionModel"/> that takes the top 100 by
         /// dollar volume and then the top 20 by earnings yield
         /// </summary>
-        public class CustomFundamentalPortfolioSelectionModel : FundamentalPortfolioSelectionModel
+        public class CustomFundamentalUniverseSelectionModel : FundamentalUniverseSelectionModel
         {
-            public CustomFundamentalPortfolioSelectionModel()
+            public CustomFundamentalUniverseSelectionModel()
                 : base(filterFineData: true)
             {
             }

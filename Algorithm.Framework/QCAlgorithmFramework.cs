@@ -16,6 +16,8 @@
 using System;
 using System.Linq;
 using QuantConnect.Algorithm.Framework.Alphas;
+using QuantConnect.Algorithm.Framework.Alphas.Analysis;
+using QuantConnect.Algorithm.Framework.Alphas.Analysis.Providers;
 using QuantConnect.Algorithm.Framework.Execution;
 using QuantConnect.Algorithm.Framework.Portfolio;
 using QuantConnect.Algorithm.Framework.Risk;
@@ -23,23 +25,32 @@ using QuantConnect.Algorithm.Framework.Selection;
 using QuantConnect.Data;
 using QuantConnect.Data.UniverseSelection;
 using QuantConnect.Securities;
+using QuantConnect.Util;
 
 namespace QuantConnect.Algorithm.Framework
 {
     /// <summary>
     /// Algorithm framework base class that enforces a modular approach to algorithm development
     /// </summary>
-    public abstract class QCAlgorithmFramework : QCAlgorithm
+    public partial class QCAlgorithmFramework : QCAlgorithm
     {
+        private readonly ISecurityValuesProvider _securityValuesProvider;
+
+        /// <summary>
+        /// Enables additional logging of framework models including:
+        /// All insights, portfolio targets, order events, and any risk management altered targets
+        /// </summary>
+        public bool DebugMode { get; set; }
+
         /// <summary>
         /// Returns true since algorithms derived from this use the framework
         /// </summary>
         public override bool IsFrameworkAlgorithm => true;
 
         /// <summary>
-        /// Gets or sets the portfolio selection model.
+        /// Gets or sets the universe selection model.
         /// </summary>
-        public IPortfolioSelectionModel PortfolioSelection { get; set; }
+        public IUniverseSelectionModel UniverseSelection { get; set; }
 
         /// <summary>
         /// Gets or sets the alpha model
@@ -66,6 +77,8 @@ namespace QuantConnect.Algorithm.Framework
         /// </summary>
         public QCAlgorithmFramework()
         {
+            _securityValuesProvider = new AlgorithmSecurityValuesProvider(this);
+
             // set model defaults
             Execution = new ImmediateExecutionModel();
             RiskManagement = new NullRiskManagementModel();
@@ -79,9 +92,22 @@ namespace QuantConnect.Algorithm.Framework
         {
             CheckModels();
 
-            foreach (var universe in PortfolioSelection.CreateUniverses(this))
+            foreach (var universe in UniverseSelection.CreateUniverses(this))
             {
                 AddUniverse(universe);
+            }
+
+            if (DebugMode)
+            {
+                InsightsGenerated += (algorithm, data) => Log($"{Time}: {string.Join(" | ", data.Insights.OrderBy(i => i.Symbol.ToString()))}");
+            }
+
+            // emit warning message about using the framework with cash modelling
+            if (BrokerageModel.AccountType == AccountType.Cash)
+            {
+                Error("These models are currently unsuitable for Cash Modeled brokerages (e.g. GDAX) and may result in unexpected trades."
+                    + " To prevent possible user error we've restricted them to Margin trading. You can select margin account types with"
+                    + " SetBrokerage( ... AccountType.Margin)");
             }
 
             base.PostInitialize();
@@ -93,23 +119,73 @@ namespace QuantConnect.Algorithm.Framework
         /// <param name="slice">The current data slice</param>
         public sealed override void OnFrameworkData(Slice slice)
         {
-            // generate, timestamp and emit alphas
-            var alphas = Alpha.Update(this, slice)
+            // generate, timestamp and emit insights
+            var insights = Alpha.Update(this, slice)
                 .Select(SetGeneratedAndClosedTimes)
-                .ToList();
+                .ToArray();
 
-            if (alphas.Count != 0)
+            // only fire insights generated event if we actually have insights
+            if (insights.Length != 0)
             {
-                // only fire alphas generated event if we actually have alphas
-                OnAlphasGenerated(alphas);
+                // debug printing of generated insights
+                if (DebugMode)
+                {
+                    Log($"{Time}: ALPHA: {string.Join(" | ", insights.Select(i => i.ToString()).OrderBy(i => i))}");
+                }
+
+                OnInsightsGenerated(insights);
             }
 
-            // construct portfolio targets from alphas
-            var targets = PortfolioConstruction.CreateTargets(this, alphas);
+            // construct portfolio targets from insights
+            var targets = PortfolioConstruction.CreateTargets(this, insights).ToArray();
 
-            // execute on the targets and manage risk
-            Execution.Execute(this, targets);
-            RiskManagement.ManageRisk(this);
+            // set security targets w/ those generated via portfolio construction module
+            foreach (var target in targets)
+            {
+                var security = Securities[target.Symbol];
+                security.Holdings.Target = target;
+            }
+
+            if (DebugMode)
+            {
+                // debug printing of generated targets
+                if (targets.Length > 0)
+                {
+                    Log($"{Time}: PORTFOLIO: {string.Join(" | ", targets.Select(t => t.ToString()).OrderBy(t => t))}");
+                }
+            }
+
+            var riskTargetOverrides = RiskManagement.ManageRisk(this, targets).ToArray();
+
+            // override security targets w/ those generated via risk management module
+            foreach (var target in riskTargetOverrides)
+            {
+                var security = Securities[target.Symbol];
+                security.Holdings.Target = target;
+            }
+
+            if (DebugMode)
+            {
+                // debug printing of generated risk target overrides
+                if (riskTargetOverrides.Length > 0)
+                {
+                    Log($"{Time}: RISK: {string.Join(" | ", riskTargetOverrides.Select(t => t.ToString()).OrderBy(t => t))}");
+                }
+            }
+
+            // execute on the targets, overriding targets for symbols w/ risk targets
+            var riskAdjustedTargets = riskTargetOverrides.Concat(targets).DistinctBy(pt => pt.Symbol).ToArray();
+
+            if (DebugMode)
+            {
+                // only log adjusted targets if we've performed an adjustment
+                if (riskTargetOverrides.Length > 0)
+                {
+                    Log($"{Time}: RISK ADJUSTED TARGETS: {string.Join(" | ", riskAdjustedTargets.Select(t => t.ToString()).OrderBy(t => t))}");
+                }
+            }
+
+            Execution.Execute(this, riskAdjustedTargets);
         }
 
         /// <summary>
@@ -118,6 +194,11 @@ namespace QuantConnect.Algorithm.Framework
         /// <param name="changes">Security additions/removals for this time step</param>
         public sealed override void OnFrameworkSecuritiesChanged(SecurityChanges changes)
         {
+            if (DebugMode)
+            {
+                Log($"{Time}: {changes}");
+            }
+
             Alpha.OnSecuritiesChanged(this, changes);
             PortfolioConstruction.OnSecuritiesChanged(this, changes);
             Execution.OnSecuritiesChanged(this, changes);
@@ -125,12 +206,12 @@ namespace QuantConnect.Algorithm.Framework
         }
 
         /// <summary>
-        /// Sets the portfolio selection model
+        /// Sets the universe selection model
         /// </summary>
-        /// <param name="portfolioSelection">Model defining universes for the algorithm</param>
-        public void SetPortfolioSelection(IPortfolioSelectionModel portfolioSelection)
+        /// <param name="universeSelection">Model defining universes for the algorithm</param>
+        public void SetUniverseSelection(IUniverseSelectionModel universeSelection)
         {
-            PortfolioSelection = portfolioSelection;
+            UniverseSelection = universeSelection;
         }
 
         /// <summary>
@@ -145,7 +226,7 @@ namespace QuantConnect.Algorithm.Framework
         /// <summary>
         /// Sets the portfolio construction model
         /// </summary>
-        /// <param name="portfolioConstruction">Model defining how to build a portoflio from alphas</param>
+        /// <param name="portfolioConstruction">Model defining how to build a portoflio from insights</param>
         public void SetPortfolioConstruction(IPortfolioConstructionModel portfolioConstruction)
         {
             PortfolioConstruction = portfolioConstruction;
@@ -169,54 +250,60 @@ namespace QuantConnect.Algorithm.Framework
             RiskManagement = riskManagement;
         }
 
-        private Alpha SetGeneratedAndClosedTimes(Alpha alpha)
+        private Insight SetGeneratedAndClosedTimes(Insight insight)
         {
-            alpha.GeneratedTimeUtc = UtcTime;
+            insight.GeneratedTimeUtc = UtcTime;
+            insight.ReferenceValue = _securityValuesProvider.GetValues(insight.Symbol).Get(insight.Type);
+            if (string.IsNullOrEmpty(insight.SourceModel))
+            {
+                // set the source model name if not already set
+                insight.SourceModel = Alpha.GetModelName();
+            }
 
             TimeSpan barSize;
             Security security;
             SecurityExchangeHours exchangeHours;
-            if (Securities.TryGetValue(alpha.Symbol, out security))
+            if (Securities.TryGetValue(insight.Symbol, out security))
             {
                 exchangeHours = security.Exchange.Hours;
                 barSize = security.Resolution.ToTimeSpan();
             }
             else
             {
-                barSize = alpha.Period.ToHigherResolutionEquivalent(false).ToTimeSpan();
-                exchangeHours = MarketHoursDatabase.GetExchangeHours(alpha.Symbol.ID.Market, alpha.Symbol, alpha.Symbol.SecurityType);
+                barSize = insight.Period.ToHigherResolutionEquivalent(false).ToTimeSpan();
+                exchangeHours = MarketHoursDatabase.GetExchangeHours(insight.Symbol.ID.Market, insight.Symbol, insight.Symbol.SecurityType);
             }
 
             var localStart = UtcTime.ConvertFromUtc(exchangeHours.TimeZone);
             barSize = QuantConnect.Time.Max(barSize, QuantConnect.Time.OneMinute);
-            var barCount = (int) (alpha.Period.Ticks / barSize.Ticks);
+            var barCount = (int) (insight.Period.Ticks / barSize.Ticks);
 
-            alpha.CloseTimeUtc = QuantConnect.Time.GetEndTimeForTradeBars(exchangeHours, localStart, barSize, barCount, false).ConvertToUtc(exchangeHours.TimeZone);
+            insight.CloseTimeUtc = QuantConnect.Time.GetEndTimeForTradeBars(exchangeHours, localStart, barSize, barCount, false).ConvertToUtc(exchangeHours.TimeZone);
 
-            return alpha;
+            return insight;
         }
 
         private void CheckModels()
         {
-            if (PortfolioSelection == null)
+            if (UniverseSelection == null)
             {
-                throw new Exception("Framework algorithms must specify a portfolio selection model using the 'PortfolioSelection' property.");
+                throw new Exception($"Framework algorithms must specify a portfolio selection model using the '{nameof(UniverseSelection)}' property.");
             }
             if (Alpha == null)
             {
-                throw new Exception("Framework algorithms must specify a alpha model using the 'Alpha' property.");
+                throw new Exception($"Framework algorithms must specify a alpha model using the '{nameof(Alpha)}' property.");
             }
             if (PortfolioConstruction == null)
             {
-                throw new Exception("Framework algorithms must specify a portfolio construction model using the 'PortfolioConstruction' property");
+                throw new Exception($"Framework algorithms must specify a portfolio construction model using the '{nameof(PortfolioConstruction)}' property");
             }
             if (Execution == null)
             {
-                throw new Exception("Framework algorithms must specify an execution model using the 'Execution' property.");
+                throw new Exception($"Framework algorithms must specify an execution model using the '{nameof(Execution)}' property.");
             }
             if (RiskManagement == null)
             {
-                throw new Exception("Framework algorithms must specify an risk management model using the 'RiskManagement' property.");
+                throw new Exception($"Framework algorithms must specify an risk management model using the '{nameof(RiskManagement)}' property.");
             }
         }
     }

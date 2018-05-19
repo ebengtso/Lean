@@ -13,7 +13,6 @@
  * limitations under the License.
 */
 
-using System.Collections.Generic;
 using System.Linq;
 using QuantConnect.Algorithm.Framework.Portfolio;
 using QuantConnect.Data.UniverseSelection;
@@ -22,16 +21,16 @@ namespace QuantConnect.Algorithm.Framework.Execution
 {
     /// <summary>
     /// Provides an implementation of <see cref="IExecutionModel"/> that immediately submits
-    /// market orders to achieve the desired portoflio targets
+    /// market orders to achieve the desired portfolio targets
     /// </summary>
-    public class ImmediateExecutionModel : IExecutionModel
+    public class ImmediateExecutionModel : ExecutionModel
     {
         /// <summary>
-        /// Immediately submits orders for the specified portolio targets.
+        /// Immediately submits orders for the specified portfolio targets.
         /// </summary>
         /// <param name="algorithm">The algorithm instance</param>
         /// <param name="targets">The portfolio targets to be ordered</param>
-        public void Execute(QCAlgorithmFramework algorithm, IEnumerable<IPortfolioTarget> targets)
+        public override void Execute(QCAlgorithmFramework algorithm, IPortfolioTarget[] targets)
         {
             foreach (var target in targets)
             {
@@ -50,7 +49,7 @@ namespace QuantConnect.Algorithm.Framework.Execution
         /// </summary>
         /// <param name="algorithm">The algorithm instance that experienced the change in securities</param>
         /// <param name="changes">The security additions and removals from the algorithm</param>
-        public void OnSecuritiesChanged(QCAlgorithmFramework algorithm, SecurityChanges changes)
+        public override void OnSecuritiesChanged(QCAlgorithmFramework algorithm, SecurityChanges changes)
         {
         }
     }

@@ -20,6 +20,7 @@ using System.Linq;
 using System.Threading;
 using Fasterflect;
 using QuantConnect.Algorithm;
+using QuantConnect.Brokerages;
 using QuantConnect.Configuration;
 using QuantConnect.Data;
 using QuantConnect.Data.Market;
@@ -132,7 +133,7 @@ namespace QuantConnect.Lean.Engine
         /// <param name="results">Result handler object</param>
         /// <param name="realtime">Realtime processing object</param>
         /// <param name="leanManager">ILeanManager implementation that is updated periodically with the IAlgorithm instance</param>
-        /// <param name="alphas">Alpha handler used to process algorithm generated alphas</param>
+        /// <param name="alphas">Alpha handler used to process algorithm generated insights</param>
         /// <param name="token">Cancellation token</param>
         /// <remarks>Modify with caution</remarks>
         public void Run(AlgorithmNodePacket job, IAlgorithm algorithm, IDataFeed feed, ITransactionHandler transactions, IResultHandler results, IRealTimeHandler realtime, ILeanManager leanManager, IAlphaHandler alphas, CancellationToken token)
@@ -199,6 +200,16 @@ namespace QuantConnect.Lean.Engine
                         methodInvokers.Add(config.Type, genericMethod.DelegateForCallMethod());
                     }
                 }
+            }
+
+            // add internal feeds for currencies added during initialization
+            var addedSecurities = algorithm.Portfolio.CashBook.EnsureCurrencyDataFeeds(algorithm.Securities, algorithm.SubscriptionManager,
+                MarketHoursDatabase.FromDataFolder(), SymbolPropertiesDatabase.FromDataFolder(),
+                DefaultBrokerageModel.DefaultMarketMap, SecurityChanges.None);
+            foreach (var security in addedSecurities)
+            {
+                // assume currency feeds are always one subscription per, these are typically quote subscriptions
+                feed.AddSubscription(new SubscriptionRequest(false, null, security, new SubscriptionDataConfig(security.Subscriptions.First()), algorithm.UtcTime, algorithm.EndDate));
             }
 
             //Loop over the queues: get a data collection, then pass them all into relevent methods in the algorithm.
@@ -300,10 +311,20 @@ namespace QuantConnect.Lean.Engine
                 {
                     foreach (var security in timeSlice.SecurityChanges.AddedSecurities)
                     {
+                        security.IsTradable = true;
                         if (!algorithm.Securities.ContainsKey(security.Symbol))
                         {
                             // add the new security
                             algorithm.Securities.Add(security);
+                        }
+                    }
+
+                    var activeSecurities = algorithm.UniverseManager.ActiveSecurities;
+                    foreach (var security in timeSlice.SecurityChanges.RemovedSecurities)
+                    {
+                        if (!activeSecurities.ContainsKey(security.Symbol))
+                        {
+                            security.IsTradable = false;
                         }
                     }
                 }
@@ -321,6 +342,22 @@ namespace QuantConnect.Lean.Engine
                     algorithm.TradeBuilder.SetMarketPrice(security.Symbol, security.Price);
                 }
 
+                //Update the securities properties with any universe data
+                if (timeSlice.UniverseData.Count > 0)
+                {
+                    foreach (var kvp in timeSlice.UniverseData)
+                    {
+                        foreach (var data in kvp.Value.Data)
+                        {
+                            Security security;
+                            if (algorithm.Securities.TryGetValue(data.Symbol, out security))
+                            {
+                                security.Cache.StoreData(data);
+                            }
+                        }
+                    }
+                }
+
                 // poke each cash object to update from the recent security data
                 foreach (var kvp in algorithm.Portfolio.CashBook)
                 {
@@ -332,7 +369,7 @@ namespace QuantConnect.Lean.Engine
                     }
                 }
 
-                // sample alpha charts now that we've updated time/price information but BEFORE we receive new alphas
+                // sample alpha charts now that we've updated time/price information but BEFORE we receive new insights
                 alphas.ProcessSynchronousEvents();
 
                 // fire real time events after we've updated based on the new data
@@ -618,6 +655,9 @@ namespace QuantConnect.Lean.Engine
                 // Process any required events of the results handler such as sampling assets, equity, or stock prices.
                 results.ProcessSynchronousEvents();
 
+                // poke the algorithm at the end of each time step
+                algorithm.OnEndOfTimeStep();
+
             } // End of ForEach feed.Bridge.GetConsumingEnumerable
 
             // stop timing the loops
@@ -727,7 +767,7 @@ namespace QuantConnect.Lean.Engine
             var start = DateTime.UtcNow.Ticks;
             var nextStatusTime = DateTime.UtcNow.AddSeconds(1);
             var minimumIncrement = algorithm.UniverseManager
-                .Select(x => x.Value.Configuration.Resolution.ToTimeSpan())
+                .Select(x => x.Value.UniverseSettings?.Resolution.ToTimeSpan() ?? algorithm.UniverseSettings.Resolution.ToTimeSpan())
                 .DefaultIfEmpty(Time.OneSecond)
                 .Min();
 
@@ -780,12 +820,24 @@ namespace QuantConnect.Lean.Engine
                             var security = algorithm.Securities[symbol];
                             var data = slice[symbol];
                             var list = new List<BaseData>();
-                            var ticks = data as List<Tick>;
-                            if (ticks != null) list.AddRange(ticks);
-                            else               list.Add(data);
+                            Type dataType;
+                            SubscriptionDataConfig config;
 
-                            Type dataType = data.GetType();
-                            var config = security.Subscriptions.FirstOrDefault(subscription => dataType.IsAssignableFrom(subscription.Type));
+                            var ticks = data as List<Tick>;
+                            if (ticks != null)
+                            {
+                                list.AddRange(ticks);
+                                dataType = typeof(Tick);
+                                config = algorithm.SubscriptionManager.Subscriptions.FirstOrDefault(
+                                    subscription => subscription.Symbol == symbol && dataType.IsAssignableFrom(subscription.Type));
+                            }
+                            else
+                            {
+                                list.Add(data);
+                                dataType = data.GetType();
+                                config = security.Subscriptions.FirstOrDefault(subscription => dataType.IsAssignableFrom(subscription.Type));
+                            }
+
                             if (config == null)
                             {
                                 throw new Exception($"A data subscription for type '{dataType.Name}' was not found.");
@@ -793,7 +845,8 @@ namespace QuantConnect.Lean.Engine
 
                             paired.Add(new DataFeedPacket(security, config, list));
                         }
-                        timeSlice = TimeSlice.Create(slice.Time.ConvertToUtc(timeZone), timeZone, algorithm.Portfolio.CashBook, paired, SecurityChanges.None);
+
+                        timeSlice = TimeSlice.Create(slice.Time.ConvertToUtc(timeZone), timeZone, algorithm.Portfolio.CashBook, paired, SecurityChanges.None, new Dictionary<Universe, BaseDataCollection>());
                     }
                     catch (Exception err)
                     {
@@ -955,6 +1008,21 @@ namespace QuantConnect.Lean.Engine
                 }
                 else
                 {
+                    // mark security as no longer tradable
+                    var security = algorithm.Securities[delisting.Symbol];
+                    security.IsTradable = false;
+                    security.IsDelisted = true;
+
+                    // remove security from all universes
+                    foreach (var ukvp in algorithm.UniverseManager)
+                    {
+                        var universe = ukvp.Value;
+                        if (universe.ContainsMember(security.Symbol))
+                        {
+                            universe.RemoveMember(algorithm.UtcTime, security);
+                        }
+                    }
+
                     Log.Trace("AlgorithmManager.Run(): Security delisted: " + delisting.Symbol.Value);
                     var cancelledOrders = algorithm.Transactions.CancelOpenOrders(delisting.Symbol);
                     foreach (var cancelledOrder in cancelledOrders)

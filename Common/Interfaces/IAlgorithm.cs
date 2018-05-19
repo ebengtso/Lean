@@ -46,9 +46,9 @@ namespace QuantConnect.Interfaces
     public interface IAlgorithm
     {
         /// <summary>
-        /// Event fired when an algorithm generates a alpha
+        /// Event fired when an algorithm generates a insight
         /// </summary>
-        event AlgorithmEvent<AlphaCollection> AlphasGenerated;
+        event AlgorithmEvent<GeneratedInsightsCollection> InsightsGenerated;
 
         /// <summary>
         /// Data subscription manager controls the information and subscriptions the algorithms recieves.
@@ -407,6 +407,12 @@ namespace QuantConnect.Interfaces
         /// </summary>
         /// <param name="changes">Security additions/removals for this time step</param>
         void OnFrameworkSecuritiesChanged(SecurityChanges changes);
+
+        /// <summary>
+        /// Invoked at the end of every time step. This allows the algorithm
+        /// to process events before advancing to the next time step.
+        /// </summary>
+        void OnEndOfTimeStep();
 
         /// <summary>
         /// Send debug message

@@ -200,7 +200,10 @@ namespace QuantConnect.Lean.Engine.DataFeeds
 
             // keep track of security changes, we emit these to the algorithm
             // as notifications, used in universe selection
-            _changes += SecurityChanges.Added(request.Security);
+            if (!request.IsUniverseSubscription)
+            {
+                _changes += SecurityChanges.Added(request.Security);
+            }
 
             UpdateFillForwardResolution();
 
@@ -240,8 +243,10 @@ namespace QuantConnect.Lean.Engine.DataFeeds
 
             // keep track of security changes, we emit these to the algorithm
             // as notications, used in universe selection
-            _changes += SecurityChanges.Removed(security);
-
+            if (!subscription.IsUniverseSelectionSubscription)
+            {
+                _changes += SecurityChanges.Removed(security);
+            }
 
             Log.Trace("LiveTradingDataFeed.RemoveSubscription(): Removed " + configuration);
             UpdateFillForwardResolution();
@@ -270,6 +275,9 @@ namespace QuantConnect.Lean.Engine.DataFeeds
                     _frontierTimeProvider.SetCurrentTime(_frontierUtc);
 
                     var data = new List<DataFeedPacket>();
+
+                    // NOTE: Tight coupling in UniverseSelection.ApplyUniverseSelection
+                    var universeData = new Dictionary<Universe, BaseDataCollection>();
                     foreach (var subscription in Subscriptions)
                     {
                         var config = subscription.Configuration;
@@ -299,6 +307,16 @@ namespace QuantConnect.Lean.Engine.DataFeeds
                             // otherwise, load all the the data into a new collection instance
                             var collection = packet.Data[0] as BaseDataCollection ?? new BaseDataCollection(_frontierUtc, config.Symbol, packet.Data);
 
+                            BaseDataCollection existingCollection;
+                            if (universeData.TryGetValue(universe, out existingCollection))
+                            {
+                                existingCollection.Data.AddRange(collection.Data);
+                            }
+                            else
+                            {
+                                universeData[universe] = collection;
+                            }
+
                             _changes += _universeSelection.ApplyUniverseSelection(universe, _frontierUtc, collection);
                         }
                     }
@@ -309,7 +327,7 @@ namespace QuantConnect.Lean.Engine.DataFeeds
                     // emit on data or if we've elapsed a full second since last emit
                     if (data.Count != 0 || _frontierUtc >= nextEmit)
                     {
-                        _bridge.Add(TimeSlice.Create(_frontierUtc, _algorithm.TimeZone, _algorithm.Portfolio.CashBook, data, _changes), _cancellationTokenSource.Token);
+                        _bridge.Add(TimeSlice.Create(_frontierUtc, _algorithm.TimeZone, _algorithm.Portfolio.CashBook, data, _changes, universeData), _cancellationTokenSource.Token);
 
                         // force emitting every second
                         nextEmit = _frontierUtc.RoundDown(Time.OneSecond).Add(Time.OneSecond);
@@ -336,7 +354,7 @@ namespace QuantConnect.Lean.Engine.DataFeeds
                 if (!_cancellationTokenSource.IsCancellationRequested)
                 {
                     _bridge.Add(
-                        TimeSlice.Create(nextEmit, _algorithm.TimeZone, _algorithm.Portfolio.CashBook, new List<DataFeedPacket>(), SecurityChanges.None),
+                        TimeSlice.Create(nextEmit, _algorithm.TimeZone, _algorithm.Portfolio.CashBook, new List<DataFeedPacket>(), SecurityChanges.None, new Dictionary<Universe, BaseDataCollection>()),
                         _cancellationTokenSource.Token);
                 }
             }
@@ -537,13 +555,13 @@ namespace QuantConnect.Lean.Engine.DataFeeds
 
             IEnumerator<BaseData> enumerator;
 
-            var userDefined = request.Universe as UserDefinedUniverse;
-            if (userDefined != null)
+            var timeTriggered = request.Universe as ITimeTriggeredUniverse;
+            if (timeTriggered != null)
             {
                 Log.Trace("LiveTradingDataFeed.CreateUniverseSubscription(): Creating user defined universe: " + config.Symbol.ToString());
 
                 // spoof a tick on the requested interval to trigger the universe selection function
-                var enumeratorFactory = new UserDefinedUniverseSubscriptionEnumeratorFactory(userDefined, MarketHoursDatabase.FromDataFolder());
+                var enumeratorFactory = new TimeTriggeredUniverseSubscriptionEnumeratorFactory(timeTriggered, MarketHoursDatabase.FromDataFolder());
                 enumerator = enumeratorFactory.CreateEnumerator(request, _dataProvider);
 
                 enumerator = new FrontierAwareEnumerator(enumerator, _timeProvider, tzOffsetProvider);
@@ -553,21 +571,25 @@ namespace QuantConnect.Lean.Engine.DataFeeds
                 enumerator = enqueueable;
 
                 // Trigger universe selection when security added/removed after Initialize
-                userDefined.CollectionChanged += (sender, args) =>
+                if (timeTriggered is UserDefinedUniverse)
                 {
-                    var items =
-                           args.Action == NotifyCollectionChangedAction.Add ? args.NewItems :
-                           args.Action == NotifyCollectionChangedAction.Remove ? args.OldItems : null;
+                    var userDefined = (UserDefinedUniverse) timeTriggered;
+                    userDefined.CollectionChanged += (sender, args) =>
+                    {
+                        var items =
+                            args.Action == NotifyCollectionChangedAction.Add ? args.NewItems :
+                            args.Action == NotifyCollectionChangedAction.Remove ? args.OldItems : null;
 
-                    if (items == null || _frontierUtc == DateTime.MinValue) return;
+                        if (items == null || _frontierUtc == DateTime.MinValue) return;
 
-                    var symbol = items.OfType<Symbol>().FirstOrDefault();
-                    if (symbol == null) return;
+                        var symbol = items.OfType<Symbol>().FirstOrDefault();
+                        if (symbol == null) return;
 
-                    var collection = new BaseDataCollection(_frontierUtc, symbol);
-                    var changes = _universeSelection.ApplyUniverseSelection(userDefined, _frontierUtc, collection);
-                    _algorithm.OnSecuritiesChanged(changes);
-                };
+                        var collection = new BaseDataCollection(_frontierUtc, symbol);
+                        var changes = _universeSelection.ApplyUniverseSelection(userDefined, _frontierUtc, collection);
+                        _algorithm.OnSecuritiesChanged(changes);
+                    };
+                }
             }
             else if (config.Type == typeof (CoarseFundamental))
             {

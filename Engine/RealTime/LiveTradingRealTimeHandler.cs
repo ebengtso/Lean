@@ -24,6 +24,9 @@ using QuantConnect.Logging;
 using QuantConnect.Packets;
 using QuantConnect.Scheduling;
 using QuantConnect.Util;
+using QuantConnect.Securities;
+using System.Collections.Generic;
+using QuantConnect.Configuration;
 
 namespace QuantConnect.Lean.Engine.RealTime
 {
@@ -35,12 +38,13 @@ namespace QuantConnect.Lean.Engine.RealTime
         private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
         // initialize this immediately since the Initialzie method gets called after IAlgorithm.Initialize,
         // so we want to be ready to accept events as soon as possible
-        private readonly ConcurrentDictionary<string, ScheduledEvent> _scheduledEvents = new ConcurrentDictionary<string, ScheduledEvent>();
+        private readonly ConcurrentDictionary<ScheduledEvent, ScheduledEvent> _scheduledEvents = new ConcurrentDictionary<ScheduledEvent, ScheduledEvent>();
 
         //Algorithm and Handlers:
-        private IApi _api;
         private IAlgorithm _algorithm;
         private IResultHandler _resultHandler;
+
+        private static MarketHoursDatabase _marketHoursDatabase;
 
         /// <summary>
         /// Boolean flag indicating thread state.
@@ -53,10 +57,10 @@ namespace QuantConnect.Lean.Engine.RealTime
         public void Setup(IAlgorithm algorithm, AlgorithmNodePacket job, IResultHandler resultHandler, IApi api)
         {
             //Initialize:
-            _api = api;
             _algorithm = algorithm;
             _resultHandler = resultHandler;
             _cancellationTokenSource = new CancellationTokenSource();
+            _marketHoursDatabase = MarketHoursDatabase.FromDataFolder();
 
             var todayInAlgorithmTimeZone = DateTime.UtcNow.ConvertFromUtc(_algorithm.TimeZone).Date;
 
@@ -126,9 +130,9 @@ namespace QuantConnect.Lean.Engine.RealTime
                     }
                     catch (ScheduledEventException scheduledEventException)
                     {
-                        var errorMessage = $"LiveTradingRealTimeHandler.Run(): There was an error in a scheduled event {scheduledEvent.Key}. The error was {scheduledEventException.ScheduledEventExceptionMessage}";
+                        var errorMessage = $"LiveTradingRealTimeHandler.Run(): There was an error in a scheduled event {scheduledEvent.Key}. The error was {scheduledEventException.Message}";
 
-                        Log.Error(errorMessage);
+                        Log.Error(scheduledEventException, errorMessage);
 
                         _resultHandler.RuntimeError(errorMessage);
 
@@ -155,11 +159,10 @@ namespace QuantConnect.Lean.Engine.RealTime
             {
                 var security = kvp.Value;
 
-                var marketHours = _api.MarketToday(date, security.Symbol);
+                var marketHours = MarketToday(date, security.Symbol);
                 security.Exchange.SetMarketHours(marketHours, date.DayOfWeek);
                 var localMarketHours = security.Exchange.Hours.MarketHours[date.DayOfWeek];
-                Log.Trace(string.Format("LiveTradingRealTimeHandler.RefreshMarketHoursToday({0}): Market hours set: Symbol: {1} {2} ({3})",
-                        security.Type, security.Symbol, localMarketHours, security.Exchange.Hours.TimeZone));
+                Log.Trace($"LiveTradingRealTimeHandler.RefreshMarketHoursToday({security.Type}): Market hours set: Symbol: {security.Symbol} {localMarketHours} ({security.Exchange.Hours.TimeZone})");
             }
         }
 
@@ -174,17 +177,16 @@ namespace QuantConnect.Lean.Engine.RealTime
                 scheduledEvent.SkipEventsUntil(_algorithm.UtcTime);
             }
 
-            _scheduledEvents.AddOrUpdate(scheduledEvent.Name, scheduledEvent);
+            _scheduledEvents.AddOrUpdate(scheduledEvent, scheduledEvent);
         }
 
         /// <summary>
         /// Removes the specified event from the schedule
         /// </summary>
-        /// <param name="name"></param>
-        public void Remove(string name)
+        /// <param name="scheduledEvent">The event to be removed</param>
+        public void Remove(ScheduledEvent scheduledEvent)
         {
-            ScheduledEvent scheduledEvent;
-            _scheduledEvents.TryRemove(name, out scheduledEvent);
+            _scheduledEvents.TryRemove(scheduledEvent, out scheduledEvent);
         }
 
         /// <summary>
@@ -213,6 +215,24 @@ namespace QuantConnect.Lean.Engine.RealTime
         public void Exit()
         {
             _cancellationTokenSource.Cancel();
+        }
+
+        /// <summary>
+        /// Get the calendar open hours for the date.
+        /// </summary>
+        private IEnumerable<MarketHoursSegment> MarketToday(DateTime time, Symbol symbol)
+        {
+            if (Config.GetBool("force-exchange-always-open"))
+            {
+                yield return MarketHoursSegment.OpenAllDay();
+                yield break;
+            }
+
+            var hours = _marketHoursDatabase.GetExchangeHours(symbol.ID.Market, symbol, symbol.ID.SecurityType);
+            foreach (var segment in hours.MarketHours[time.DayOfWeek].Segments)
+            {
+                yield return segment;
+            }
         }
     }
 }

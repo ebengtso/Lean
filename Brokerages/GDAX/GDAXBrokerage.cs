@@ -69,7 +69,7 @@ namespace QuantConnect.Brokerages.GDAX
             req.AddJsonBody(payload);
 
             GetAuthenticationToken(req);
-            var response = RestClient.Execute(req);
+            var response = ExecuteRestRequest(req, GdaxEndpointType.Private);
 
             if (response.StatusCode == HttpStatusCode.OK && response.Content != null)
             {
@@ -148,7 +148,7 @@ namespace QuantConnect.Brokerages.GDAX
             {
                 var req = new RestRequest("/orders/" + id, Method.DELETE);
                 GetAuthenticationToken(req);
-                var response = RestClient.Execute(req);
+                var response = ExecuteRestRequest(req, GdaxEndpointType.Private);
                 success.Add(response.StatusCode == HttpStatusCode.OK);
                 if (response.StatusCode == HttpStatusCode.OK)
                 {
@@ -179,7 +179,7 @@ namespace QuantConnect.Brokerages.GDAX
 
             var req = new RestRequest("/orders?status=open&status=pending", Method.GET);
             GetAuthenticationToken(req);
-            var response = RestClient.Execute(req);
+            var response = ExecuteRestRequest(req, GdaxEndpointType.Private);
 
             if (response.StatusCode != HttpStatusCode.OK)
             {
@@ -231,7 +231,6 @@ namespace QuantConnect.Brokerages.GDAX
             }
 
             return list;
-
         }
 
         /// <summary>
@@ -258,7 +257,7 @@ namespace QuantConnect.Brokerages.GDAX
 
             var request = new RestRequest("/accounts", Method.GET);
             GetAuthenticationToken(request);
-            var response = RestClient.Execute(request);
+            var response = ExecuteRestRequest(request, GdaxEndpointType.Private);
 
             if (response.StatusCode != HttpStatusCode.OK)
             {
@@ -292,38 +291,12 @@ namespace QuantConnect.Brokerages.GDAX
         #endregion
 
         /// <summary>
-        /// Retrieves the fee for a given order
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
         /// </summary>
-        /// <param name="order"></param>
-        /// <returns></returns>
-        public decimal GetFee(Order order)
+        public override void Dispose()
         {
-            var gdaxOrderProperties = order.Properties as GDAXOrderProperties;
-            if (order.Type == OrderType.Limit && gdaxOrderProperties?.PostOnly == true)
-            {
-                return 0m;
-            }
-
-            var totalFee = 0m;
-
-            foreach (var item in order.BrokerId)
-            {
-                var req = new RestRequest("/orders/" + item, Method.GET);
-                GetAuthenticationToken(req);
-                var response = RestClient.Execute(req);
-
-                if (response.StatusCode != HttpStatusCode.OK)
-                {
-                    throw new Exception($"GDAXBrokerage.GetFee: request failed: [{(int)response.StatusCode}] {response.StatusDescription}, Content: {response.Content}, ErrorMessage: {response.ErrorMessage}");
-                }
-
-                var fill = JsonConvert.DeserializeObject<dynamic>(response.Content);
-
-                totalFee += (decimal)fill.fill_fees;
-            }
-
-            return totalFee;
+            _publicEndpointRateLimiter.Dispose();
+            _privateEndpointRateLimiter.Dispose();
         }
-
     }
 }

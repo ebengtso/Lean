@@ -15,7 +15,8 @@
 */
 
 using System;
-using QuantConnect.Data.UniverseSelection;
+using System.Collections.Generic;
+using QuantConnect.Algorithm.Framework.Portfolio;
 
 namespace QuantConnect.Algorithm.Framework.Risk
 {
@@ -23,15 +24,17 @@ namespace QuantConnect.Algorithm.Framework.Risk
     /// Provides an implementation of <see cref="IRiskManagementModel"/> that limits the drawdown
     /// per holding to the specified percentage
     /// </summary>
-    public class MaximumDrawdownPercentPerSecurity : IRiskManagementModel
+    public class MaximumDrawdownPercentPerSecurity : RiskManagementModel
     {
         private readonly decimal _maximumDrawdownPercent;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MaximumDrawdownPercentPerSecurity"/> class
         /// </summary>
-        /// <param name="maximumDrawdownPercent">The maximum percentage drawdown allowed for any single security holding</param>
-        public MaximumDrawdownPercentPerSecurity(decimal maximumDrawdownPercent)
+        /// <param name="maximumDrawdownPercent">The maximum percentage drawdown allowed for any single security holding, defaults to 5% drawdown per security</param>
+        public MaximumDrawdownPercentPerSecurity(
+            decimal maximumDrawdownPercent = 0.05m
+            )
         {
             _maximumDrawdownPercent = -Math.Abs(maximumDrawdownPercent);
         }
@@ -40,7 +43,8 @@ namespace QuantConnect.Algorithm.Framework.Risk
         /// Manages the algorithm's risk at each time step
         /// </summary>
         /// <param name="algorithm">The algorithm instance</param>
-        public void ManageRisk(QCAlgorithmFramework algorithm)
+        /// <param name="targets">The current portfolio targets to be assessed for risk</param>
+        public override IEnumerable<IPortfolioTarget> ManageRisk(QCAlgorithmFramework algorithm, IPortfolioTarget[] targets)
         {
             foreach (var kvp in algorithm.Securities)
             {
@@ -54,18 +58,10 @@ namespace QuantConnect.Algorithm.Framework.Risk
                 var pnl = security.Holdings.UnrealizedProfitPercent;
                 if (pnl < _maximumDrawdownPercent)
                 {
-                    algorithm.Liquidate(security.Symbol);
+                    // liquidate
+                    yield return new PortfolioTarget(security.Symbol, 0);
                 }
             }
-        }
-
-        /// <summary>
-        /// Event fired each time the we add/remove securities from the data feed
-        /// </summary>
-        /// <param name="algorithm">The algorithm instance that experienced the change in securities</param>
-        /// <param name="changes">The security additions and removals from the algorithm</param>
-        public void OnSecuritiesChanged(QCAlgorithmFramework algorithm, SecurityChanges changes)
-        {
         }
     }
 }

@@ -36,7 +36,7 @@ namespace QuantConnect.Lean.Engine.RealTime
         private IResultHandler _resultHandler;
         // initialize this immediately since the Initialize method gets called after IAlgorithm.Initialize,
         // so we want to be ready to accept events as soon as possible
-        private readonly ConcurrentDictionary<string, ScheduledEvent> _scheduledEvents = new ConcurrentDictionary<string, ScheduledEvent>();
+        private readonly ConcurrentDictionary<ScheduledEvent, ScheduledEvent> _scheduledEvents = new ConcurrentDictionary<ScheduledEvent, ScheduledEvent>();
 
         private List<ScheduledEvent> _scheduledEventsSortedByTime = new List<ScheduledEvent>();
 
@@ -97,7 +97,8 @@ namespace QuantConnect.Lean.Engine.RealTime
                 scheduledEvent.SkipEventsUntil(_algorithm.UtcTime);
             }
 
-            _scheduledEvents[scheduledEvent.Name] = scheduledEvent;
+            _scheduledEvents.AddOrUpdate(scheduledEvent, scheduledEvent);
+
             if (Log.DebuggingEnabled)
             {
                 scheduledEvent.IsLoggingEnabled = true;
@@ -109,11 +110,10 @@ namespace QuantConnect.Lean.Engine.RealTime
         /// <summary>
         /// Removes the specified event from the schedule
         /// </summary>
-        /// <param name="name">The name of the event to remove</param>
-        public void Remove(string name)
+        /// <param name="scheduledEvent">The event to be removed</param>
+        public void Remove(ScheduledEvent scheduledEvent)
         {
-            ScheduledEvent scheduledEvent;
-            _scheduledEvents.TryRemove(name, out scheduledEvent);
+            _scheduledEvents.TryRemove(scheduledEvent, out scheduledEvent);
 
             _scheduledEventsSortedByTime = GetScheduledEventsSortedByTime();
         }
@@ -149,15 +149,15 @@ namespace QuantConnect.Lean.Engine.RealTime
                     }
                     catch (ScheduledEventException scheduledEventException)
                     {
-                        var errorMessage = $"BacktestingRealTimeHandler.Run(): There was an error in a scheduled event {scheduledEvent.Name}. The error was {scheduledEventException.ScheduledEventExceptionMessage}";
+                        var errorMessage = $"BacktestingRealTimeHandler.Run(): There was an error in a scheduled event {scheduledEvent.Name}. The error was {scheduledEventException.Message}";
 
-                        Log.Error(errorMessage);
+                        Log.Error(scheduledEventException, errorMessage);
 
                         _resultHandler.RuntimeError(errorMessage);
 
                         // Errors in scheduled event should be treated as runtime error
                         // Runtime errors should end Lean execution
-                        _algorithm.RunTimeError = new Exception(errorMessage);
+                        _algorithm.RunTimeError = scheduledEventException;
                     }
                 }
             }

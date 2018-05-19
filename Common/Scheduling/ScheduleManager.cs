@@ -20,6 +20,7 @@ using NodaTime;
 using QuantConnect.Securities;
 using QuantConnect.Logging;
 using System.Linq;
+using Python.Runtime;
 
 namespace QuantConnect.Scheduling
 {
@@ -37,12 +38,12 @@ namespace QuantConnect.Scheduling
         /// <summary>
         /// Gets the date rules helper object to make specifying dates for events easier
         /// </summary>
-        public DateRules DateRules { get; private set; }
+        public DateRules DateRules { get; }
 
         /// <summary>
         /// Gets the time rules helper object to make specifying times for events easier
         /// </summary>
-        public TimeRules TimeRules { get; private set; }
+        public TimeRules TimeRules { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ScheduleManager"/> class
@@ -67,7 +68,7 @@ namespace QuantConnect.Scheduling
         {
             if (eventSchedule == null)
             {
-                throw new ArgumentNullException("eventSchedule");
+                throw new ArgumentNullException(nameof(eventSchedule));
             }
 
             lock (_eventScheduleLock)
@@ -83,7 +84,7 @@ namespace QuantConnect.Scheduling
         }
 
         /// <summary>
-        /// Adds the specified event to the schedule using the <see cref="ScheduledEvent.Name"/> as a key.
+        /// Adds the specified event to the schedule
         /// </summary>
         /// <param name="scheduledEvent">The event to be scheduled, including the date/times the event fires and the callback</param>
         public void Add(ScheduledEvent scheduledEvent)
@@ -102,20 +103,20 @@ namespace QuantConnect.Scheduling
         }
 
         /// <summary>
-        /// Removes the event with the specified name from the schedule
+        /// Removes the specified event from the schedule
         /// </summary>
-        /// <param name="name">The name of the event to be removed</param>
-        public void Remove(string name)
+        /// <param name="scheduledEvent">The event to be removed</param>
+        public void Remove(ScheduledEvent scheduledEvent)
         {
             lock (_eventScheduleLock)
             {
                 if (_eventSchedule != null)
                 {
-                    _eventSchedule.Remove(name);
+                    _eventSchedule.Remove(scheduledEvent);
                 }
                 else
                 {
-                    _preInitializedEvents.RemoveAll(se => se.Name == name);
+                    _preInitializedEvents.RemoveAll(se => Equals(se, scheduledEvent));
                 }
             }
         }
@@ -129,6 +130,17 @@ namespace QuantConnect.Scheduling
         public ScheduledEvent On(IDateRule dateRule, ITimeRule timeRule, Action callback)
         {
             return On(dateRule, timeRule, (name, time) => callback());
+        }
+
+        /// <summary>
+        /// Schedules the callback to run using the specified date and time rules
+        /// </summary>
+        /// <param name="dateRule">Specifies what dates the event should run</param>
+        /// <param name="timeRule">Specifies the times on those dates the event should run</param>
+        /// <param name="callback">The callback to be invoked</param>
+        public ScheduledEvent On(IDateRule dateRule, ITimeRule timeRule, PyObject callback)
+        {
+            return On(dateRule, timeRule, (name, time) => { using (Py.GIL()) callback.Invoke(); });
         }
 
         /// <summary>
@@ -153,6 +165,18 @@ namespace QuantConnect.Scheduling
         public ScheduledEvent On(string name, IDateRule dateRule, ITimeRule timeRule, Action callback)
         {
             return On(name, dateRule, timeRule, (n, d) => callback());
+        }
+
+        /// <summary>
+        /// Schedules the callback to run using the specified date and time rules
+        /// </summary>
+        /// <param name="name">The event's unique name</param>
+        /// <param name="dateRule">Specifies what dates the event should run</param>
+        /// <param name="timeRule">Specifies the times on those dates the event should run</param>
+        /// <param name="callback">The callback to be invoked</param>
+        public ScheduledEvent On(string name, IDateRule dateRule, ITimeRule timeRule, PyObject callback)
+        {
+            return On(name, dateRule, timeRule, (n, d) => { using (Py.GIL()) callback.Invoke(); });
         }
 
         /// <summary>
