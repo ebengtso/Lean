@@ -430,6 +430,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
 <<<<<<< HEAD
+<<<<<<< HEAD
     <None Include="TestData\bitfinex_cancel.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -454,6 +455,12 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
 >>>>>>> 1201d84c96d093cdd7a1e53cd87f3fc361db4f88
+||||||| merged common ancestors
+=======
+    <None Include="TestData\aapl_fine_fundamental.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+>>>>>>> 1201d84c96d093cdd7a1e53cd87f3fc361db4f88
     <None Include="TestData\CashTestingStrategy.csv">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -465,6 +472,7 @@
     </Content>
     <Content Include="Python\Indicators\IndicatorExtensionsTests.py" />
 <<<<<<< HEAD
+<<<<<<< HEAD
     <None Include="TestData\bitfinex_wallet.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -474,6 +482,21 @@
     <None Include="TestData\bitfinex_fill.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+||||||| merged common ancestors
+=======
+    <Content Include="RegressionAlgorithms\Test_AlgorithmPythonWrapper.py">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="RegressionAlgorithms\Test_CustomDataAlgorithm.py">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="RegressionAlgorithms\Test_PythonExceptionInterpreter.py">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="RegressionAlgorithms\Test_MethodOverload.py">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+>>>>>>> 1201d84c96d093cdd7a1e53cd87f3fc361db4f88
 ||||||| merged common ancestors
 =======
     <Content Include="RegressionAlgorithms\Test_AlgorithmPythonWrapper.py">

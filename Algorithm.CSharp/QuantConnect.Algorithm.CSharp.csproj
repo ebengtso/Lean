@@ -103,10 +103,17 @@
     <Compile Include="CustomFrameworkModelsAlgorithm.cs" />
     <Compile Include="EmaCrossUniverseSelectionFrameworkAlgorithm.cs" />
     <Compile Include="FinancialAdvisorDemoAlgorithm.cs" />
+<<<<<<< HEAD
     <Compile Include="BitfinexAlgorithm.cs" />
     <Compile Include="ForexInternalFeedOnDataHigherResolutionRegressionAlgorithm.cs" />
     <Compile Include="ForexInternalFeedOnDataSameResolutionRegressionAlgorithm.cs" />
     <Compile Include="PairsTradingAlphaModelFrameworkAlgorithm.cs" />
+||||||| merged common ancestors
+=======
+    <Compile Include="ForexInternalFeedOnDataHigherResolutionRegressionAlgorithm.cs" />
+    <Compile Include="ForexInternalFeedOnDataSameResolutionRegressionAlgorithm.cs" />
+    <Compile Include="PairsTradingAlphaModelFrameworkAlgorithm.cs" />
+>>>>>>> 1201d84c96d093cdd7a1e53cd87f3fc361db4f88
     <Compile Include="RollingWindowAlgorithm.cs" />
     <Compile Include="BasicTemplateDailyAlgorithm.cs" />
     <Compile Include="BasicTemplateFxcmVolumeAlgorithm.cs" />
