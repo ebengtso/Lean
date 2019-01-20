@@ -38,12 +38,12 @@ namespace QuantConnect.Data.Market
         /// <summary>
         /// Volume:
         /// </summary>
-        public decimal Volume { get; set; }
+        public virtual decimal Volume { get; set; }
 
         /// <summary>
         /// Opening price of the bar: Defined as the price at the start of the time period.
         /// </summary>
-        public decimal Open
+        public virtual decimal Open
         {
             get { return _open; }
             set
@@ -56,7 +56,7 @@ namespace QuantConnect.Data.Market
         /// <summary>
         /// High price of the TradeBar during the time period.
         /// </summary>
-        public decimal High
+        public virtual decimal High
         {
             get { return _high; }
             set
@@ -69,7 +69,7 @@ namespace QuantConnect.Data.Market
         /// <summary>
         /// Low price of the TradeBar during the time period.
         /// </summary>
-        public decimal Low
+        public virtual decimal Low
         {
             get { return _low; }
             set
@@ -82,7 +82,7 @@ namespace QuantConnect.Data.Market
         /// <summary>
         /// Closing price of the TradeBar. Defined as the price at Start Time + TimeSpan.
         /// </summary>
-        public decimal Close
+        public virtual decimal Close
         {
             get { return Value; }
             set
@@ -104,7 +104,7 @@ namespace QuantConnect.Data.Market
         /// <summary>
         /// The period of this trade bar, (second, minute, daily, ect...)
         /// </summary>
-        public TimeSpan Period { get; set; }
+        public virtual TimeSpan Period { get; set; }
 
         //In Base Class: Alias of Closing:
         //public decimal Price;
@@ -556,6 +556,24 @@ namespace QuantConnect.Data.Market
                 source += "#" + LeanData.GenerateZipEntryName(config.Symbol, date, config.Resolution, config.TickType);
             }
             return new SubscriptionDataSource(source, SubscriptionTransportMedium.LocalFile, FileFormat.Csv);
+        }
+
+        /// <summary>
+        /// Return a new instance clone of this object, used in fill forward
+        /// </summary>
+        /// <param name="fillForward">True if this is a fill forward clone</param>
+        /// <returns>A clone of the current object</returns>
+        public override BaseData Clone(bool fillForward)
+        {
+            var clone = base.Clone(fillForward);
+
+            if (fillForward)
+            {
+                // zero volume out, since it would skew calculations in volume-based indicators
+                ((TradeBar) clone).Volume = 0;
+            }
+
+            return clone;
         }
 
         /// <summary>

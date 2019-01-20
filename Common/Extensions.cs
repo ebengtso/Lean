@@ -24,12 +24,12 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 using NodaTime;
 using Python.Runtime;
 using QuantConnect.Orders;
 using QuantConnect.Securities;
-using QuantConnect.Util;
 using Timer = System.Timers.Timer;
 
 namespace QuantConnect
@@ -235,10 +235,29 @@ namespace QuantConnect
             return (decimal) input;
         }
 
+        /// <summary>
+        /// Will remove any trailing zeros for the provided decimal input
+        /// </summary>
+        /// <param name="input">The <see cref="decimal"/> to remove trailing zeros from</param>
+        /// <returns>Provided input with no trailing zeros</returns>
+        /// <remarks>Will not have the expected behavior when called from Python,
+        /// since the returned <see cref="decimal"/> will be converted to python float,
+        /// <see cref="NormalizeToStr"/></remarks>
         public static decimal Normalize(this decimal input)
         {
             // http://stackoverflow.com/a/7983330/1582922
             return input / 1.000000000000000000000000000000000m;
+        }
+
+        /// <summary>
+        /// Will remove any trailing zeros for the provided decimal and convert to string.
+        /// Uses <see cref="Normalize"/>.
+        /// </summary>
+        /// <param name="input">The <see cref="decimal"/> to convert to <see cref="string"/></param>
+        /// <returns>Input converted to <see cref="string"/> with no trailing zeros</returns>
+        public static string NormalizeToStr(this decimal input)
+        {
+            return Normalize(input).ToString(CultureInfo.InvariantCulture);
         }
 
         /// <summary>
@@ -488,7 +507,7 @@ namespace QuantConnect
         }
 
         /// <summary>
-        /// Rounds the specified date time in the specified time zone
+        /// Rounds the specified date time in the specified time zone. Careful with calling this method in a loop while modifying dateTime, check unit tests.
         /// </summary>
         /// <param name="dateTime">Date time to be rounded</param>
         /// <param name="roundingInterval">Timespan rounding period</param>
@@ -543,10 +562,20 @@ namespace QuantConnect
             // can't round against a zero interval
             if (interval == TimeSpan.Zero) return dateTime;
 
-            var rounded = dateTime.RoundDownInTimeZone(interval, exchangeHours.TimeZone, roundingTimeZone);
+            var dateTimeInRoundingTimeZone = dateTime.ConvertTo(exchangeHours.TimeZone, roundingTimeZone);
+            var roundedDateTimeInRoundingTimeZone = dateTimeInRoundingTimeZone.RoundDown(interval);
+            var rounded = roundedDateTimeInRoundingTimeZone.ConvertTo(roundingTimeZone, exchangeHours.TimeZone);
+
             while (!exchangeHours.IsOpen(rounded, rounded + interval, extendedMarket))
             {
-                rounded = (rounded - interval).RoundDownInTimeZone(interval, exchangeHours.TimeZone, roundingTimeZone);
+                // Will subtract interval to 'dateTime' in the roundingTimeZone (using the same value type instance) to avoid issues with daylight saving time changes.
+                // GH issue 2368: subtracting interval to 'dateTime' in exchangeHours.TimeZone and converting back to roundingTimeZone
+                // caused the substraction to be neutralized by daylight saving time change, which caused an infinite loop situation in this loop.
+                // The issue also happens if substracting in roundingTimeZone and converting back to exchangeHours.TimeZone.
+
+                dateTimeInRoundingTimeZone -= interval;
+                roundedDateTimeInRoundingTimeZone = dateTimeInRoundingTimeZone.RoundDown(interval);
+                rounded = roundedDateTimeInRoundingTimeZone.ConvertTo(roundingTimeZone, exchangeHours.TimeZone);
             }
             return rounded;
         }
@@ -588,8 +617,6 @@ namespace QuantConnect
         /// <returns>The time in terms of the to time zone</returns>
         public static DateTime ConvertTo(this DateTime time, DateTimeZone from, DateTimeZone to, bool strict = false)
         {
-            if (ReferenceEquals(from, to)) return time;
-
             if (strict)
             {
                 return from.AtStrictly(LocalDateTime.FromDateTime(time)).WithZone(to).ToDateTimeUnspecified();
@@ -921,7 +948,7 @@ namespace QuantConnect
         {
             // if there's only one use that guy
             // if there's more than one then find which one we should use using the algorithmTypeName specified
-            return names.Count == 1 ? names.Single() : names.SingleOrDefault(x => x.Contains("." + algorithmTypeName));
+            return names.Count == 1 ? names.Single() : names.SingleOrDefault(x => x.EndsWith("." + algorithmTypeName));
         }
 
         /// <summary>
@@ -982,8 +1009,9 @@ namespace QuantConnect
                 order.Properties);
 
             submitOrderRequest.SetOrderId(order.Id);
-
-            return new OrderTicket(transactionManager, submitOrderRequest);
+            var orderTicket = new OrderTicket(transactionManager, submitOrderRequest);
+            orderTicket.SetOrder(order);
+            return orderTicket;
         }
 
         public static void ProcessUntilEmpty<T>(this IProducerConsumerCollection<T> collection, Action<T> handler)
@@ -1037,30 +1065,47 @@ namespace QuantConnect
         /// <param name="result">Managed object </param>
         /// <returns>True if successful conversion</returns>
         public static bool TryConvert<T>(this PyObject pyObject, out T result)
-            where T : class
         {
             result = default(T);
+            var type = typeof(T);
 
             if (pyObject == null)
             {
                 return true;
             }
-            
+
             using (Py.GIL())
             {
                 try
                 {
-                    result = pyObject.AsManagedObject(typeof(T)) as T;
-
-                    if (typeof(T) == typeof(Type) || result is IEnumerable)
+                    // Special case: Type
+                    if (typeof(Type).IsAssignableFrom(type))
                     {
+                        result = (T)pyObject.AsManagedObject(type);
                         return true;
                     }
+
+                    // Special case: IEnumerable
+                    if (typeof(IEnumerable).IsAssignableFrom(type))
+                    {
+                        result = (T)pyObject.AsManagedObject(type);
+                        return true;
+                    }
+
+                    var pythonType = pyObject.GetPythonType();
+                    var csharpType = pythonType.As<Type>();
+
+                    if (!type.IsAssignableFrom(csharpType))
+                    {
+                        return false;
+                    }
+
+                    result = (T)pyObject.AsManagedObject(type);
 
                     // If the PyObject type and the managed object names are the same,
                     // pyObject is a C# object wrapped in PyObject, in this case return true
                     // Otherwise, pyObject is a python object that subclass a C# class.
-                    string name = (pyObject.GetPythonType() as dynamic).__name__;
+                    string name = ((dynamic) pythonType).__name__;
                     return name == result.GetType().Name;
                 }
                 catch
@@ -1100,22 +1145,26 @@ namespace QuantConnect
             var locals = new PyDict();
             var types = type.GetGenericArguments();
 
-            for (var i = 0; i < types.Length; i++)
-            {
-                code += $",t{i}";
-                locals.SetItem($"t{i}", types[i].ToPython());
-            }
-            locals.SetItem("pyObject", pyObject);
-
             try
             {
-                var name = type.FullName.Substring(0, type.FullName.IndexOf('`'));
-                code = $"import System; delegate = {name}[{code.Substring(1)}](pyObject)";
+                using (Py.GIL())
+                {
+                    for (var i = 0; i < types.Length; i++)
+                    {
+                        code += $",t{i}";
+                        locals.SetItem($"t{i}", types[i].ToPython());
+                    }
 
-                PythonEngine.Exec(code, null, locals.Handle);
-                result = (T)locals.GetItem("delegate").AsManagedObject(typeof(T));
+                    locals.SetItem("pyObject", pyObject);
 
-                return true;
+                    var name = type.FullName.Substring(0, type.FullName.IndexOf('`'));
+                    code = $"import System; delegate = {name}[{code.Substring(1)}](pyObject)";
+
+                    PythonEngine.Exec(code, null, locals.Handle);
+                    result = (T)locals.GetItem("delegate").AsManagedObject(typeof(T));
+
+                    return true;
+                }
             }
             catch
             {
@@ -1227,6 +1276,27 @@ namespace QuantConnect
                     yield return list;
                 }
             }
+        }
+
+        /// <summary>
+        /// Safely blocks until the specified task has completed executing
+        /// </summary>
+        /// <typeparam name="TResult">The task's result type</typeparam>
+        /// <param name="task">The task to be awaited</param>
+        /// <returns>The result of the task</returns>
+        public static TResult SynchronouslyAwaitTaskResult<TResult>(this Task<TResult> task)
+        {
+            return task.ConfigureAwait(false).GetAwaiter().GetResult();
+        }
+
+        /// <summary>
+        /// Safely blocks until the specified task has completed executing
+        /// </summary>
+        /// <param name="task">The task to be awaited</param>
+        /// <returns>The result of the task</returns>
+        public static void SynchronouslyAwaitTask(this Task task)
+        {
+            task.ConfigureAwait(false).GetAwaiter().GetResult();
         }
     }
 }

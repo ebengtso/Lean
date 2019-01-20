@@ -42,6 +42,8 @@ namespace QuantConnect.AlgorithmFactory.Python.Wrappers
     public class AlgorithmPythonWrapper : IAlgorithm
     {
         private readonly dynamic _algorithm = null;
+        private readonly dynamic _onData;
+        private readonly dynamic _onOrderEvent;
         private readonly IAlgorithm _baseAlgorithm;
         private readonly bool _isOnDataDefined = false;
 
@@ -82,8 +84,11 @@ namespace QuantConnect.AlgorithmFactory.Python.Wrappers
 
                             // determines whether OnData method was defined or inherits from QCAlgorithm
                             // If it is not, OnData from the base class will not be called
-                            var pythonType = (_algorithm as PyObject).GetAttr("OnData").GetPythonType();
+                            _onData = (_algorithm as PyObject).GetAttr("OnData");
+                            var pythonType = _onData.GetPythonType();
                             _isOnDataDefined = pythonType.Repr().Equals("<class \'method\'>");
+
+                            _onOrderEvent = (_algorithm as PyObject).GetAttr("OnOrderEvent");
                         }
                     }
 
@@ -262,7 +267,7 @@ namespace QuantConnect.AlgorithmFactory.Python.Wrappers
         /// <summary>
         /// Gets the user settings for the algorithm
         /// </summary>
-        public AlgorithmSettings Settings => _baseAlgorithm.Settings;
+        public IAlgorithmSettings Settings => _baseAlgorithm.Settings;
 
         /// <summary>
         /// Gets the option chain provider, used to get the list of option contracts for an underlying symbol
@@ -273,6 +278,11 @@ namespace QuantConnect.AlgorithmFactory.Python.Wrappers
         /// Gets the future chain provider, used to get the list of future contracts for an underlying symbol
         /// </summary>
         public IFutureChainProvider FutureChainProvider => _baseAlgorithm.FutureChainProvider;
+
+        /// <summary>
+        /// Returns the current Slice object
+        /// </summary>
+        public Slice CurrentSlice => _baseAlgorithm.CurrentSlice;
 
         /// <summary>
         /// Algorithm start date for backtesting, set by the SetStartDate methods.
@@ -336,6 +346,11 @@ namespace QuantConnect.AlgorithmFactory.Python.Wrappers
         }
 
         /// <summary>
+        /// Gets the time keeper instance
+        /// </summary>
+        public ITimeKeeper TimeKeeper => _baseAlgorithm.TimeKeeper;
+
+        /// <summary>
         /// Data subscription manager controls the information and subscriptions the algorithms recieves.
         /// Subscription configurations can be added through the Subscription Manager.
         /// </summary>
@@ -371,6 +386,11 @@ namespace QuantConnect.AlgorithmFactory.Python.Wrappers
         /// Current date/time in UTC.
         /// </summary>
         public DateTime UtcTime => _baseAlgorithm.UtcTime;
+
+        /// <summary>
+        /// Gets the account currency
+        /// </summary>
+        public string AccountCurrency => _baseAlgorithm.AccountCurrency;
 
         /// <summary>
         /// Set a required SecurityType-symbol and resolution for algorithm
@@ -528,7 +548,7 @@ namespace QuantConnect.AlgorithmFactory.Python.Wrappers
             {
                 using (Py.GIL())
                 {
-                    _algorithm.OnData(SubscriptionManager.HasCustomData ? new PythonSlice(slice) : slice);
+                    _onData(SubscriptionManager.HasCustomData ? new PythonSlice(slice) : slice);
                 }
             }
         }
@@ -673,7 +693,7 @@ namespace QuantConnect.AlgorithmFactory.Python.Wrappers
         {
             using (Py.GIL())
             {
-                _algorithm.OnOrderEvent(newEvent);
+                _onOrderEvent(newEvent);
             }
         }
 
@@ -776,7 +796,7 @@ namespace QuantConnect.AlgorithmFactory.Python.Wrappers
         /// <param name="symbol">The cash symbol to set</param>
         /// <param name="startingCash">Decimal cash value of portfolio</param>
         /// <param name="conversionRate">The current conversion rate for the</param>
-        public void SetCash(string symbol, decimal startingCash, decimal conversionRate) => _baseAlgorithm.SetCash(symbol, startingCash, conversionRate);
+        public void SetCash(string symbol, decimal startingCash, decimal conversionRate = 0) => _baseAlgorithm.SetCash(symbol, startingCash, conversionRate);
 
         /// <summary>
         /// Set the DateTime Frontier: This is the master time and is
@@ -855,5 +875,11 @@ namespace QuantConnect.AlgorithmFactory.Python.Wrappers
         /// </summary>
         /// <returns></returns>
         public override string ToString() => _algorithm == null ? base.ToString() : _algorithm.Repr();
+
+        /// <summary>
+        /// Sets the current slice
+        /// </summary>
+        /// <param name="slice">The Slice object</param>
+        public void SetCurrentSlice(Slice slice) => _baseAlgorithm.SetCurrentSlice(slice);
     }
 }

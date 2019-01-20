@@ -14,6 +14,7 @@
 */
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using QuantConnect.Algorithm.Framework.Alphas;
 using QuantConnect.Algorithm.Framework.Alphas.Analysis;
@@ -119,10 +120,50 @@ namespace QuantConnect.Algorithm.Framework
         /// <param name="slice">The current data slice</param>
         public sealed override void OnFrameworkData(Slice slice)
         {
-            // generate, timestamp and emit insights
-            var insights = Alpha.Update(this, slice)
-                .Select(SetGeneratedAndClosedTimes)
-                .ToArray();
+            if (UtcTime >= UniverseSelection.GetNextRefreshTimeUtc())
+            {
+                var universes = UniverseSelection.CreateUniverses(this).ToDictionary(u => u.Configuration.Symbol);
+
+                // remove deselected universes by symbol
+                foreach (var ukvp in UniverseManager)
+                {
+                    var universeSymbol = ukvp.Key;
+                    var qcUserDefined = UserDefinedUniverse.CreateSymbol(ukvp.Value.SecurityType, ukvp.Value.Market);
+                    if (universeSymbol.Equals(qcUserDefined))
+                    {
+                        // prevent removal of qc algorithm created user defined universes
+                        continue;
+                    }
+
+                    Universe universe;
+                    if (!universes.TryGetValue(universeSymbol, out universe))
+                    {
+                        if (ukvp.Value.DisposeRequested)
+                        {
+                            UniverseManager.Remove(universeSymbol);
+                        }
+
+                        // mark this universe as disposed to remove all child subscriptions
+                        ukvp.Value.Dispose();
+                    }
+                }
+
+                // add newly selected universes
+                foreach (var ukvp in universes)
+                {
+                    // note: UniverseManager.Add uses TryAdd, so don't need to worry about duplicates here
+                    UniverseManager.Add(ukvp);
+                }
+            }
+
+            // we only want to run universe selection if there's no data available in the slice
+            if (!slice.HasData)
+            {
+                return;
+            }
+
+            // insight timestamping handled via InsightsGenerated event handler
+            var insights = Alpha.Update(this, slice).ToArray();
 
             // only fire insights generated event if we actually have insights
             if (insights.Length != 0)
@@ -250,37 +291,29 @@ namespace QuantConnect.Algorithm.Framework
             RiskManagement = riskManagement;
         }
 
-        private Insight SetGeneratedAndClosedTimes(Insight insight)
+        /// <summary>
+        /// Event invocator for the <see cref="QCAlgorithm.InsightsGenerated"/> event
+        /// </summary>
+        /// <remarks>
+        /// This method is sealed because the framework must be able to force setting of the
+        /// generated and close times before any event handlers are run. Bind directly to the
+        /// <see cref="QCAlgorithm.InsightsGenerated"/> event insead of overriding.
+        /// </remarks>
+        /// <param name="insights">The collection of insights generaed at the current time step</param>
+        protected sealed override void OnInsightsGenerated(IEnumerable<Insight> insights)
         {
-            insight.GeneratedTimeUtc = UtcTime;
-            insight.ReferenceValue = _securityValuesProvider.GetValues(insight.Symbol).Get(insight.Type);
-            if (string.IsNullOrEmpty(insight.SourceModel))
+            // set values not required to be set by alpha models
+            base.OnInsightsGenerated(insights.Select(insight =>
             {
-                // set the source model name if not already set
-                insight.SourceModel = Alpha.GetModelName();
-            }
+                insight.GeneratedTimeUtc = UtcTime;
+                insight.ReferenceValue = _securityValuesProvider.GetValues(insight.Symbol).Get(insight.Type);
+                insight.SourceModel = string.IsNullOrEmpty(insight.SourceModel) ? Alpha.GetModelName() : insight.SourceModel;
 
-            TimeSpan barSize;
-            Security security;
-            SecurityExchangeHours exchangeHours;
-            if (Securities.TryGetValue(insight.Symbol, out security))
-            {
-                exchangeHours = security.Exchange.Hours;
-                barSize = security.Resolution.ToTimeSpan();
-            }
-            else
-            {
-                barSize = insight.Period.ToHigherResolutionEquivalent(false).ToTimeSpan();
-                exchangeHours = MarketHoursDatabase.GetExchangeHours(insight.Symbol.ID.Market, insight.Symbol, insight.Symbol.SecurityType);
-            }
+                var exchangeHours = MarketHoursDatabase.GetExchangeHours(insight.Symbol.ID.Market, insight.Symbol, insight.Symbol.SecurityType);
+                insight.SetPeriodAndCloseTime(exchangeHours);
 
-            var localStart = UtcTime.ConvertFromUtc(exchangeHours.TimeZone);
-            barSize = QuantConnect.Time.Max(barSize, QuantConnect.Time.OneMinute);
-            var barCount = (int) (insight.Period.Ticks / barSize.Ticks);
-
-            insight.CloseTimeUtc = QuantConnect.Time.GetEndTimeForTradeBars(exchangeHours, localStart, barSize, barCount, false).ConvertToUtc(exchangeHours.TimeZone);
-
-            return insight;
+                return insight;
+            }));
         }
 
         private void CheckModels()

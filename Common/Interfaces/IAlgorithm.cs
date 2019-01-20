@@ -43,12 +43,20 @@ namespace QuantConnect.Interfaces
     /// Interface for QuantConnect algorithm implementations. All algorithms must implement these
     /// basic members to allow interaction with the Lean Backtesting Engine.
     /// </summary>
-    public interface IAlgorithm
+    public interface IAlgorithm : ISecurityInitializerProvider, IAccountCurrencyProvider
     {
         /// <summary>
         /// Event fired when an algorithm generates a insight
         /// </summary>
         event AlgorithmEvent<GeneratedInsightsCollection> InsightsGenerated;
+
+        /// <summary>
+        /// Gets the time keeper instance
+        /// </summary>
+        ITimeKeeper TimeKeeper
+        {
+            get;
+        }
 
         /// <summary>
         /// Data subscription manager controls the information and subscriptions the algorithms recieves.
@@ -289,14 +297,6 @@ namespace QuantConnect.Interfaces
         }
 
         /// <summary>
-        /// Gets an instance that is to be used to initialize newly created securities.
-        /// </summary>
-        ISecurityInitializer SecurityInitializer
-        {
-            get;
-        }
-
-        /// <summary>
         /// Gets the Trade Builder to generate trades from executions
         /// </summary>
         ITradeBuilder TradeBuilder
@@ -307,7 +307,7 @@ namespace QuantConnect.Interfaces
         /// <summary>
         /// Gets the user settings for the algorithm
         /// </summary>
-        AlgorithmSettings Settings
+        IAlgorithmSettings Settings
         {
             get;
         }
@@ -327,6 +327,11 @@ namespace QuantConnect.Interfaces
         {
             get;
         }
+
+        /// <summary>
+        /// Returns the current Slice object
+        /// </summary>
+        Slice CurrentSlice { get; }
 
         /// <summary>
         /// Initialise the Algorithm and Prepare Required Data:
@@ -573,7 +578,7 @@ namespace QuantConnect.Interfaces
         /// <param name="symbol">The cash symbol to set</param>
         /// <param name="startingCash">Decimal cash value of portfolio</param>
         /// <param name="conversionRate">The current conversion rate for the</param>
-        void SetCash(string symbol, decimal startingCash, decimal conversionRate);
+        void SetCash(string symbol, decimal startingCash, decimal conversionRate = 0);
 
         /// <summary>
         /// Liquidate your portfolio holdings:
@@ -650,5 +655,11 @@ namespace QuantConnect.Interfaces
         /// </summary>
         /// <param name="futureChainProvider">The future chain provider</param>
         void SetFutureChainProvider(IFutureChainProvider futureChainProvider);
+
+        /// <summary>
+        /// Sets the current slice
+        /// </summary>
+        /// <param name="slice">The Slice object</param>
+        void SetCurrentSlice(Slice slice);
     }
 }

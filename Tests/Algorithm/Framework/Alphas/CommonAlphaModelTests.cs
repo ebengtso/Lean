@@ -26,8 +26,9 @@ using QuantConnect.Lean.Engine.HistoricalData;
 using QuantConnect.Securities;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
+using QuantConnect.Python;
+using QuantConnect.Tests.Engine.DataFeeds;
 
 namespace QuantConnect.Tests.Algorithm.Framework.Alphas
 {
@@ -41,12 +42,12 @@ namespace QuantConnect.Tests.Algorithm.Framework.Alphas
         [TestFixtureSetUp]
         public void Initialize()
         {
-            var pythonPath = new DirectoryInfo("../../../Algorithm.Framework/Alphas");
-            Environment.SetEnvironmentVariable("PYTHONPATH", pythonPath.FullName);
+            PythonInitializer.Initialize();
 
             _algorithm = new QCAlgorithmFramework();
             _algorithm.PortfolioConstruction = new NullPortfolioConstructionModel();
             _algorithm.HistoryProvider = new SineHistoryProvider(_algorithm.Securities);
+            _algorithm.SubscriptionManager.SetDataManager(new DataManagerStub(_algorithm));
             InitializeAlgorithm(_algorithm);
         }
 
@@ -63,6 +64,7 @@ namespace QuantConnect.Tests.Algorithm.Framework.Alphas
 
             // Set the alpha model
             _algorithm.SetAlpha(model);
+            _algorithm.SetUniverseSelection(new ManualUniverseSelectionModel());
 
             var changes = new SecurityChanges(AddedSecurities, RemovedSecurities);
             _algorithm.OnFrameworkSecuritiesChanged(changes);
@@ -98,18 +100,18 @@ namespace QuantConnect.Tests.Algorithm.Framework.Alphas
                 Console.WriteLine(insight);
             }
 
-            Assert.AreEqual(actualInsights.Count, expectedInsights.Count);
+            Assert.AreEqual(expectedInsights.Count, actualInsights.Count);
 
             for (var i = 0; i < actualInsights.Count; i++)
             {
                 var actual = actualInsights[i];
                 var expected = expectedInsights[i];
-                Assert.AreEqual(actual.Symbol, expected.Symbol);
-                Assert.AreEqual(actual.Type, expected.Type);
-                Assert.AreEqual(actual.Direction, expected.Direction);
-                Assert.AreEqual(actual.Period, expected.Period);
-                Assert.AreEqual(actual.Magnitude, expected.Magnitude);
-                Assert.AreEqual(actual.Confidence, expected.Confidence);
+                Assert.AreEqual(expected.Symbol, actual.Symbol);
+                Assert.AreEqual(expected.Type, actual.Type);
+                Assert.AreEqual(expected.Direction, actual.Direction);
+                Assert.AreEqual(expected.Period, actual.Period);
+                Assert.AreEqual(expected.Magnitude, actual.Magnitude);
+                Assert.AreEqual(expected.Confidence, actual.Confidence);
             }
         }
 
@@ -205,7 +207,7 @@ namespace QuantConnect.Tests.Algorithm.Framework.Alphas
         /// </summary>
         protected virtual IEnumerable<Slice> CreateSlices()
         {
-            var cashBook = new CashBook();
+            var timeSliceFactory = new TimeSliceFactory(TimeZones.NewYork);
             var changes = SecurityChanges.None;
             var sliceDateTimes = GetSliceDateTimes(MaxSliceCount);
 
@@ -223,14 +225,16 @@ namespace QuantConnect.Tests.Algorithm.Framework.Alphas
                 {
                     var security = kvp.Value;
                     var exchange = security.Exchange.Hours;
-                    var extendedMarket = security.IsExtendedMarketHours;
+                    var configs = _algorithm.SubscriptionManager.SubscriptionDataConfigService
+                        .GetSubscriptionDataConfigs(security.Symbol);
+                    var extendedMarket = configs.IsExtendedMarketHours();
                     var localDateTime = utcDateTime.ConvertFromUtc(exchange.TimeZone);
                     if (!exchange.IsOpen(localDateTime, extendedMarket))
                     {
                         continue;
                     }
                     var configuration = security.Subscriptions.FirstOrDefault();
-                    var period = security.Resolution.ToTimeSpan();
+                    var period = configs.GetHighestResolution().ToTimeSpan();
                     var time = (utcDateTime - period).ConvertFromUtc(configuration.DataTimeZone);
                     var tradeBar = new TradeBar(time, security.Symbol, last, high, low, last, 1000, period);
                     packets.Add(new DataFeedPacket(security, configuration, new List<BaseData> { tradeBar }));
@@ -238,7 +242,7 @@ namespace QuantConnect.Tests.Algorithm.Framework.Alphas
 
                 if (packets.Count > 0)
                 {
-                    yield return TimeSlice.Create(utcDateTime, TimeZones.NewYork, cashBook, packets, changes, new Dictionary<Universe, BaseDataCollection>()).Slice;
+                    yield return timeSliceFactory.Create(utcDateTime, packets, changes, new Dictionary<Universe, BaseDataCollection>()).Slice;
                 }
             }
         }
@@ -258,16 +262,17 @@ namespace QuantConnect.Tests.Algorithm.Framework.Alphas
             {
                 foreach (var kvp in _algorithm.Securities)
                 {
-                    var resolution = kvp.Value.Resolution.ToTimeSpan();
+                    var security = kvp.Value;
+                    var configs = _algorithm.SubscriptionManager.SubscriptionDataConfigService
+                        .GetSubscriptionDataConfigs(security.Symbol);
+                    var resolution = configs.GetHighestResolution().ToTimeSpan();
                     utcDateTime = utcDateTime.Add(resolution);
                     if (resolution == Time.OneDay && utcDateTime.TimeOfDay == TimeSpan.Zero)
                     {
                         utcDateTime = utcDateTime.AddHours(17);
                     }
-
-                    var security = kvp.Value;
                     var exchange = security.Exchange.Hours;
-                    var extendedMarket = security.IsExtendedMarketHours;
+                    var extendedMarket = configs.IsExtendedMarketHours();
                     var localDateTime = utcDateTime.ConvertFromUtc(exchange.TimeZone);
                     if (exchange.IsOpen(localDateTime, extendedMarket))
                     {
@@ -284,24 +289,17 @@ namespace QuantConnect.Tests.Algorithm.Framework.Alphas
         {
             model = default(IAlphaModel);
 
-            try
+            switch (language)
             {
-                switch (language)
-                {
-                    case Language.CSharp:
-                        model = CreateCSharpAlphaModel();
-                        return true;
-                    case Language.Python:
-                        _algorithm.SetPandasConverter();
-                        model = CreatePythonAlphaModel();
-                        return true;
-                    default:
-                        return false;
-                }
-            }
-            catch
-            {
-                return false;
+                case Language.CSharp:
+                    model = CreateCSharpAlphaModel();
+                    return true;
+                case Language.Python:
+                    _algorithm.SetPandasConverter();
+                    model = CreatePythonAlphaModel();
+                    return true;
+                default:
+                    return false;
             }
         }
     }

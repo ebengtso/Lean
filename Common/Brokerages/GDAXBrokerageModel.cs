@@ -130,7 +130,7 @@ namespace QuantConnect.Brokerages
             if (security.Type != SecurityType.Crypto)
             {
                 message = new BrokerageMessageEvent(BrokerageMessageType.Warning, "NotSupported",
-                    "This model does not support " + security.Type + " security type."
+                    $"The {nameof(GDAXBrokerageModel)} does not support {security.Type} security type."
                 );
 
                 return false;
@@ -139,7 +139,7 @@ namespace QuantConnect.Brokerages
             if (order.Type != OrderType.Limit && order.Type != OrderType.Market && order.Type != OrderType.StopMarket)
             {
                 message = new BrokerageMessageEvent(BrokerageMessageType.Warning, "NotSupported",
-                    "This model does not support " + order.Type + " order type."
+                    $"The {nameof(GDAXBrokerageModel)} does not support {order.Type} order type."
                 );
 
                 return false;
@@ -148,7 +148,7 @@ namespace QuantConnect.Brokerages
             if (order.TimeInForce != TimeInForce.GoodTilCanceled)
             {
                 message = new BrokerageMessageEvent(BrokerageMessageType.Warning, "NotSupported",
-                    "This model does not support " + order.TimeInForce + " time in force."
+                    $"The {nameof(GDAXBrokerageModel)} does not support {order.TimeInForce.GetType().Name} time in force."
                 );
 
                 return false;
@@ -172,9 +172,8 @@ namespace QuantConnect.Brokerages
         /// For cash accounts, leverage = 1 is used.
         /// </summary>
         /// <param name="security">The security to get a buying power model for</param>
-        /// <param name="accountType">The account type</param>
         /// <returns>The buying power model for this brokerage/security</returns>
-        public override IBuyingPowerModel GetBuyingPowerModel(Security security, AccountType accountType)
+        public override IBuyingPowerModel GetBuyingPowerModel(Security security)
         {
             // margin trading is not currently supported by GDAX
             return new CashBuyingPowerModel();

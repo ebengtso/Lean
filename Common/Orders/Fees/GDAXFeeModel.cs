@@ -13,52 +13,48 @@
  * limitations under the License.
 */
 
-using System.Collections.Generic;
+using QuantConnect.Securities;
 
 namespace QuantConnect.Orders.Fees
 {
     /// <summary>
-    /// Provides an implementation of <see cref="IFeeModel"/> that models GDAX order fees
+    /// Provides an implementation of <see cref="FeeModel"/> that models GDAX order fees
     /// </summary>
-    public class GDAXFeeModel : IFeeModel
+    public class GDAXFeeModel : FeeModel
     {
         /// <summary>
-        /// Tier 1 maker fees
-        /// https://www.gdax.com/fees/BTC-USD
+        /// Tier 1 taker fees
+        /// https://www.gdax.com/fees
         /// </summary>
-        public static readonly Dictionary<string, decimal> Fees = new Dictionary<string, decimal>
-        {
-            { "BTCUSD", 0.0025m }, { "BTCEUR", 0.0025m }, { "BTCGBP", 0.0025m },
-            { "BCHBTC", 0.003m  }, { "BCHEUR", 0.003m  }, { "BCHUSD", 0.003m  },
-            { "ETHBTC", 0.003m  }, { "ETHEUR", 0.003m  }, { "ETHUSD", 0.003m  },
-            { "LTCBTC", 0.003m  }, { "LTCEUR", 0.003m  }, { "LTCUSD", 0.003m  }
-        };
+        public const decimal TakerFee = 0.003m;
 
         /// <summary>
-        /// Get the fee for this order in units of the account currency
+        /// Get the fee for this order in quote currency
         /// </summary>
-        /// <param name="security">The security matching the order</param>
-        /// <param name="order">The order to compute fees for</param>
-        /// <returns>The cost of the order in units of the account currency</returns>
-        public decimal GetOrderFee(Securities.Security security, Order order)
+        /// <param name="parameters">A <see cref="OrderFeeParameters"/> object
+        /// containing the security and order</param>
+        /// <returns>The cost of the order in quote currency</returns>
+        public override OrderFee GetOrderFee(OrderFeeParameters parameters)
         {
+            var order = parameters.Order;
+            var security = parameters.Security;
+
             // marketable limit orders are considered takers
-            if (order.Type == OrderType.Limit && !order.IsMarketable)
+            decimal fee = 0;
+            // check limit order posted to the order book, 0% maker fee
+            if (!(order.Type == OrderType.Limit && !order.IsMarketable))
             {
-                // limit order posted to the order book, 0% maker fee
-                return 0m;
+                // get order value in quote currency, then apply taker fee factor
+                var unitPrice = order.Direction == OrderDirection.Buy ? security.AskPrice : security.BidPrice;
+                unitPrice *= security.SymbolProperties.ContractMultiplier;
+
+                // currently we do not model 30-day volume, so we use the first tier
+
+                fee = unitPrice * order.AbsoluteQuantity * TakerFee;
             }
-
-            // currently we do not model daily rebates
-
-            decimal fee;
-            Fees.TryGetValue(security.Symbol.Value, out fee);
-
-            // get order value in account currency, then apply taker fee factor
-            var unitPrice = order.Direction == OrderDirection.Buy ? security.AskPrice : security.BidPrice;
-            unitPrice *= security.QuoteCurrency.ConversionRate * security.SymbolProperties.ContractMultiplier;
-
-            return unitPrice * order.AbsoluteQuantity * fee;
+            return new OrderFee(new CashAmount(
+                fee,
+                security.QuoteCurrency.Symbol));
         }
     }
 }

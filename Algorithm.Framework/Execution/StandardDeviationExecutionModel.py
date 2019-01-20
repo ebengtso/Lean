@@ -15,15 +15,19 @@ from clr import AddReference
 AddReference("System")
 AddReference("QuantConnect.Common")
 AddReference("QuantConnect.Indicators")
+AddReference("QuantConnect.Algorithm")
 AddReference("QuantConnect.Algorithm.Framework")
 
 from System import *
 from QuantConnect import *
 from QuantConnect.Indicators import *
-from QuantConnect.Data.Market import TradeBar
+from QuantConnect.Data import *
+from QuantConnect.Data.Market import *
 from QuantConnect.Orders import *
-from QuantConnect.Algorithm.Framework.Execution import ExecutionModel, OrderSizing
-from QuantConnect.Algorithm.Framework.Portfolio import PortfolioTargetCollection
+from QuantConnect.Algorithm import *
+from QuantConnect.Algorithm.Framework import *
+from QuantConnect.Algorithm.Framework.Execution import *
+from QuantConnect.Algorithm.Framework.Portfolio import *
 import numpy as np
 
 
@@ -31,7 +35,7 @@ class StandardDeviationExecutionModel(ExecutionModel):
     '''Execution model that submits orders while the current market prices is at least the configured number of standard
      deviations away from the mean in the favorable direction (below/above for buy/sell respectively)'''
 
-    def __init__(self, 
+    def __init__(self,
                  period = 60,
                  deviations = 2,
                  resolution = Resolution.Minute):
@@ -60,7 +64,7 @@ class StandardDeviationExecutionModel(ExecutionModel):
            targets: The portfolio targets'''
         self.targetsCollection.AddRange(targets)
 
-        for target in self.targetsCollection:
+        for target in self.targetsCollection.OrderByMarginImpact(algorithm):
             symbol = target.Symbol
 
             # calculate remaining quantity to be ordered
@@ -70,24 +74,26 @@ class StandardDeviationExecutionModel(ExecutionModel):
             data = self.symbolData.get(symbol, None)
             if data is None: return
 
-            # ensure we're receiving price data before submitting orders
-            if data.Security.Price == 0: return
-
             # check order entry conditions
             if data.STD.IsReady and self.PriceIsFavorable(data, unorderedQuantity):
                 # get the maximum order size based on total order value
                 maxOrderSize = OrderSizing.Value(data.Security, self.MaximumOrderValue)
                 orderSize = np.min([maxOrderSize, np.abs(unorderedQuantity)])
 
+                remainder = orderSize % data.Security.SymbolProperties.LotSize
+                missingForLotSize = data.Security.SymbolProperties.LotSize - remainder
+                # if the amount we are missing for +1 lot size is 1M part of a lot size
+                # we suppose its due to floating point error and round up
+                # Note: this is required to avoid a diff with C# equivalent
+                if missingForLotSize < (data.Security.SymbolProperties.LotSize / 1000000):
+                    remainder -= data.Security.SymbolProperties.LotSize
+
                 # round down to even lot size
-                orderSize -= orderSize % data.Security.SymbolProperties.LotSize
+                orderSize -= remainder
                 if orderSize != 0:
                     algorithm.MarketOrder(symbol, np.sign(unorderedQuantity) * orderSize)
 
-            # check to see if we're done with this target
-            unorderedQuantity = OrderSizing.GetUnorderedQuantity(algorithm, target)
-            if unorderedQuantity == 0:
-                self.targetsCollection.Remove(target.Symbol)
+        self.targetsCollection.ClearFulfilled(algorithm)
 
 
     def OnSecuritiesChanged(self, algorithm, changes):

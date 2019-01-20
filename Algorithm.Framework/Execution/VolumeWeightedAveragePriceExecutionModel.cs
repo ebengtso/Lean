@@ -22,6 +22,7 @@ using QuantConnect.Data.Consolidators;
 using QuantConnect.Data.UniverseSelection;
 using QuantConnect.Indicators;
 using QuantConnect.Securities;
+using QuantConnect.Orders;
 
 namespace QuantConnect.Algorithm.Framework.Execution
 {
@@ -51,7 +52,7 @@ namespace QuantConnect.Algorithm.Framework.Execution
             // update the complete set of portfolio targets with the new targets
             _targetsCollection.AddRange(targets);
 
-            foreach (var target in _targetsCollection)
+            foreach (var target in _targetsCollection.OrderByMarginImpact(algorithm))
             {
                 var symbol = target.Symbol;
 
@@ -61,12 +62,6 @@ namespace QuantConnect.Algorithm.Framework.Execution
                 // fetch our symbol data containing our VWAP indicator
                 SymbolData data;
                 if (!_symbolData.TryGetValue(symbol, out data))
-                {
-                    continue;
-                }
-
-                // ensure we're receiving price data before submitting orders
-                if (data.Security.Price == 0m)
                 {
                     continue;
                 }
@@ -85,14 +80,9 @@ namespace QuantConnect.Algorithm.Framework.Execution
                         algorithm.MarketOrder(data.Security.Symbol, Math.Sign(unorderedQuantity) * orderSize);
                     }
                 }
-
-                // check to see if we're done with this target
-                unorderedQuantity = OrderSizing.GetUnorderedQuantity(algorithm, target);
-                if (unorderedQuantity == 0m)
-                {
-                    _targetsCollection.Remove(target.Symbol);
-                }
             }
+
+            _targetsCollection.ClearFulfilled(algorithm);
         }
 
         /// <summary>
