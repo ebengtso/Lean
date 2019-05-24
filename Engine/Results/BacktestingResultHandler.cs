@@ -53,8 +53,24 @@ namespace QuantConnect.Lean.Engine.Results
         private DateTime _lastUpdate;
         private readonly List<string> _log = new List<string>();
         private string _errorMessage = "";
+<<<<<<< HEAD
+        private IAlgorithm _algorithm;
+        private ConcurrentQueue<Packet> _messages;
+        private ConcurrentDictionary<string, Chart> _charts;
+        private bool _isActive = true;
+        protected object _chartLock = new Object();
+        private object _runtimeLock = new Object();
+||||||| merged common ancestors
+        private IAlgorithm _algorithm;
+        private ConcurrentQueue<Packet> _messages;
+        private ConcurrentDictionary<string, Chart> _charts;
+        private bool _isActive = true;
+        private object _chartLock = new Object();
+        private object _runtimeLock = new Object();
+=======
         private readonly object _chartLock = new object();
         private readonly object _runtimeLock = new object();
+>>>>>>> d2923b3ca1497258036d88109a0aa6363d642c6f
         private readonly Dictionary<string, string> _runtimeStatistics = new Dictionary<string, string>();
         private double _daysProcessed;
         private double _daysProcessedFrontier;

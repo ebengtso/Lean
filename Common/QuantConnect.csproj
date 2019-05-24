@@ -206,8 +206,13 @@
     <Compile Include="Benchmarks\FuncBenchmark.cs" />
     <Compile Include="Benchmarks\IBenchmark.cs" />
     <Compile Include="Benchmarks\SecurityBenchmark.cs" />
+<<<<<<< HEAD
+    <Compile Include="Brokerages\BitfinexBrokerageModel.cs" />
+||||||| merged common ancestors
+=======
     <Compile Include="Brokerages\AlpacaBrokerageModel.cs" />
     <Compile Include="Brokerages\BrokerageFactoryAttribute.cs" />
+>>>>>>> d2923b3ca1497258036d88109a0aa6363d642c6f
     <Compile Include="Brokerages\BrokerageName.cs" />
     <Compile Include="Brokerages\DefaultBrokerageMessageHandler.cs" />
     <Compile Include="Brokerages\DefaultBrokerageModel.cs" />
@@ -295,7 +300,12 @@
     <Compile Include="Orders\Fees\BitfinexFeeModel.cs" />
     <Compile Include="Orders\Fills\FillModel.cs" />
     <Compile Include="Orders\Fills\LatestPriceFillModel.cs" />
+<<<<<<< HEAD
+    <Compile Include="Orders\Fees\BitfinexFeeModel.cs" />
+||||||| merged common ancestors
+=======
     <Compile Include="Orders\BitfinexOrderProperties.cs" />
+>>>>>>> d2923b3ca1497258036d88109a0aa6363d642c6f
     <Compile Include="Orders\GDAXOrderProperties.cs" />
     <Compile Include="Orders\OrderSizing.cs" />
     <Compile Include="Orders\TimeInForceJsonConverter.cs" />

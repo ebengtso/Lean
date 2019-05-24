@@ -30,7 +30,22 @@ using System.Threading;
 
 namespace QuantConnect.Tests.Brokerages.GDAX
 {
+<<<<<<< HEAD
+<<<<<<< HEAD
+
     [TestFixture]
+||||||| merged common ancestors
+
+    [TestFixture, Ignore("These tests are ignored while gdax is under maintenance. REMOVE [Ignore] WHEN GDAX IS READY FOR PRODUCTION")]
+=======
+    [TestFixture]
+>>>>>>> 1201d84c96d093cdd7a1e53cd87f3fc361db4f88
+||||||| merged common ancestors
+
+    [TestFixture, Ignore("These tests are ignored while gdax is under maintenance. REMOVE [Ignore] WHEN GDAX IS READY FOR PRODUCTION")]
+=======
+    [TestFixture]
+>>>>>>> 1201d84c96d093cdd7a1e53cd87f3fc361db4f88
     public class GDAXBrokerageTests
     {
         #region Declarations
@@ -107,8 +122,27 @@ namespace QuantConnect.Tests.Brokerages.GDAX
         [Test]
         public void ConnectTest()
         {
+<<<<<<< HEAD
+<<<<<<< HEAD
+            _wss.Setup(m => m.IsOpen).Returns(false);
+            _wss.Setup(w => w.Connect()).Callback(() => _wss.Setup(w => w.IsOpen).Returns(true)).Verifiable();
+
+||||||| merged common ancestors
+            _wss.Setup(m => m.Connect()).Verifiable();
+            _wss.Setup(m => m.IsOpen).Returns(true);
+
+=======
             _wss.Setup(m => m.Connect()).Callback(() => { _wss.Setup(m => m.IsOpen).Returns(true); }).Verifiable();
             _wss.Setup(m => m.IsOpen).Returns(false);
+>>>>>>> 1201d84c96d093cdd7a1e53cd87f3fc361db4f88
+||||||| merged common ancestors
+            _wss.Setup(m => m.Connect()).Verifiable();
+            _wss.Setup(m => m.IsOpen).Returns(true);
+
+=======
+            _wss.Setup(m => m.Connect()).Callback(() => { _wss.Setup(m => m.IsOpen).Returns(true); }).Verifiable();
+            _wss.Setup(m => m.IsOpen).Returns(false);
+>>>>>>> 1201d84c96d093cdd7a1e53cd87f3fc361db4f88
             _unit.Connect();
             _wss.Verify();
         }
@@ -116,8 +150,23 @@ namespace QuantConnect.Tests.Brokerages.GDAX
         [Test]
         public void DisconnectTest()
         {
+            _wss.Setup(m => m.IsOpen).Returns(false);
+            _wss.Setup(w => w.Connect()).Callback(() => _wss.Setup(w => w.IsOpen).Returns(true)).Verifiable();
             _wss.Setup(m => m.Close()).Verifiable();
+<<<<<<< HEAD
+
+            _unit.Connect();
+||||||| merged common ancestors
             _wss.Setup(m => m.IsOpen).Returns(true);
+<<<<<<< HEAD
+            _unit.Connect();
+=======
+            _wss.Setup(m => m.IsOpen).Returns(true);
+>>>>>>> 1201d84c96d093cdd7a1e53cd87f3fc361db4f88
+||||||| merged common ancestors
+            _unit.Connect();
+=======
+>>>>>>> 1201d84c96d093cdd7a1e53cd87f3fc361db4f88
             _unit.Disconnect();
             _wss.Verify();
         }
@@ -151,13 +200,40 @@ namespace QuantConnect.Tests.Brokerages.GDAX
                 Assert.IsTrue(actualQuantity != orderQuantity);
                 Assert.AreEqual(OrderStatus.Filled, e.Status);
                 Assert.AreEqual(expectedQuantity, e.FillQuantity);
+<<<<<<< HEAD
+<<<<<<< HEAD
+                Assert.AreEqual(0.00858216m, Math.Round(actualFee, 8));
+||||||| merged common ancestors
+                Assert.AreEqual(0.01m, Math.Round(actualFee, 8));
+=======
                 // fill quantity = 5.23512
                 // fill price = 400.23
+<<<<<<< HEAD
+                // partial order fee = (400.23 * 5.23512 * 0.0025) = 5.238130194
+                Assert.AreEqual(5.238130194m, actualFee);
+>>>>>>> 1201d84c96d093cdd7a1e53cd87f3fc361db4f88
+||||||| merged common ancestors
+                Assert.AreEqual(0.01m, Math.Round(actualFee, 8));
+=======
+                // fill quantity = 5.23512
+                // fill price = 400.23
+                // partial order fee = (400.23 * 5.23512 * 0.0025) = 5.238130194
+                Assert.AreEqual(5.238130194m, actualFee);
+>>>>>>> 1201d84c96d093cdd7a1e53cd87f3fc361db4f88
+||||||| merged common ancestors
+                // partial order fee = (400.23 * 5.23512 * 0.0025) = 5.238130194
+                Assert.AreEqual(5.238130194m, actualFee);
+=======
                 // partial order fee = (400.23 * 5.23512 * 0.003) = 6.2857562328
                 Assert.AreEqual(6.2857562328m, actualFee);
+>>>>>>> d2923b3ca1497258036d88109a0aa6363d642c6f
                 raised.Set();
             };
 
+            _unit.OnMessage(_unit, new WebSocketMessage(json));
+
+            // not our order, market order is completed even if not totally filled
+            json = json.Replace(id, Guid.NewGuid().ToString());
             _unit.OnMessage(_unit, GDAXTestsHelpers.GetArgs(json));
 
             // not our order, market order is completed even if not totally filled
@@ -272,13 +348,21 @@ namespace QuantConnect.Tests.Brokerages.GDAX
             Assert.AreEqual(1.1, btc.Amount);
         }
 
+<<<<<<< HEAD
+<<<<<<< HEAD
+        [Test()]
+||||||| merged common ancestors
+        [Test(), Ignore("Holdings are now set to 0 swaps at the start of each launch. Not meaningful.")]
+=======
         [Test, Ignore("Holdings are now set to 0 swaps at the start of each launch. Not meaningful.")]
+>>>>>>> 1201d84c96d093cdd7a1e53cd87f3fc361db4f88
+||||||| merged common ancestors
+        [Test(), Ignore("Holdings are now set to 0 swaps at the start of each launch. Not meaningful.")]
+=======
+        [Test, Ignore("Holdings are now set to 0 swaps at the start of each launch. Not meaningful.")]
+>>>>>>> 1201d84c96d093cdd7a1e53cd87f3fc361db4f88
         public void GetAccountHoldingsTest()
         {
-            SetupResponse(_holdingData);
-
-            _unit.CachedOrderIDs.TryAdd(1, new Orders.MarketOrder { BrokerId = new List<string> { "1" }, Price = 123 });
-
             var actual = _unit.GetAccountHoldings();
 
             Assert.AreEqual(0, actual.Count());
@@ -309,7 +393,7 @@ namespace QuantConnect.Tests.Brokerages.GDAX
             Assert.Throws<NotSupportedException>(() => _unit.UpdateOrder(new LimitOrder()));
         }
 
-        [Test]
+        [Test, Ignore("Obsolete. Now uses order book")]
         public void SubscribeTest()
         {
             string actual = null;
@@ -345,15 +429,39 @@ namespace QuantConnect.Tests.Brokerages.GDAX
             _unit.Unsubscribe(new List<Symbol> { Symbol.Create("BTCUSD", SecurityType.Crypto, Market.GDAX) });
             StringAssert.Contains("user", actual);
             StringAssert.Contains("heartbeat", actual);
+<<<<<<< HEAD
+<<<<<<< HEAD
+            //obsolete. now uses order book
+            //StringAssert.Contains("ticker", actual);
+||||||| merged common ancestors
+            StringAssert.Contains("ticker", actual);
+=======
+>>>>>>> 1201d84c96d093cdd7a1e53cd87f3fc361db4f88
+||||||| merged common ancestors
+            StringAssert.Contains("ticker", actual);
+=======
+>>>>>>> 1201d84c96d093cdd7a1e53cd87f3fc361db4f88
             StringAssert.Contains("matches", actual);
         }
 
+<<<<<<< HEAD
+<<<<<<< HEAD
+        [Test, Ignore("Obsolete: Now uses order book updates")]
+||||||| merged common ancestors
+        [Test]
+=======
         [Test, Ignore("This test is obsolete, the 'ticker' channel is no longer used.")]
+>>>>>>> 1201d84c96d093cdd7a1e53cd87f3fc361db4f88
+||||||| merged common ancestors
+        [Test]
+=======
+        [Test, Ignore("This test is obsolete, the 'ticker' channel is no longer used.")]
+>>>>>>> 1201d84c96d093cdd7a1e53cd87f3fc361db4f88
         public void OnMessageTickerTest()
         {
             string json = _tickerData;
 
-            _unit.OnMessage(_unit, GDAXTestsHelpers.GetArgs(json));
+            _unit.OnMessage(_unit, new WebSocketMessage(json));
 
             var actual = _unit.Ticks.First();
 
@@ -374,9 +482,31 @@ namespace QuantConnect.Tests.Brokerages.GDAX
         {
             _unit.PollTick(Symbol.Create("GBPUSD", SecurityType.Forex, Market.FXCM));
             Thread.Sleep(1000);
+<<<<<<< HEAD
+<<<<<<< HEAD
+            Assert.AreEqual(0.8103727714748784440842787682m, _unit.Ticks.First().Price);
+||||||| merged common ancestors
+            Assert.AreEqual(1.234m, _unit.Ticks.First().Price);
+=======
 
+            // conversion rates are inverted: value = 1 / 1.234
+            Assert.AreEqual(0.8103727714748784440842787682m, _unit.Ticks.First().Price);
+>>>>>>> 1201d84c96d093cdd7a1e53cd87f3fc361db4f88
+||||||| merged common ancestors
+            Assert.AreEqual(1.234m, _unit.Ticks.First().Price);
+=======
+
+<<<<<<< HEAD
+            // conversion rates are inverted: value = 1 / 1.234
+            Assert.AreEqual(0.8103727714748784440842787682m, _unit.Ticks.First().Price);
+>>>>>>> 1201d84c96d093cdd7a1e53cd87f3fc361db4f88
+||||||| merged common ancestors
+            // conversion rates are inverted: value = 1 / 1.234
+            Assert.AreEqual(0.8103727714748784440842787682m, _unit.Ticks.First().Price);
+=======
             // conversion rate is the price returned by the QC pricing API
             Assert.AreEqual(1.234m, _unit.Ticks.First().Price);
+>>>>>>> d2923b3ca1497258036d88109a0aa6363d642c6f
         }
 
         [Test]
