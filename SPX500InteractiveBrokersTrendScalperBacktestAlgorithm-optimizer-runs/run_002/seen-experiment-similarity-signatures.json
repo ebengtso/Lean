@@ -1,0 +1,14 @@
+[
+  {
+    "first_run": "run_001",
+    "similarity_signature": "[[\"profile.breakout_long_no_0dte.es-structure.min-score\",\"5\"],[\"profile.breakout_long_no_0dte.es-vwap.slope-min\",\"0\"],[\"profile.breakout_long_no_0dte.take-profit.distance\",\"4\"],[\"profile.pullback_long_no_0dte.es-structure.min-score\",\"5\"]]"
+  },
+  {
+    "first_run": "run_003",
+    "similarity_signature": "[[\"profile.breakout_long_no_0dte.dynamic-take-profit.max\",\"4\"],[\"profile.breakout_long_no_0dte.es-structure.min-score\",\"5\"],[\"profile.breakout_long_no_0dte.es-vwap.slope-min\",\"0\"],[\"profile.pullback_long_no_0dte.es-structure.min-score\",\"5\"]]"
+  },
+  {
+    "first_run": "run_004",
+    "similarity_signature": "[[\"profile.breakout_long_no_0dte.es-structure.min-score\",\"5\"],[\"profile.breakout_long_no_0dte.es-vwap.slope-min\",\"0\"],[\"profile.breakout_long_no_0dte.take-profit.distance\",\"4\"],[\"profile.pullback_long_no_0dte.es-vwap.max-distance\",\"8.4\"]]"
+  }
+]

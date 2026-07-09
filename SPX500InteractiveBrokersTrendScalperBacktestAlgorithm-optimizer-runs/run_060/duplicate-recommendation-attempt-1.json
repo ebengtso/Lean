@@ -1,0 +1,42 @@
+{
+  "changes": {
+    "profile.call_wall_acceptance_long.dynamic-take-profit.max": "5"
+  },
+  "duplicate_of": "run_052",
+  "error": "duplicate experiment",
+  "iteration": 20,
+  "recommendation": {
+    "changes": [
+      {
+        "key": "option-strike-acceptance-seconds",
+        "reason": "Batch A only. The worst portfolio MAE is the call_wall_acceptance_long convex recovery; requiring 60 seconds of strike acceptance tests whether transient wall touches can be filtered without disabling the profile or touching global vetoes.",
+        "value": "60"
+      },
+      {
+        "key": "profile.call_wall_acceptance_long.dynamic-take-profit.max",
+        "reason": "Retest the accepted call-wall realization cap from the leader-family branch. This profile has only 2 trades but owns -655.2 MAE, so the first lever should be target containment rather than entry deletion.",
+        "value": "5"
+      },
+      {
+        "key": "profile.call_wall_acceptance_long.take-profit.distance",
+        "reason": "Set a moderate fixed realization target for call-wall acceptance so it can monetize accepted-wall continuation before exposure stretches into deep heat. This is narrower than the current wide selected target behavior but not a hard stop or broad filter.",
+        "value": "3.5"
+      }
+    ],
+    "expected_effect": "Should reduce call_wall_acceptance_long hold time, average MAE, and exposure drag while preserving most of the rare convex call-wall PnL. Main risk is underpaying the largest winner; reject if total net profit falls below 98% of run_001/run_044 leader, call-wall PnL retention is below 70%, or pnl_per_exposure_hour falls.",
+    "label": "promote",
+    "rationale": "Use exactly one legal family: batch_a_call_wall_acceptance_long. The current leader is plateaued at 103 trades and $7532.8, with no realized losses or slow 12h trades, so the only meaningful risk-adjusted weakness is hidden intratrade heat. call_wall_acceptance_long contributes $640.5 on 2 VALID_0DTE trades and the best profile PnL/hour, but also owns the -655.2 worst MAE. This experiment contains the call-wall sleeve through persistence and realization shape, not broad entry-veto tightening or stop losses.",
+    "strategy_hypotheses": [
+      {
+        "evidence": "The worst call-wall trade made $546 but required 120 minutes and -655.2 MAE; latest stats show call_wall_acceptance_long has $640.5 PnL, $290.3/hour, 2 trades, and average MAE -333.7. Static broad filters would either delete too much PnL or fail to improve kept worst MAE.",
+        "implementation_scope": "requires-code",
+        "name": "Call-Wall Convex Recovery Monitor",
+        "risk": "Can overfit a two-trade profile and cut rare convex recoveries unless validated against protected fast winners and out-of-sample days.",
+        "trigger": "call_wall_acceptance_long entry with wide selected target or extended ES-VWAP that fails to convert early favorable movement into sustained continuation.",
+        "validation_metric": "Reduce call-wall worst MAE below -655.2 while retaining at least 70% call-wall PnL, total net profit >=98% of leader, pnl_per_exposure_hour flat or better, and slow_12h remains 0."
+      }
+    ]
+  },
+  "run": "run_060",
+  "signature": "[[\"profile.call_wall_acceptance_long.dynamic-take-profit.max\",\"5\"]]"
+}

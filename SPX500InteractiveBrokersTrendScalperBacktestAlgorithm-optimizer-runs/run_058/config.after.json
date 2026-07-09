@@ -1,0 +1,3281 @@
+{
+  "_environment": "live-oanda-interactive-data",
+  "environment": "backtesting",
+  "databento-api-key": "db-Wvr6HA75r3cYQDwPB9h9ggiydDYfQ",
+  "algorithm-type-name": "SPX500InteractiveBrokersTrendScalperBacktestAlgorithm",
+  "algorithm-language": "CSharp",
+  "algorithm-location": "/Users/erikbengtson/Lean2026/LeanCustom/Algo/bin/Debug/Algo.dll",
+  "data-folder": "/Users/erikbengtson/Lean2026/LeanCustom/Data/",
+  "optimizer": {
+    "advisor": {
+      "provider": "codex",
+      "codex-bin": "/Users/erikbengtson/.vscode/extensions/openai.chatgpt-26.623.31921-darwin-arm64/bin/macos-aarch64/codex",
+      "codex-model": "gpt-5.5",
+      "codex-reasoning-effort": "low"
+    }
+  },
+  "spx500-trend-scalper": {
+    "subscriptions": {
+      "spx500-resolution": "Second",
+      "spx500-cached-price-max-age-seconds": "5",
+      "vix-resolution": "Minute",
+      "es-resolution": "Second"
+    },
+    "indicators": {
+      "source": "ES",
+      "ema-period": "20",
+      "rsi-period": "10",
+      "adx-period": "14",
+      "register-resolution": "Minute",
+      "consolidator-period": "1"
+    },
+    "warmup": {
+      "indicator-warmup-resolution": "Minute",
+      "indicator-warmup-bar-count": "80",
+      "indicator-warmup-buffer": "0",
+      "es-vwap-warmup-resolution": "Minute",
+      "es-vwap-warmup-bar-count": "0"
+    },
+    "backtest": {
+      "_backtest-start-date": "2024-06-19",
+      "_backtest-end-date": "2025-02-01",
+      "backtest-start-date": "2026-06-25",
+      "backtest-end-date": "2026-07-07"
+    },
+    "entry": {
+      "pullback": {
+        "enabled": "true",
+        "pullback-distance": "0"
+      },
+      "rsi-momentum": {
+        "enabled": "true",
+        "rsi-threshold": "30"
+      },
+      "adx-trend-strength": {
+        "enabled": "true",
+        "adx-threshold": "16"
+      },
+      "ema20-pullback": {
+        "enabled": "false"
+      },
+      "ema20-max-distance-points": {
+        "enabled": "false",
+        "ema20-max-distance": "20"
+      },
+      "ema20-max-distance-range": {
+        "enabled": "true",
+        "ema20-range-lookback-minutes": "20",
+        "ema20-range-multiplier": "0.8",
+        "ema20-range-min-distance": "6",
+        "ema20-range-max-distance": "28"
+      },
+      "entry-veto": {
+        "enabled": "true",
+        "score": {
+          "enabled": "true",
+          "entry-veto-min-points": "6",
+          "entry-veto-low-setup-quality-score": "50",
+          "entry-veto-weak-adx-threshold": "18",
+          "entry-veto-low-rsi-threshold": "45",
+          "entry-veto-high-rsi-threshold": "70",
+          "entry-veto-rsi-slope-min": "-2",
+          "entry-veto-adx-slope-min": "-1",
+          "entry-veto-es-vwap-distance-max": "2",
+          "entry-veto-es-structure-max-score": "3",
+          "entry-veto-es-structure-higher-low-min": "0.25",
+          "entry-veto-es-structure-higher-high-min": "0",
+          "entry-veto-es-structure-pullback-min": "5",
+          "entry-veto-es-rolling-high-distance-min": "5",
+          "entry-veto-es-rolling-high-minutes-since-max": "15"
+        },
+        "configured-tp-distance": {
+          "enabled": "false",
+          "min": "0",
+          "max": "8"
+        },
+        "es-session-volume": {
+          "enabled": "false",
+          "min": "0",
+          "max": "0"
+        },
+        "vwap-structure-signature": {
+          "enabled": "true",
+          "entry-veto-vwap-structure-max-setup-quality-score": "56",
+          "entry-veto-vwap-structure-max-vwap-distance": "2.25",
+          "entry-veto-vwap-structure-max-structure-score": "5",
+          "entry-veto-vwap-structure-max-higher-high-distance": "0"
+        },
+        "mid-vwap-weak-higher-high-signature": {
+          "enabled": "true",
+          "entry-veto-mid-vwap-max-setup-quality-score": "55",
+          "entry-veto-mid-vwap-min-vwap-distance": "1.8",
+          "entry-veto-mid-vwap-max-vwap-distance": "3",
+          "entry-veto-mid-vwap-min-structure-score": "3",
+          "entry-veto-mid-vwap-max-structure-score": "4",
+          "entry-veto-mid-vwap-max-higher-high-distance": "-0.25",
+          "entry-veto-mid-vwap-max-vwap-slope": "0.025"
+        },
+        "local-high-stall-signature": {
+          "enabled": "true",
+          "entry-veto-local-high-stall-max-setup-quality-score": "55",
+          "entry-veto-local-high-stall-min-vwap-distance": "2.2",
+          "entry-veto-local-high-stall-max-vwap-distance": "3",
+          "entry-veto-local-high-stall-min-structure-score": "4",
+          "entry-veto-local-high-stall-max-structure-score": "4",
+          "entry-veto-local-high-stall-max-higher-high-distance": "-0.25",
+          "entry-veto-local-high-stall-max-vwap-slope": "0.025",
+          "entry-veto-local-high-stall-max-rolling-high-distance": "3"
+        },
+        "high-vwap-weak-support-signature": {
+          "enabled": "true",
+          "entry-veto-high-vwap-weak-support-max-setup-quality-score": "75",
+          "entry-veto-high-vwap-weak-support-min-vwap-distance": "5.5",
+          "entry-veto-high-vwap-weak-support-max-vwap-distance": "8",
+          "entry-veto-high-vwap-weak-support-min-structure-score": "4",
+          "entry-veto-high-vwap-weak-support-max-structure-score": "4",
+          "entry-veto-high-vwap-weak-support-max-higher-low-distance": "0",
+          "entry-veto-high-vwap-weak-support-max-higher-high-distance": "1.5",
+          "entry-veto-high-vwap-weak-support-max-vwap-slope": "0.07",
+          "entry-veto-high-vwap-weak-support-max-rolling-high-distance": "4",
+          "entry-veto-high-vwap-weak-support-min-adx": "30",
+          "entry-veto-high-vwap-weak-support-max-adx-slope": "0.75"
+        },
+        "extended-vwap-rejection-signature": {
+          "enabled": "true",
+          "entry-veto-extended-vwap-rejection-max-setup-quality-score": "86",
+          "entry-veto-extended-vwap-rejection-min-vwap-distance": "1.1",
+          "entry-veto-extended-vwap-rejection-max-vwap-distance": "27",
+          "entry-veto-extended-vwap-rejection-max-vwap-slope": "0.157",
+          "entry-veto-extended-vwap-rejection-max-vwap-acceleration": "0.06",
+          "entry-veto-extended-vwap-rejection-min-structure-score": "3",
+          "entry-veto-extended-vwap-rejection-max-structure-score": "5",
+          "entry-veto-extended-vwap-rejection-min-pullback-from-high": "0.5",
+          "entry-veto-extended-vwap-rejection-max-pullback-from-high": "14.5",
+          "entry-veto-extended-vwap-rejection-max-rolling-high-distance": "17.5",
+          "entry-veto-extended-vwap-rejection-max-higher-high-distance": "7.25",
+          "entry-veto-extended-vwap-rejection-min-adx": "12.75",
+          "entry-veto-extended-vwap-rejection-max-rsi-slope": "3.6"
+        },
+        "extended-vwap-acceleration-edge-signature": {
+          "enabled": "true",
+          "entry-veto-extended-vwap-acceleration-edge-max-setup-quality-score": "75",
+          "entry-veto-extended-vwap-acceleration-edge-min-vwap-distance": "11.5",
+          "entry-veto-extended-vwap-acceleration-edge-max-vwap-distance": "14.5",
+          "entry-veto-extended-vwap-acceleration-edge-min-vwap-slope": "0.055",
+          "entry-veto-extended-vwap-acceleration-edge-max-vwap-slope": "0.085",
+          "entry-veto-extended-vwap-acceleration-edge-min-vwap-acceleration": "0.03",
+          "entry-veto-extended-vwap-acceleration-edge-max-vwap-acceleration": "0.045",
+          "entry-veto-extended-vwap-acceleration-edge-min-structure-score": "5",
+          "entry-veto-extended-vwap-acceleration-edge-max-structure-score": "5",
+          "entry-veto-extended-vwap-acceleration-edge-min-pullback-from-high": "2.5",
+          "entry-veto-extended-vwap-acceleration-edge-max-pullback-from-high": "4.5",
+          "entry-veto-extended-vwap-acceleration-edge-max-rolling-high-distance": "4.5",
+          "entry-veto-extended-vwap-acceleration-edge-max-higher-low-distance": "0.75",
+          "entry-veto-extended-vwap-acceleration-edge-max-higher-high-distance": "1.5",
+          "entry-veto-extended-vwap-acceleration-edge-min-adx": "18",
+          "entry-veto-extended-vwap-acceleration-edge-max-adx": "20.5",
+          "entry-veto-extended-vwap-acceleration-edge-max-rsi-slope": "0.5"
+        },
+        "extended-slow-quality-signature": {
+          "enabled": "true",
+          "entry-veto-extended-slow-quality-min-setup-quality-score": "65",
+          "entry-veto-extended-slow-quality-min-vwap-distance": "8",
+          "entry-veto-extended-slow-quality-max-vwap-distance": "12",
+          "entry-veto-extended-slow-quality-min-rsi": "62",
+          "entry-veto-extended-slow-quality-min-rsi-slope": "1",
+          "entry-veto-extended-slow-quality-min-adx": "20",
+          "entry-veto-extended-slow-quality-min-adx-slope": "0.5",
+          "entry-veto-extended-slow-quality-min-structure-score": "4",
+          "entry-veto-extended-slow-quality-min-higher-low-distance": "3",
+          "entry-veto-extended-slow-quality-min-higher-high-distance": "3",
+          "entry-veto-extended-slow-quality-max-pullback-from-high": "2",
+          "entry-veto-extended-slow-quality-max-rolling-high-distance": "2",
+          "entry-veto-extended-slow-quality-max-minutes-since-high": "2"
+        },
+        "recent-high-rejection-weak-momentum-signature": {
+          "enabled": "true",
+          "entry-veto-rejection-min-pullback-from-high": "6.25",
+          "entry-veto-rejection-min-rolling-high-distance": "5",
+          "entry-veto-rejection-max-minutes-since-high": "10",
+          "entry-veto-rejection-max-rsi-slope": "-0.5",
+          "entry-veto-rejection-max-adx": "32"
+        },
+        "weak-structure-pullback-signature": {
+          "enabled": "true",
+          "entry-veto-weak-structure-max-higher-high-distance": "0",
+          "entry-veto-weak-structure-min-pullback-from-high": "7",
+          "entry-veto-weak-structure-min-rolling-high-distance": "7",
+          "entry-veto-weak-structure-max-minutes-since-high": "15",
+          "entry-veto-weak-structure-max-adx": "19"
+        },
+        "late-weak-structure-low-rsi-signature": {
+          "enabled": "true",
+          "entry-veto-late-weak-structure-max-setup-quality-score": "50",
+          "entry-veto-late-weak-structure-min-vwap-distance": "3",
+          "entry-veto-late-weak-structure-max-vwap-distance": "10",
+          "entry-veto-late-weak-structure-max-structure-score": "3",
+          "entry-veto-late-weak-structure-max-higher-low-distance": "-1",
+          "entry-veto-late-weak-structure-max-higher-high-distance": "-5",
+          "entry-veto-late-weak-structure-max-rsi": "45",
+          "entry-veto-late-weak-structure-max-adx": "40"
+        },
+        "fresh-clean-structure-low-adx-signature": {
+          "enabled": "true",
+          "entry-veto-fresh-clean-structure-max-setup-quality-score": "58",
+          "entry-veto-fresh-clean-structure-min-vwap-distance": "3",
+          "entry-veto-fresh-clean-structure-max-vwap-distance": "4",
+          "entry-veto-fresh-clean-structure-min-structure-score": "5",
+          "entry-veto-fresh-clean-structure-min-higher-low-distance": "0",
+          "entry-veto-fresh-clean-structure-min-higher-high-distance": "0",
+          "entry-veto-fresh-clean-structure-min-rolling-high-distance": "3",
+          "entry-veto-fresh-clean-structure-max-rolling-high-distance": "5",
+          "entry-veto-fresh-clean-structure-max-adx": "20",
+          "entry-veto-fresh-clean-structure-min-slow-risk-points": "3"
+        },
+        "fresh-high-exhaustion-signature": {
+          "enabled": "true",
+          "entry-veto-exhaustion-min-pullback-from-high": "3.5",
+          "entry-veto-exhaustion-min-rolling-high-distance": "3.5",
+          "entry-veto-exhaustion-max-minutes-since-high": "10",
+          "entry-veto-exhaustion-max-higher-low-distance": "2.5",
+          "entry-veto-exhaustion-min-higher-high-distance": "0.5",
+          "entry-veto-exhaustion-min-vwap-slope": "0.05",
+          "entry-veto-exhaustion-max-adx-slope": "0.5"
+        },
+        "fresh-high-rsi-shock-signature": {
+          "enabled": "true",
+          "entry-veto-fresh-high-rsi-shock-min-pullback-from-high": "5",
+          "entry-veto-fresh-high-rsi-shock-min-rolling-high-distance": "5",
+          "entry-veto-fresh-high-rsi-shock-max-higher-low-distance": "3",
+          "entry-veto-fresh-high-rsi-shock-min-higher-high-distance": "4",
+          "entry-veto-fresh-high-rsi-shock-min-vwap-slope": "0.1",
+          "entry-veto-fresh-high-rsi-shock-min-adx": "45",
+          "entry-veto-fresh-high-rsi-shock-max-rsi-slope": "-3",
+          "entry-veto-fresh-high-rsi-shock-max-adx-slope": "0.5"
+        },
+        "near-vwap-low-rsi-high-adx-signature": {
+          "enabled": "true",
+          "entry-veto-near-vwap-min-points": "3",
+          "entry-veto-near-vwap-max-vwap-distance": "2.5",
+          "entry-veto-near-vwap-max-rsi": "61.5",
+          "entry-veto-near-vwap-min-adx": "18",
+          "entry-veto-near-vwap-max-higher-high-distance": "1.75"
+        },
+        "charm-pin-tail-risk-signature": {
+          "enabled": "false",
+          "profile": "charm_pin_pullback_long",
+          "min-setup-quality-score": "70",
+          "max-adx": "18",
+          "max-vwap-acceleration": "0",
+          "min-vwap-distance": "14",
+          "min-pullback-from-high": "3",
+          "max-pullback-from-high": "4.5",
+          "max-higher-high-distance": "4",
+          "max-rolling-high-distance": "6",
+          "require-profile-match": "true",
+          "veto-points": "99",
+          "log-decision": "false"
+        },
+        "charm-pin-dynamic-vwap-overextension": {
+          "enabled": "false",
+          "profile": "charm_pin_pullback_long",
+          "max-adx": "18",
+          "max-vwap-acceleration": "0.02",
+          "min-vwap-distance-dynamic-multiple": "2.0",
+          "max-vwap-distance-dynamic-multiple": "0",
+          "min-pullback-from-high": "2.5",
+          "max-pullback-from-high": "4.5",
+          "max-rolling-high-distance": "5",
+          "require-profile-match": "true",
+          "veto-points": "99",
+          "log-decision": "false"
+        },
+        "charm-pin-broken-structure-veto": {
+          "enabled": "false",
+          "profile": "charm_pin_pullback_long",
+          "max-es-structure-score": "3",
+          "max-higher-low-distance": "0.25",
+          "max-higher-high-distance": "0",
+          "require-profile-match": "true",
+          "veto-points": "99",
+          "log-decision": "false"
+        },
+        "pullback-long-broken-structure-veto": {
+          "enabled": "true",
+          "profiles": "pullback_long,charm_pin_pullback_long,trend_day_pullback_long,pullback_long_no_0dte",
+          "max-higher-low-distance": "-3",
+          "max-higher-high-distance": "-2",
+          "max-vwap-slope": "0.02",
+          "max-vwap-acceleration": "0",
+          "require-profile-match": "true",
+          "veto-points": "99",
+          "veto-scope": "long-pullback-context",
+          "log-decision": "true"
+        }
+      }
+    },
+    "take-profit": {
+      "take-profit-distance": "1.5",
+      "dynamic": {
+        "enabled": "true",
+        "dynamic-take-profit-min": "2.6",
+        "dynamic-take-profit-max": "3",
+        "dynamic-take-profit-ema-distance-divisor": "3",
+        "dynamic-take-profit-vwap-distance-divisor": "5",
+        "dynamic-take-profit-rsi-divisor": "40",
+        "dynamic-take-profit-adx-divisor": "60"
+      },
+      "upside-extension": {
+        "enabled": "true",
+        "min-age-minutes": "30",
+        "min-current-profit-points": "1.5",
+        "min-max-favorable-points": "8",
+        "min-es-vwap-distance": "0",
+        "min-es-vwap-slope": "0",
+        "min-rsi": "50",
+        "min-adx": "12",
+        "additional-points": "4.25",
+        "min-target-distance": "5",
+        "max-target-distance": "12.5",
+        "min-step-points": "0.25",
+        "use-option-strike-map-next-level": "true",
+        "require-higher-timeframe-trend": "false",
+        "exhaustion": {
+          "enabled": "true",
+          "stop-on-es-vwap-slope-rollover": "true",
+          "es-vwap-slope-rollover-min-drop": "0.02",
+          "stop-on-rsi-rollover": "true",
+          "rsi-rollover-min-drop": "3",
+          "stop-on-orderbook-bearish": "true",
+          "tighten-distance": "0.75",
+          "strike-target": {
+            "enabled": "true",
+            "stop-on-es-vwap-slope-rollover": "true",
+            "es-vwap-slope-rollover-min-drop": "0.05",
+            "stop-on-rsi-rollover": "true",
+            "rsi-rollover-min-drop": "6",
+            "stop-on-orderbook-bearish": "false",
+            "tighten-distance": "1.5"
+          }
+        }
+      }
+    },
+    "higher-timeframe": {
+      "enabled": "false",
+      "higher-timeframe-resolution": "15min",
+      "higher-timeframe-ema-period": "50",
+      "higher-timeframe-ema-slope-min": "0"
+    },
+    "setup-quality": {
+      "enabled": "true",
+      "setup-quality-min-score": "41.3",
+      "setup-quality-vwap-distance-full-score": "20",
+      "setup-quality-vwap-slope-full-score": "0.08",
+      "setup-quality-rsi-full-score": "20",
+      "setup-quality-adx-full-score": "20",
+      "take-profit": {
+        "enabled": "true",
+        "setup-quality-take-profit-min-score": "60",
+        "setup-quality-take-profit-max-boost": "1.35",
+        "setup-quality-take-profit-score-divisor": "18"
+      }
+    },
+    "indicator-slope": {
+      "enabled": "true",
+      "indicator-slope-lookback-minutes": "5",
+      "rsi-slope-min": "-5",
+      "adx-slope-min": "-1.8"
+    },
+    "es": {
+      "es-minimum-days-to-expiry": "7",
+      "vwap": {
+        "enabled": "true",
+        "es-vwap-min-distance": "1.05",
+        "es-vwap-max-distance": "16",
+        "es-vwap-max-age-seconds": "90",
+        "es-vwap-confirmation-seconds": "30",
+        "slope": {
+          "enabled": "true",
+          "es-vwap-slope-lookback-minutes": "5",
+          "es-vwap-slope-min": "0"
+        },
+        "acceleration": {
+          "enabled": "true",
+          "es-vwap-acceleration-lookback-minutes": "5",
+          "es-vwap-acceleration-min": "0"
+        }
+      },
+      "opening-range": {
+        "enabled": "false",
+        "start-time": "09:30",
+        "minutes": "30",
+        "acceptance-seconds": "60",
+        "min-breakout-points": "0"
+      },
+      "reclaim": {
+        "enabled": "false",
+        "es-reclaim-lookback-minutes": "10",
+        "es-reclaim-min-distance": "10"
+      },
+      "rolling-high": {
+        "enabled": "true",
+        "es-rolling-high-lookback-minutes": "30",
+        "es-rolling-high-max-distance": "12",
+        "es-rolling-high-max-minutes-since": "30"
+      },
+      "higher-low": {
+        "enabled": "false",
+        "es-higher-low-lookback-minutes": "10",
+        "es-higher-low-min-distance": "1"
+      },
+      "structure": {
+        "enabled": "true",
+        "es-structure-lookback-minutes": "20",
+        "es-structure-min-score": "3",
+        "es-structure-min-higher-low-distance": "0",
+        "es-structure-min-higher-high-distance": "0",
+        "es-structure-max-pullback-points": "5.5"
+      },
+      "order-book": {
+        "order-book-features-directory": "/Users/erikbengtson/Lean2026/LeanCustom/Data/ib/order-book/es/daily",
+        "order-book-features-file": "/Users/erikbengtson/Lean2026/LeanCustom/Data/ib/order-book/es/es_order_book_features.csv",
+        "replay-mode": "auto",
+        "order-book-max-spread-points": "1",
+        "order-book-max-realized-volatility-5s-points": "0.35",
+        "require-collector-tradeable": "false",
+        "entry-filter": {
+          "enabled": "false",
+          "order-book-min-depth-imbalance-5": "0",
+          "order-book-min-weighted-depth-imbalance": "0",
+          "order-book-min-ofi-1s-normalized": "0",
+          "order-book-min-ofi-5s-normalized": "-10",
+          "order-book-min-edge-after-cost-points": "0"
+        },
+        "price-trend": {
+          "enabled": "false",
+          "order-book-price-trend-lookback-seconds": "60",
+          "order-book-min-mid-slope-points-per-second": "-0.003",
+          "order-book-min-microprice-slope-points-per-second": "-0.004"
+        },
+        "microstructure": {
+          "enabled": "false",
+          "order-book-microstructure-confirmation-count": "1",
+          "long": {
+            "order-book-long-min-depth-imbalance-5": "0.10",
+            "order-book-long-min-weighted-depth-imbalance": "0.05",
+            "order-book-long-min-ofi-1s-normalized": "0.25",
+            "order-book-long-min-ofi-5s-normalized": "0",
+            "order-book-long-min-microprice-edge-points": "0",
+            "order-book-long-min-edge-after-cost-points": "-0.20"
+          }
+        }
+      }
+    },
+    "spx": {
+      "option-iv": {
+        "replay-mode": "auto",
+        "option-iv-features-directory": "/Users/erikbengtson/Lean2026/LeanCustom/Data/ib/options/spx/features_daily",
+        "option-iv-features-file": "/Users/erikbengtson/Lean2026/LeanCustom/Data/ib/options/spx/spx_iv_features.csv",
+        "option-iv-max-age-seconds": "600",
+        "option-iv-min-valid-options": "12",
+        "option-iv-allow-thin-data-quality": "false",
+        "signal": {
+          "enabled": "false"
+        },
+        "entry-filter": {
+          "enabled": "false"
+        },
+        "put-iv-shock": {
+          "enabled": "false",
+          "max-skew-change-60s": "0.02",
+          "max-iv30d-change-60s": "0.02"
+        },
+        "option-iv-max-vix-like-30d": "25",
+        "option-iv-max-iv-30dte-change-60s": "0.02",
+        "option-iv-max-iv-30dte-vol-of-vol-300s": "0.5",
+        "option-iv-max-put-call-skew-1pct": "2",
+        "option-iv-max-put-call-skew-1pct-change-60s": "0.02",
+        "dynamic-take-profit": {
+          "enabled": "false",
+          "option-iv-dynamic-take-profit-min": "1.5",
+          "option-iv-dynamic-take-profit-max": "8",
+          "option-iv-dynamic-take-profit-expected-move-divisor": "20"
+        }
+      },
+      "option-strike-map": {
+        "long-entry": {
+          "enabled": "true"
+        },
+        "take-profit": {
+          "enabled": "true",
+          "target": "weighted-best",
+          "min-distance": "1.5",
+          "max-distance": "50"
+        },
+        "strike-acceptance": {
+          "enabled": "true",
+          "seconds": "60",
+          "min-distance-points": "0",
+          "max-distance-points": "50"
+        },
+        "call-volume-expansion": {
+          "enabled": "true",
+          "min-increase": "1",
+          "min-increase-pct": "0"
+        },
+        "gamma-flip": {
+          "enabled": "true",
+          "source": "oi",
+          "fallback-source": "volume",
+          "near-distance-points": "10",
+          "at-distance-points": "2",
+          "block-longs-below-flip": "true",
+          "require-reclaim-when-near-flip": "true",
+          "reduce-size-near-flip": "true",
+          "near-flip-quantity-multiplier": "0.5",
+          "max-age-seconds": "600"
+        },
+        "wall-hl": {
+          "enabled": "true",
+          "log-snapshots": "false",
+          "lookback-samples": "5",
+          "min-wall-step": "5",
+          "confirmation-samples": "2",
+          "near-wall-distance": "3",
+          "acceptance-seconds": "60",
+          "acceptance-min-distance-points": "1",
+          "compression-max-points": "25",
+          "positive-gamma-min-score": "0.15",
+          "negative-gamma-max-score": "-0.15",
+          "min-call-put-imbalance-breakaway": "0.25",
+          "min-forward-dex-improvement-ratio": "0.02",
+          "pin-score-threshold": "40",
+          "support-score-threshold": "50",
+          "breakaway-score-threshold": "70",
+          "stale-max-age-seconds": "600",
+          "profile-defaults": {
+            "default": {
+              "enabled": "true",
+              "mode": "off",
+              "allowed-states": "",
+              "block-states": "",
+              "allow-rules": "",
+              "min-call-put-volume-imbalance": "0.25",
+              "block-if-not-ready": "false"
+            },
+            "breakout_long": {
+              "enabled": "true",
+              "mode": "off",
+              "allowed-states": "",
+              "block-states": "",
+              "allow-rules": "",
+              "min-call-put-volume-imbalance": "0.25",
+              "block-if-not-ready": "false"
+            },
+            "squeeze_long": {
+              "enabled": "true",
+              "mode": "off",
+              "allowed-states": "",
+              "block-states": "",
+              "allow-rules": "",
+              "min-call-put-volume-imbalance": "0.25",
+              "block-if-not-ready": "false"
+            },
+            "pullback_long": {
+              "enabled": "true",
+              "mode": "off",
+              "allowed-states": "",
+              "block-states": "",
+              "allow-rules": "",
+              "min-call-put-volume-imbalance": "0.25",
+              "block-if-not-ready": "false"
+            },
+            "charm_pin_pullback_long": {
+              "enabled": "true",
+              "mode": "off",
+              "allowed-states": "",
+              "block-states": "",
+              "allow-rules": "",
+              "min-call-put-volume-imbalance": "0.25",
+              "block-if-not-ready": "false"
+            },
+            "call_wall_acceptance_long": {
+              "enabled": "true",
+              "mode": "off",
+              "allowed-states": "",
+              "block-states": "",
+              "allow-rules": "",
+              "min-call-put-volume-imbalance": "0.25",
+              "block-if-not-ready": "false"
+            },
+            "charm_wall_breakaway_long": {
+              "enabled": "true",
+              "mode": "off",
+              "allowed-states": "",
+              "block-states": "",
+              "allow-rules": "",
+              "min-call-put-volume-imbalance": "0.25",
+              "block-if-not-ready": "false"
+            },
+            "breakout_long_1dte": {
+              "enabled": "true",
+              "mode": "off",
+              "allowed-states": "",
+              "block-states": "",
+              "allow-rules": "",
+              "min-call-put-volume-imbalance": "0.25",
+              "block-if-not-ready": "false"
+            },
+            "pullback_long_1dte": {
+              "enabled": "true",
+              "mode": "off",
+              "allowed-states": "",
+              "block-states": "",
+              "allow-rules": "",
+              "min-call-put-volume-imbalance": "0.25",
+              "block-if-not-ready": "false"
+            }
+          }
+        },
+        "long-regime-filter": {
+          "enabled": "true",
+          "positive-gamma-min": "0.15",
+          "negative-gamma-max": "-0.15",
+          "low-vol-max-vix-like": "18",
+          "high-vol-min-vix-like": "22",
+          "inside-expected-move-max-position": "0.75",
+          "outside-expected-move-min-position": "1",
+          "upper-chase-min-position": "0.65",
+          "lower-fade-max-position": "-0.65",
+          "heavy-call-buying-min-imbalance": "0.25",
+          "heavy-put-buying-max-imbalance": "-0.25",
+          "bull-bear-score-threshold": "0.50",
+          "bull-bear-net-dex-volume-scale": "1000000000",
+          "bull-bear-net-dex-oi-scale": "1000000000",
+          "bull-bear-net-vanna-scale": "1000000000",
+          "bull-bear-charm-scale": "100000000",
+          "bull-bear-rising-iv-scale": "0.02",
+          "late-day-atm-distance": "2",
+          "late-day-start-time": "14:30:00",
+          "block-positive-gamma-non-lower-fade": "false",
+          "block-heavy-put-buying": "true",
+          "block-late-day-atm-pin": "true",
+          "block-iv-elevated": "false",
+          "require-breakout-in-negative-gamma": "true"
+        },
+        "features-directory": "/Users/erikbengtson/Lean2026/LeanCustom/Data/ib/options/spx/strike_map_daily",
+        "features-file": "/Users/erikbengtson/Lean2026/LeanCustom/Data/ib/options/spx/spx_0dte_strike_map.csv",
+        "max-age-seconds": "600",
+        "require-long-breakout-allowed": "false",
+        "allow-missing-0dte": "true",
+        "max-expected-move-position": "1.05",
+        "min-call-put-volume-imbalance": "-0.25",
+        "min-gamma-regime-score": "-0.75",
+        "require-call-put-volume-imbalance": "false",
+        "require-gamma-regime-score": "false",
+        "require-next-upside-call-volume-distance": "false",
+        "min-next-upside-distance": "0"
+      },
+      "option-strike-map-1dte": {
+        "enabled": "true",
+        "features-directory": "/Users/erikbengtson/Lean2026/LeanCustom/Data/ib/options/spx/strike_map_1dte_daily",
+        "features-file": "/Users/erikbengtson/Lean2026/LeanCustom/Data/ib/options/spx/spx_1dte_strike_map.csv",
+        "max-age-seconds-rth": "60",
+        "max-age-seconds-curb": "120",
+        "max-age-seconds-gth": "300",
+        "use-after-time": "15:45:00",
+        "primary-after-time": "16:00:00",
+        "allow-handoff-entries": "true",
+        "overnight-trading-enabled": "true",
+        "min-valid-options": "12",
+        "allow-thin-data-quality": "false"
+      }
+    },
+    "___profiles": [
+      "breakout_long_no_0dte",
+      "pullback_long_no_0dte",
+      "squeeze_long_no_0dte",
+      "run_settings_long_no_0dte"
+    ],
+    "strategies": {
+      "data-state-router": {
+        "valid-0dte-profiles": ["breakout_long", "pullback_long", "squeeze_long", "wall_reclaim_long", "wall_breakout_retest_long", "late_day_pin_fade", "negative_gamma_momentum_long", "trend_day_pullback_long", "charm_pin_pullback_long", "charm_wall_breakaway_long", "call_wall_acceptance_long"],
+        "no-0dte-profiles": ["breakout_long_no_0dte", "pullback_long_no_0dte", "squeeze_long_no_0dte"],
+        "one-dte-profiles": ["breakout_long_1dte", "pullback_long_1dte"]
+      },
+      "profiles": {
+        "run_settings_long_no_0dte": {
+          "enabled": "false",
+          "entry-modules": [
+            "calendar",
+            "es-vwap",
+            "es-vwap-slope",
+            "es-vwap-acceleration",
+            "es-structure",
+            "indicator-slope",
+            "rsi-momentum",
+            "adx",
+            "setup-quality",
+            "entry-veto"
+          ],
+          "take-profit-modules": [
+            "setup-quality"
+          ],
+          "risk-modules": [
+            "max-adverse",
+            "tail-risk",
+            "trade-health",
+            "upside-extension"
+          ],
+          "module-config": {
+            "wall-hl": {
+              "enabled": "true",
+              "allowed-states": "",
+              "block-states": "",
+              "mode": "off"
+            },
+            "es-vwap": {
+              "min-distance": "1.05",
+              "max-distance": "16",
+              "slope-lookback-minutes": "5",
+              "slope-min": "0.01",
+              "acceleration-lookback-minutes": "5",
+              "acceleration-min": "0",
+              "enabled": "true",
+              "slope-enabled": "true",
+              "acceleration-enabled": "true"
+            },
+            "es-structure": {
+              "lookback-minutes": "20",
+              "min-score": "3",
+              "min-higher-low-distance": "0",
+              "min-higher-high-distance": "0",
+              "max-pullback-points": "8",
+              "enabled": "true"
+            },
+            "rsi-momentum": {
+              "enabled": "true",
+              "threshold": "45"
+            },
+            "adx": {
+              "enabled": "true",
+              "threshold": "16"
+            },
+            "dynamic-take-profit": {
+              "enabled": "true",
+              "min": "2.6",
+              "max": "4"
+            },
+            "take-profit": {
+              "distance": "2.5"
+            },
+            "setup-quality": {
+              "enabled": "true",
+              "min-score": "45"
+            },
+            "indicator-slope": {
+              "lookback-minutes": "5",
+              "rsi-min": "-5",
+              "adx-min": "-1.8"
+            },
+            "entry-sizing": {
+              "quantity-multiplier": "0.50"
+            },
+            "order-book": {
+              "enabled": "false",
+              "price-trend-enabled": "false",
+              "microstructure-signal-enabled": "false"
+            },
+            "event-risk-gate": {
+              "enabled": "false",
+              "block-window-minutes": "15",
+              "minutes-to-event": "999999"
+            },
+            "gamma-regime-filter": {
+              "enabled": "false",
+              "neutral-band": "0.05",
+              "hard-block-opposite": "false"
+            },
+            "dealer-delta-pressure-score": {
+              "enabled": "false",
+              "min-call-put-imbalance": "0.15"
+            },
+            "charm-pin-filter": {
+              "enabled": "false",
+              "near-distance-points": "5",
+              "block-breakout-pin-risk": "false"
+            },
+            "vanna-iv-regime-filter": {
+              "enabled": "false",
+              "max-iv30d-change-60s": "0.02",
+              "max-skew-change-60s": "0.02"
+            },
+            "wall-breakout-classifier": {
+              "enabled": "false",
+              "block-failed-breakout": "true"
+            },
+            "trend-day-detector": {
+              "enabled": "false",
+              "min-vwap-distance": "3",
+              "min-vwap-slope": "0.05",
+              "min-adx": "18"
+            },
+            "late-day-pin-guard": {
+              "enabled": "false",
+              "start-time": "14:45:00",
+              "near-distance-points": "5",
+              "hard-block": "true"
+            },
+            "market-structure-modules": {
+              "log-decisions": "false"
+            }
+          }
+        },
+        "breakout_long_no_0dte": {
+          "enabled": "true",
+          "entry-modules": [
+            "calendar",
+            "es-vwap",
+            "es-vwap-slope",
+            "es-vwap-acceleration",
+            "es-rolling-high",
+            "es-structure",
+            "indicator-slope",
+            "rsi-momentum",
+            "adx",
+            "long-regime-filter",
+            "setup-quality",
+            "entry-veto"
+          ],
+          "take-profit-modules": [
+            "setup-quality",
+            "long-regime-filter"
+          ],
+          "risk-modules": [
+            "max-adverse",
+            "tail-risk",
+            "trade-health",
+            "upside-extension"
+          ],
+          "module-config": {
+            "wall-hl": {
+              "enabled": "true",
+              "allowed-states": "",
+              "block-states": "",
+              "mode": "off"
+            },
+            "es-vwap": {
+              "min-distance": "3",
+              "max-distance": "12",
+              "slope-min": "0.08",
+              "acceleration-min": "0.02"
+            },
+            "es-structure": {
+              "min-score": "4"
+            },
+            "adx": {
+              "threshold": "18"
+            },
+            "rsi-momentum": {
+              "threshold": "48"
+            },
+            "dynamic-take-profit": {
+              "min": "3",
+              "max": "6"
+            },
+            "tail-risk": {
+              "min-age-minutes": "45"
+            },
+            "take-profit": {
+              "distance": "3"
+            },
+            "event-risk-gate": {
+              "enabled": "false",
+              "block-window-minutes": "15",
+              "minutes-to-event": "999999"
+            },
+            "gamma-regime-filter": {
+              "enabled": "false",
+              "neutral-band": "0.05",
+              "hard-block-opposite": "false"
+            },
+            "dealer-delta-pressure-score": {
+              "enabled": "false",
+              "min-call-put-imbalance": "0.15"
+            },
+            "charm-pin-filter": {
+              "enabled": "false",
+              "near-distance-points": "5",
+              "block-breakout-pin-risk": "false"
+            },
+            "vanna-iv-regime-filter": {
+              "enabled": "false",
+              "max-iv30d-change-60s": "0.02",
+              "max-skew-change-60s": "0.02"
+            },
+            "wall-breakout-classifier": {
+              "enabled": "false",
+              "block-failed-breakout": "true"
+            },
+            "trend-day-detector": {
+              "enabled": "false",
+              "min-vwap-distance": "3",
+              "min-vwap-slope": "0.05",
+              "min-adx": "18"
+            },
+            "late-day-pin-guard": {
+              "enabled": "false",
+              "start-time": "14:45:00",
+              "near-distance-points": "5",
+              "hard-block": "true"
+            },
+            "market-structure-modules": {
+              "log-decisions": "false"
+            }
+          }
+        },
+        "pullback_long_no_0dte": {
+          "enabled": "true",
+          "entry-modules": [
+            "calendar",
+            "es-vwap",
+            "es-reclaim",
+            "es-structure",
+            "es-higher-low",
+            "pullback",
+            "ema20-pullback",
+            "rsi-momentum",
+            "adx",
+            "long-regime-filter",
+            "setup-quality",
+            "entry-veto"
+          ],
+          "take-profit-modules": [
+            "setup-quality",
+            "long-regime-filter"
+          ],
+          "risk-modules": [
+            "max-adverse",
+            "tail-risk",
+            "trade-health",
+            "stale-trade",
+            "upside-extension"
+          ],
+          "module-config": {
+            "wall-hl": {
+              "enabled": "true",
+              "allowed-states": "",
+              "block-states": "",
+              "mode": "off"
+            },
+            "rsi-momentum": {
+              "threshold": "38"
+            },
+            "adx": {
+              "threshold": "12"
+            },
+            "es-vwap": {
+              "min-distance": "0.5",
+              "max-distance": "10"
+            },
+            "es-structure": {
+              "min-score": "4"
+            },
+            "es-reclaim": {
+              "min-distance": "0.5"
+            },
+            "take-profit": {
+              "distance": "2.5"
+            },
+            "dynamic-take-profit": {
+              "max": "4"
+            },
+            "tail-risk": {
+              "min-age-minutes": "45"
+            },
+            "entry-sizing": {
+              "quantity-multiplier": "0.5"
+            },
+            "event-risk-gate": {
+              "enabled": "false",
+              "block-window-minutes": "15",
+              "minutes-to-event": "999999"
+            },
+            "gamma-regime-filter": {
+              "enabled": "false",
+              "neutral-band": "0.05",
+              "hard-block-opposite": "false"
+            },
+            "dealer-delta-pressure-score": {
+              "enabled": "false",
+              "min-call-put-imbalance": "0.15"
+            },
+            "charm-pin-filter": {
+              "enabled": "false",
+              "near-distance-points": "5",
+              "block-breakout-pin-risk": "false"
+            },
+            "vanna-iv-regime-filter": {
+              "enabled": "false",
+              "max-iv30d-change-60s": "0.02",
+              "max-skew-change-60s": "0.02"
+            },
+            "wall-breakout-classifier": {
+              "enabled": "false",
+              "block-failed-breakout": "true"
+            },
+            "trend-day-detector": {
+              "enabled": "false",
+              "min-vwap-distance": "3",
+              "min-vwap-slope": "0.05",
+              "min-adx": "18"
+            },
+            "late-day-pin-guard": {
+              "enabled": "false",
+              "start-time": "14:45:00",
+              "near-distance-points": "5",
+              "hard-block": "true"
+            },
+            "market-structure-modules": {
+              "log-decisions": "false"
+            }
+          }
+        },
+        "squeeze_long_no_0dte": {
+          "enabled": "true",
+          "entry-modules": [
+            "calendar",
+            "es-vwap",
+            "es-vwap-slope",
+            "es-vwap-acceleration",
+            "es-rolling-high",
+            "es-structure",
+            "indicator-slope",
+            "rsi-momentum",
+            "adx",
+            "setup-quality",
+            "entry-veto"
+          ],
+          "take-profit-modules": [
+            "setup-quality"
+          ],
+          "risk-modules": [
+            "max-adverse",
+            "tail-risk",
+            "trade-health",
+            "upside-extension"
+          ],
+          "module-config": {
+            "wall-hl": {
+              "enabled": "true",
+              "allowed-states": "",
+              "block-states": "",
+              "mode": "off"
+            },
+            "es-vwap": {
+              "min-distance": "2",
+              "slope-min": "0.08"
+            },
+            "order-book": {
+              "long-min-depth-imbalance-5": "0.12",
+              "long-min-ofi-1s-normalized": "0.35",
+              "long-min-edge-after-cost-points": "-0.10"
+            },
+            "dynamic-take-profit": {
+              "max": "4"
+            },
+            "upside-extension": {
+              "enabled": "false"
+            },
+            "take-profit": {
+              "distance": "2"
+            },
+            "es-structure": {
+              "min-score": "5"
+            },
+            "adx": {
+              "threshold": "20"
+            },
+            "rsi-momentum": {
+              "threshold": "45"
+            },
+            "event-risk-gate": {
+              "enabled": "false",
+              "block-window-minutes": "15",
+              "minutes-to-event": "999999"
+            },
+            "gamma-regime-filter": {
+              "enabled": "false",
+              "neutral-band": "0.05",
+              "hard-block-opposite": "false"
+            },
+            "dealer-delta-pressure-score": {
+              "enabled": "false",
+              "min-call-put-imbalance": "0.15"
+            },
+            "charm-pin-filter": {
+              "enabled": "false",
+              "near-distance-points": "5",
+              "block-breakout-pin-risk": "false"
+            },
+            "vanna-iv-regime-filter": {
+              "enabled": "false",
+              "max-iv30d-change-60s": "0.02",
+              "max-skew-change-60s": "0.02"
+            },
+            "wall-breakout-classifier": {
+              "enabled": "false",
+              "block-failed-breakout": "true"
+            },
+            "trend-day-detector": {
+              "enabled": "false",
+              "min-vwap-distance": "3",
+              "min-vwap-slope": "0.05",
+              "min-adx": "18"
+            },
+            "late-day-pin-guard": {
+              "enabled": "false",
+              "start-time": "14:45:00",
+              "near-distance-points": "5",
+              "hard-block": "true"
+            },
+            "market-structure-modules": {
+              "log-decisions": "false"
+            }
+          }
+        },
+        "breakout_long_1dte": {
+          "enabled": "true",
+          "entry-modules": [
+            "calendar",
+            "es-vwap",
+            "es-vwap-slope",
+            "es-vwap-acceleration",
+            "es-rolling-high",
+            "es-structure",
+            "indicator-slope",
+            "rsi-momentum",
+            "adx",
+            "option-iv",
+            "option-strike-map-1dte",
+            "long-regime-filter-1dte",
+            "order-book",
+            "setup-quality",
+            "entry-veto"
+          ],
+          "take-profit-modules": [
+            "setup-quality",
+            "option-iv",
+            "option-strike-map-1dte",
+            "long-regime-filter-1dte"
+          ],
+          "risk-modules": [
+            "max-adverse",
+            "tail-risk",
+            "trade-health",
+            "upside-extension"
+          ],
+          "module-config": {
+            "wall-hl": {
+              "enabled": "true",
+              "allowed-states": "",
+              "block-states": "",
+              "mode": "off"
+            },
+            "option-strike-map": {
+              "require-long-breakout-allowed": "true",
+              "allow-missing-0dte": "true",
+              "max-expected-move-position": "0.90",
+              "min-call-put-volume-imbalance": "0.20",
+              "min-gamma-regime-score": "-0.25",
+              "require-call-put-volume-imbalance": "true",
+              "require-gamma-regime-score": "true",
+              "require-next-upside-call-volume-distance": "true",
+              "min-next-upside-distance": "1"
+            },
+            "long-regime-filter-1dte": {
+              "require-map": "true",
+              "require-breakout": "true",
+              "min-forward-dex-ratio-30m": "0.05"
+            },
+            "es-vwap": {
+              "min-distance": "2",
+              "max-distance": "18",
+              "slope-min": "0.01",
+              "acceleration-min": "0.01"
+            },
+            "es-structure": {
+              "min-score": "3"
+            },
+            "adx": {
+              "threshold": "16"
+            },
+            "rsi-momentum": {
+              "threshold": "45"
+            },
+            "take-profit": {
+              "multiplier": "0.8",
+              "max-distance": "6",
+              "distance": "4"
+            },
+            "event-risk-gate": {
+              "enabled": "false",
+              "block-window-minutes": "15",
+              "minutes-to-event": "999999"
+            },
+"gamma-regime-filter": {
+  "enabled": "false",
+  "neutral-band": "0.05",
+  "hard-block-opposite": "false"
+},
+"dealer-delta-pressure-score": {
+  "enabled": "false",
+  "min-call-put-imbalance": "0.15"
+},
+            "charm-pin-filter": {
+              "enabled": "false",
+              "near-distance-points": "5",
+              "block-breakout-pin-risk": "false"
+            },
+            "vanna-iv-regime-filter": {
+              "enabled": "false",
+              "max-iv30d-change-60s": "0.02",
+              "max-skew-change-60s": "0.02"
+            },
+"wall-breakout-classifier": {
+  "enabled": "false",
+  "block-failed-breakout": "true"
+},
+"trend-day-detector": {
+  "enabled": "false",
+  "min-vwap-distance": "2",
+  "min-vwap-slope": "0.04",
+  "min-adx": "18"
+},
+          "late-day-pin-guard": {
+            "enabled": "false",
+            "start-time": "14:45:00",
+            "near-distance-points": "5",
+            "hard-block": "false"
+          },
+"market-structure-modules": {
+  "log-decisions": "false"
+}
+          }
+        },
+        "pullback_long_1dte": {
+          "enabled": "true",
+          "entry-modules": [
+            "calendar",
+            "es-vwap",
+            "es-reclaim",
+            "es-structure",
+            "es-higher-low",
+            "pullback",
+            "ema20-pullback",
+            "rsi-momentum",
+            "adx",
+            "option-iv",
+            "option-strike-map-1dte",
+            "long-regime-filter-1dte",
+            "setup-quality",
+            "entry-veto"
+          ],
+          "take-profit-modules": [
+            "setup-quality",
+            "option-strike-map-1dte",
+            "long-regime-filter-1dte"
+          ],
+          "risk-modules": [
+            "max-adverse",
+            "tail-risk",
+            "trade-health",
+            "stale-trade",
+            "upside-extension"
+          ],
+          "module-config": {
+            "wall-hl": {
+              "enabled": "true",
+              "allowed-states": "",
+              "block-states": "",
+              "mode": "off"
+            },
+            "long-regime-filter-1dte": {
+              "require-map": "true",
+              "require-breakout": "false",
+              "min-forward-dex-ratio-30m": "0.00",
+              "block-heavy-put-buying": "true"
+            },
+            "rsi-momentum": {
+              "threshold": "40"
+            },
+            "adx": {
+              "threshold": "14"
+            },
+            "es-vwap": {
+              "min-distance": "0.5",
+              "max-distance": "10"
+            },
+            "es-structure": {
+              "min-score": "3"
+            },
+            "es-reclaim": {
+              "min-distance": "0.5"
+            },
+            "take-profit": {
+              "distance": "2.5",
+              "max-distance": "6",
+              "multiplier": "1"
+            },
+            "dynamic-take-profit": {
+              "max": "5"
+            },
+            "entry-sizing": {
+              "quantity-multiplier": "0.50"
+            },
+            "event-risk-gate": {
+              "enabled": "false",
+              "block-window-minutes": "15",
+              "minutes-to-event": "999999"
+            },
+            "gamma-regime-filter": {
+              "enabled": "false",
+              "neutral-band": "0.05",
+              "hard-block-opposite": "false"
+            },
+            "dealer-delta-pressure-score": {
+              "enabled": "false",
+              "min-call-put-imbalance": "0.15"
+            },
+            "charm-pin-filter": {
+              "enabled": "false",
+              "near-distance-points": "5",
+              "block-breakout-pin-risk": "false"
+            },
+            "vanna-iv-regime-filter": {
+              "enabled": "false",
+              "max-iv30d-change-60s": "0.02",
+              "max-skew-change-60s": "0.02"
+            },
+            "wall-breakout-classifier": {
+              "enabled": "false",
+              "block-failed-breakout": "true"
+            },
+            "trend-day-detector": {
+              "enabled": "false",
+              "min-vwap-distance": "3",
+              "min-vwap-slope": "0.05",
+              "min-adx": "18"
+            },
+            "late-day-pin-guard": {
+              "enabled": "false",
+              "start-time": "14:45:00",
+              "near-distance-points": "5",
+              "hard-block": "true"
+            },
+            "market-structure-modules": {
+              "log-decisions": "false"
+            }
+          }
+        },
+        "delta_charm_breakout_long": {
+          "enabled": "false",
+          "entry-modules": [
+            "calendar",
+            "es-vwap",
+            "es-vwap-slope",
+            "es-vwap-acceleration",
+            "es-rolling-high",
+            "es-structure",
+            "indicator-slope",
+            "rsi-momentum",
+            "adx",
+            "option-iv",
+            "option-strike-map",
+            "option-breakout",
+            "long-regime-filter",
+            "order-book",
+            "setup-quality",
+            "entry-veto"
+          ],
+          "take-profit-modules": [
+            "setup-quality",
+            "option-iv",
+            "option-strike-map",
+            "long-regime-filter"
+          ],
+          "risk-modules": [
+            "max-adverse",
+            "tail-risk",
+            "trade-health",
+            "upside-extension"
+          ],
+          "module-config": {
+            "long-regime-filter": {
+              "require-breakout": "true",
+              "require-forward-dex": "true",
+              "min-forward-dex-ratio-30m": "0.05",
+              "min-net-dex-volume": "500000000",
+              "require-net-charm": "false",
+              "min-net-dex": "0",
+              "min-abs-net-charm-next-30m": "0",
+              "require-estimated-dealer-charm": "false",
+              "max-estimated-dealer-charm-next-30m": "0"
+            },
+            "take-profit": {
+              "multiplier": "1.25",
+              "max-distance": "12"
+            },
+            "es-vwap": {
+              "min-distance": "2",
+              "max-distance": "18",
+              "slope-min": "0.05",
+              "acceleration-min": "0.01"
+            },
+            "es-structure": {
+              "min-score": "3"
+            },
+            "adx": {
+              "threshold": "16"
+            },
+            "rsi-momentum": {
+              "threshold": "45"
+            },
+            "upside-extension": {
+              "enabled": "true"
+            },
+            "event-risk-gate": {
+              "enabled": "false",
+              "block-window-minutes": "15",
+              "minutes-to-event": "999999"
+            },
+            "gamma-regime-filter": {
+              "enabled": "false",
+              "neutral-band": "0.05",
+              "hard-block-opposite": "false"
+            },
+            "dealer-delta-pressure-score": {
+              "enabled": "false",
+              "min-call-put-imbalance": "0.15"
+            },
+            "charm-pin-filter": {
+              "enabled": "false",
+              "near-distance-points": "5",
+              "block-breakout-pin-risk": "false"
+            },
+            "vanna-iv-regime-filter": {
+              "enabled": "false",
+              "max-iv30d-change-60s": "0.02",
+              "max-skew-change-60s": "0.02"
+            },
+            "wall-breakout-classifier": {
+              "enabled": "false",
+              "block-failed-breakout": "true"
+            },
+            "trend-day-detector": {
+              "enabled": "false",
+              "min-vwap-distance": "3",
+              "min-vwap-slope": "0.05",
+              "min-adx": "18"
+            },
+            "late-day-pin-guard": {
+              "enabled": "false",
+              "start-time": "14:45:00",
+              "near-distance-points": "5",
+              "hard-block": "true"
+            },
+            "market-structure-modules": {
+              "log-decisions": "false"
+            }
+          }
+        },
+        "charm_pin_pullback_long": {
+          "enabled": "true",
+          "entry-modules": [
+            "calendar",
+            "es-vwap",
+            "es-reclaim",
+            "es-structure",
+            "es-higher-low",
+            "pullback",
+            "ema20-pullback",
+            "rsi-momentum",
+            "adx",
+            "option-iv",
+            "option-strike-map",
+            "long-regime-filter",
+            "setup-quality",
+            "entry-veto"
+          ],
+          "take-profit-modules": [
+            "setup-quality",
+            "option-iv",
+            "long-regime-filter"
+          ],
+          "risk-modules": [
+            "max-adverse",
+            "tail-risk",
+            "trade-health",
+            "stale-trade"
+          ],
+          "module-config": {
+            "wall-hl": {
+              "enabled": "true",
+              "allowed-states": "",
+              "block-states": "",
+              "mode": "off"
+            },
+            "entry-veto": {
+              "charm-pin-tail-risk-signature": {
+                "enabled": "false",
+                "profile": "charm_pin_pullback_long",
+                "min-setup-quality-score": "70",
+                "max-adx": "18",
+                "max-vwap-acceleration": "0.02",
+                "min-vwap-distance": "31",
+                "min-pullback-from-high": "3",
+                "max-pullback-from-high": "4.5",
+                "max-higher-high-distance": "4",
+                "max-rolling-high-distance": "5",
+                "require-profile-match": "true",
+                "veto-points": "99",
+                "log-decision": "true"
+              },
+              "charm-pin-dynamic-vwap-overextension": {
+                "enabled": "true",
+                "profile": "charm_pin_pullback_long",
+                "max-adx": "18",
+                "max-vwap-acceleration": "0.02",
+                "min-vwap-distance-dynamic-multiple": "2.0",
+                "max-vwap-distance-dynamic-multiple": "0",
+                "min-pullback-from-high": "2.5",
+                "max-pullback-from-high": "4.5",
+                "max-rolling-high-distance": "5",
+                "require-profile-match": "true",
+                "veto-points": "99",
+                "log-decision": "true"
+              },
+              "charm-pin-broken-structure-veto": {
+                "enabled": "true",
+                "profile": "charm_pin_pullback_long",
+                "max-es-structure-score": "3",
+                "max-higher-low-distance": "-2",
+                "max-higher-high-distance": "-1",
+                "require-profile-match": "true",
+                "veto-points": "99",
+                "log-decision": "false"
+              }
+            },
+            "long-regime-filter": {
+              "min-abs-net-charm-next-30m": "100000",
+              "require-pullback-or-lower-fade": "true",
+              "dynamic-vwap-min-distance": "8",
+              "dynamic-vwap-max-distance": "30",
+              "dynamic-vwap-expected-move-fraction": "0.25",
+              "dynamic-vwap-volatility-multiplier": "0.5",
+              "max-support-wall-distance": "8",
+              "recent-high-rejection-min-pullback": "6",
+              "recent-high-rejection-max-vwap-slope": "0.01"
+            },
+            "take-profit": {
+              "multiplier": "0.80",
+              "max-distance": "3",
+              "distance": "1.5"
+            },
+            "rsi-momentum": {
+              "threshold": "38"
+            },
+            "adx": {
+              "threshold": "16.5"
+            },
+            "es-vwap": {
+              "min-distance": "0",
+              "max-distance": "8"
+            },
+            "es-structure": {
+              "min-score": "3"
+            },
+            "dynamic-take-profit": {
+              "min": "1",
+              "max": "3"
+            },
+            "event-risk-gate": {
+              "enabled": "false",
+              "block-window-minutes": "15",
+              "minutes-to-event": "999999"
+            },
+            "gamma-regime-filter": {
+              "enabled": "false",
+              "neutral-band": "0.05",
+              "hard-block-opposite": "false"
+            },
+            "dealer-delta-pressure-score": {
+              "enabled": "false",
+              "min-call-put-imbalance": "0.15"
+            },
+            "charm-pin-filter": {
+              "enabled": "false",
+              "near-distance-points": "5",
+              "block-breakout-pin-risk": "false"
+            },
+            "vanna-iv-regime-filter": {
+              "enabled": "false",
+              "max-iv30d-change-60s": "0.02",
+              "max-skew-change-60s": "0.02"
+            },
+            "wall-breakout-classifier": {
+              "enabled": "false",
+              "block-failed-breakout": "true"
+            },
+            "trend-day-detector": {
+              "enabled": "false",
+              "min-vwap-distance": "3",
+              "min-vwap-slope": "0.05",
+              "min-adx": "18"
+            },
+            "late-day-pin-guard": {
+              "enabled": "false",
+              "start-time": "14:45:00",
+              "near-distance-points": "5",
+              "hard-block": "true"
+            },
+            "market-structure-modules": {
+              "log-decisions": "false"
+            },
+            "calendar": {
+              "block-before-option-expiration": "true",
+              "option-expiration-time": "16:00",
+              "minutes-before-option-expiration": "10"
+            }            
+          }
+        },
+        "late_day_pin_avoid_long": {
+          "enabled": "false",
+          "entry-modules": [],
+          "take-profit-modules": [],
+          "risk-modules": [],
+          "module-config": {
+            "wall-hl": {
+              "enabled": "true",
+              "allowed-states": "",
+              "block-states": "",
+              "mode": "off"
+            },
+            "long-regime-filter": {
+              "require-positive-gamma": "true",
+              "require-near-atm-late-day": "true",
+              "min-abs-net-charm-next-30m": "100000"
+            },
+            "event-risk-gate": {
+              "enabled": "false",
+              "block-window-minutes": "15",
+              "minutes-to-event": "999999"
+            },
+            "gamma-regime-filter": {
+              "enabled": "false",
+              "neutral-band": "0.05",
+              "hard-block-opposite": "false"
+            },
+            "dealer-delta-pressure-score": {
+              "enabled": "false",
+              "min-call-put-imbalance": "0.15"
+            },
+            "charm-pin-filter": {
+              "enabled": "false",
+              "near-distance-points": "5",
+              "block-breakout-pin-risk": "false"
+            },
+            "vanna-iv-regime-filter": {
+              "enabled": "false",
+              "max-iv30d-change-60s": "0.02",
+              "max-skew-change-60s": "0.02"
+            },
+            "wall-breakout-classifier": {
+              "enabled": "false",
+              "block-failed-breakout": "true"
+            },
+            "trend-day-detector": {
+              "enabled": "false",
+              "min-vwap-distance": "3",
+              "min-vwap-slope": "0.05",
+              "min-adx": "18"
+            },
+            "late-day-pin-guard": {
+              "enabled": "false",
+              "start-time": "14:45:00",
+              "near-distance-points": "5",
+              "hard-block": "true"
+            },
+            "market-structure-modules": {
+              "log-decisions": "false"
+            }
+          }
+        },
+        "charm_wall_pin_avoid_long": {
+          "enabled": "false",
+          "entry-modules": [],
+          "take-profit-modules": [],
+          "risk-modules": [],
+          "module-config": {
+            "long-regime-filter": {
+              "require-late-day": "true",
+              "require-positive-gamma": "false",
+              "max-distance-from-charm-wall": "2",
+              "min-abs-net-charm-next-30m": "100000"
+            },
+            "event-risk-gate": {
+              "enabled": "false",
+              "block-window-minutes": "15",
+              "minutes-to-event": "999999"
+            },
+            "gamma-regime-filter": {
+              "enabled": "false",
+              "neutral-band": "0.05",
+              "hard-block-opposite": "false"
+            },
+            "dealer-delta-pressure-score": {
+              "enabled": "false",
+              "min-call-put-imbalance": "0.15"
+            },
+            "charm-pin-filter": {
+              "enabled": "false",
+              "near-distance-points": "5",
+              "block-breakout-pin-risk": "false"
+            },
+            "vanna-iv-regime-filter": {
+              "enabled": "false",
+              "max-iv30d-change-60s": "0.02",
+              "max-skew-change-60s": "0.02"
+            },
+            "wall-breakout-classifier": {
+              "enabled": "false",
+              "block-failed-breakout": "true"
+            },
+            "trend-day-detector": {
+              "enabled": "false",
+              "min-vwap-distance": "3",
+              "min-vwap-slope": "0.05",
+              "min-adx": "18"
+            },
+            "late-day-pin-guard": {
+              "enabled": "false",
+              "start-time": "14:45:00",
+              "near-distance-points": "5",
+              "hard-block": "true"
+            },
+            "market-structure-modules": {
+              "log-decisions": "false"
+            }
+          }
+        },
+        "charm_wall_breakaway_long": {
+          "enabled": "true",
+          "entry-modules": [
+            "calendar",
+            "es-vwap",
+            "es-vwap-slope",
+            "es-vwap-acceleration",
+            "es-rolling-high",
+            "es-structure",
+            "indicator-slope",
+            "rsi-momentum",
+            "adx",
+            "option-iv",
+            "option-strike-map",
+            "long-regime-filter",
+            "order-book",
+            "setup-quality",
+            "entry-veto"
+          ],
+          "take-profit-modules": [
+            "setup-quality",
+            "option-iv",
+            "option-strike-map",
+            "long-regime-filter"
+          ],
+          "risk-modules": [
+            "max-adverse",
+            "tail-risk",
+            "trade-health",
+            "upside-extension"
+          ],
+          "module-config": {
+            "wall-hl": {
+              "enabled": "true",
+              "allowed-states": "",
+              "block-states": "",
+              "mode": "off"
+            },
+            "long-regime-filter": {
+              "require-breakout": "true",
+              "require-negative-gamma": "false",
+              "require-net-charm": "true",
+              "min-distance-above-charm-wall": "2",
+              "max-distance-above-charm-wall": "20",
+              "min-abs-net-charm-next-30m": "100000"
+            },
+            "take-profit": {
+              "multiplier": "1.25",
+              "max-distance": "12"
+            },
+            "es-vwap": {
+              "min-distance": "2",
+              "max-distance": "25",
+              "slope-min": "0.04"
+            },
+            "es-structure": {
+              "min-score": "3",
+              "min-higher-low-distance": "0.5",
+              "min-higher-high-distance": "1"
+            },
+            "adx": {
+              "threshold": "14"
+            },
+            "rsi-momentum": {
+              "threshold": "42"
+            },
+            "upside-extension": {
+              "enabled": "true"
+            },
+            "event-risk-gate": {
+              "enabled": "false",
+              "block-window-minutes": "15",
+              "minutes-to-event": "999999"
+            },
+            "gamma-regime-filter": {
+              "enabled": "false",
+              "neutral-band": "0.05",
+              "hard-block-opposite": "false"
+            },
+            "dealer-delta-pressure-score": {
+              "enabled": "false",
+              "min-call-put-imbalance": "0.15"
+            },
+            "charm-pin-filter": {
+              "enabled": "false",
+              "near-distance-points": "5",
+              "block-breakout-pin-risk": "false"
+            },
+            "vanna-iv-regime-filter": {
+              "enabled": "false",
+              "max-iv30d-change-60s": "0.02",
+              "max-skew-change-60s": "0.02"
+            },
+            "wall-breakout-classifier": {
+              "enabled": "false",
+              "block-failed-breakout": "true"
+            },
+            "trend-day-detector": {
+              "enabled": "false",
+              "min-vwap-distance": "3",
+              "min-vwap-slope": "0.05",
+              "min-adx": "18"
+            },
+            "late-day-pin-guard": {
+              "enabled": "false",
+              "start-time": "14:45:00",
+              "near-distance-points": "5",
+              "hard-block": "true"
+            },
+            "market-structure-modules": {
+              "log-decisions": "false"
+            }
+          }
+        },
+        "breakout_long": {
+          "enabled": "false",
+          "entry-modules": [
+            "calendar",
+            "es-vwap",
+            "es-vwap-slope",
+            "es-vwap-acceleration",
+            "es-rolling-high",
+            "es-structure",
+            "indicator-slope",
+            "rsi-momentum",
+            "adx",
+            "option-iv",
+            "option-strike-map",
+            "option-breakout",
+            "long-regime-filter",
+            "order-book",
+            "setup-quality",
+            "entry-veto"
+          ],
+          "take-profit-modules": [
+            "setup-quality",
+            "option-iv",
+            "option-strike-map",
+            "long-regime-filter"
+          ],
+          "risk-modules": [
+            "max-adverse",
+            "tail-risk",
+            "trade-health",
+            "upside-extension"
+          ],
+          "module-config": {
+            "wall-hl": {
+              "enabled": "true",
+              "allowed-states": "",
+              "block-states": "",
+              "mode": "off"
+            },
+            "option-strike-map": {
+              "require-long-breakout-allowed": "false"
+            },
+            "es-vwap": {
+              "min-distance": "3",
+              "max-distance": "18",
+              "slope-min": "0.08",
+              "acceleration-min": "0.02"
+            },
+            "es-structure": {
+              "min-score": "4"
+            },
+            "adx": {
+              "threshold": "18"
+            },
+            "rsi-momentum": {
+              "threshold": "48"
+            },
+            "dynamic-take-profit": {
+              "min": "3",
+              "max": "8"
+            },
+            "tail-risk": {
+              "min-age-minutes": "30"
+            },
+            "take-profit": {
+              "distance": "4.5"
+            },
+            "event-risk-gate": {
+              "enabled": "false",
+              "block-window-minutes": "15",
+              "minutes-to-event": "999999"
+            },
+            "gamma-regime-filter": {
+              "enabled": "false",
+              "neutral-band": "0.05",
+              "hard-block-opposite": "false"
+            },
+            "dealer-delta-pressure-score": {
+              "enabled": "false",
+              "min-call-put-imbalance": "0.15"
+            },
+            "charm-pin-filter": {
+              "enabled": "false",
+              "near-distance-points": "5",
+              "block-breakout-pin-risk": "false"
+            },
+            "vanna-iv-regime-filter": {
+              "enabled": "false",
+              "max-iv30d-change-60s": "0.02",
+              "max-skew-change-60s": "0.02"
+            },
+            "wall-breakout-classifier": {
+              "enabled": "false",
+              "block-failed-breakout": "true"
+            },
+            "trend-day-detector": {
+              "enabled": "false",
+              "min-vwap-distance": "3",
+              "min-vwap-slope": "0.05",
+              "min-adx": "18"
+            },
+            "late-day-pin-guard": {
+              "enabled": "false",
+              "start-time": "14:45:00",
+              "near-distance-points": "5",
+              "hard-block": "true"
+            },
+            "market-structure-modules": {
+              "log-decisions": "false"
+            }
+          }
+        },
+        "squeeze_long": {
+          "enabled": "true",
+          "entry-modules": [
+            "calendar",
+            "es-vwap",
+            "es-vwap-slope",
+            "es-vwap-acceleration",
+            "es-rolling-high",
+            "indicator-slope",
+            "rsi-momentum",
+            "adx",
+            "option-iv",
+            "option-strike-map",
+            "option-breakout",
+            "long-regime-filter",
+            "order-book",
+            "setup-quality",
+            "entry-veto"
+          ],
+          "take-profit-modules": [
+            "setup-quality",
+            "option-iv",
+            "option-strike-map",
+            "long-regime-filter"
+          ],
+          "risk-modules": [
+            "max-adverse",
+            "tail-risk",
+            "trade-health",
+            "upside-extension"
+          ],
+          "module-config": {
+            "wall-hl": {
+              "enabled": "true",
+              "allowed-states": "",
+              "block-states": "",
+              "mode": "off"
+            },
+            "es-vwap": {
+              "min-distance": "2",
+              "slope-min": "0.04"
+            },
+            "order-book": {
+              "long-min-depth-imbalance-5": "0.12",
+              "long-min-ofi-1s-normalized": "0.35",
+              "long-min-edge-after-cost-points": "-0.10"
+            },
+            "dynamic-take-profit": {
+              "max": "6.5"
+            },
+            "upside-extension": {
+              "enabled": "false"
+            },
+            "take-profit": {
+              "distance": "3.75"
+            },
+            "option-strike-map": {
+              "require-long-breakout-allowed": "true",
+              "allow-missing-0dte": "false",
+              "max-expected-move-position": "0.95",
+              "min-call-put-volume-imbalance": "0.35",
+              "min-gamma-regime-score": "-0.15",
+              "require-call-put-volume-imbalance": "true",
+              "require-gamma-regime-score": "true",
+              "require-next-upside-call-volume-distance": "true",
+              "min-next-upside-distance": "2"
+            },
+            "event-risk-gate": {
+              "enabled": "false",
+              "block-window-minutes": "15",
+              "minutes-to-event": "999999"
+            },
+"gamma-regime-filter": {
+  "enabled": "true",
+  "neutral-band": "0.05",
+  "hard-block-opposite": "false"
+},
+"dealer-delta-pressure-score": {
+  "enabled": "true",
+  "min-call-put-imbalance": "0.25"
+},
+"vanna-iv-regime-filter": {
+  "enabled": "true",
+  "max-iv30d-change-60s": "0.02",
+  "max-skew-change-60s": "0.02"
+},
+            "charm-pin-filter": {
+              "enabled": "false",
+              "near-distance-points": "5",
+              "block-breakout-pin-risk": "false"
+            },
+"wall-breakout-classifier": {
+  "enabled": "true",
+  "block-failed-breakout": "true"
+},
+"trend-day-detector": {
+  "enabled": "true",
+  "min-vwap-distance": "2",
+  "min-vwap-slope": "0.04",
+  "min-adx": "18"
+},
+"late-day-pin-guard": {
+  "enabled": "true",
+  "start-time": "14:45:00",
+  "near-distance-points": "5",
+  "hard-block": "true"
+},
+"market-structure-modules": {
+  "log-decisions": "false"
+}
+          }
+        },
+        "wall_reclaim_long": {
+          "enabled": "false",
+          "entry-modules": [
+            "calendar",
+            "es-vwap",
+            "es-vwap-slope",
+            "es-vwap-acceleration",
+            "es-structure",
+            "indicator-slope",
+            "rsi-momentum",
+            "adx",
+            "option-iv",
+            "option-strike-map",
+            "option-breakout",
+            "long-regime-filter",
+            "setup-quality",
+            "entry-veto",
+            "wall-hl",
+            "gamma-regime-filter",
+            "dealer-delta-pressure-score",
+            "trend-day-detector"
+          ],
+          "take-profit-modules": [
+            "setup-quality",
+            "option-iv",
+            "option-strike-map",
+            "long-regime-filter"
+          ],
+          "risk-modules": [
+            "max-adverse",
+            "tail-risk",
+            "trade-health",
+            "upside-extension"
+          ],
+          "module-config": {
+            "wall-hl": {
+              "enabled": "true",
+              "allowed-states": "",
+              "block-states": "",
+              "mode": "detect-only"
+            },
+            "es-vwap": {
+              "min-distance": "0.5",
+              "max-distance": "10",
+              "slope-min": "0",
+              "acceleration-min": "0"
+            },
+            "es-structure": {
+              "min-score": "3"
+            },
+            "adx": {
+              "threshold": "12"
+            },
+            "rsi-momentum": {
+              "threshold": "38"
+            },
+            "take-profit": {
+              "distance": "2.5",
+              "multiplier": "0.90",
+              "max-distance": "6"
+            },
+            "event-risk-gate": {
+              "enabled": "false",
+              "block-window-minutes": "15",
+              "minutes-to-event": "999999"
+            },
+            "gamma-regime-filter": {
+              "enabled": "true",
+              "neutral-band": "0.05",
+              "hard-block-opposite": "false"
+            },
+            "dealer-delta-pressure-score": {
+              "enabled": "true",
+              "min-call-put-imbalance": "0.15"
+            },
+            "charm-pin-filter": {
+              "enabled": "false",
+              "near-distance-points": "5",
+              "block-breakout-pin-risk": "false"
+            },
+            "vanna-iv-regime-filter": {
+              "enabled": "false",
+              "max-iv30d-change-60s": "0.02",
+              "max-skew-change-60s": "0.02"
+            },
+            "wall-breakout-classifier": {
+              "enabled": "false",
+              "block-failed-breakout": "true"
+            },
+            "trend-day-detector": {
+              "enabled": "true",
+              "min-vwap-distance": "3",
+              "min-vwap-slope": "0.05",
+              "min-adx": "18"
+            },
+            "late-day-pin-guard": {
+              "enabled": "false",
+              "start-time": "14:45:00",
+              "near-distance-points": "5",
+              "hard-block": "true"
+            },
+            "market-structure-modules": {
+              "log-decisions": "false"
+            }
+          }
+        },
+        "wall_breakout_retest_long": {
+          "enabled": "false",
+          "entry-modules": [
+            "calendar",
+            "es-vwap",
+            "es-vwap-slope",
+            "es-vwap-acceleration",
+            "es-structure",
+            "indicator-slope",
+            "rsi-momentum",
+            "adx",
+            "option-iv",
+            "option-strike-map",
+            "option-breakout",
+            "long-regime-filter",
+            "setup-quality",
+            "entry-veto",
+            "wall-breakout-classifier",
+            "gamma-regime-filter",
+            "trend-day-detector",
+            "vanna-iv-regime-filter"
+          ],
+          "take-profit-modules": [
+            "setup-quality",
+            "option-iv",
+            "option-strike-map",
+            "long-regime-filter"
+          ],
+          "risk-modules": [
+            "max-adverse",
+            "tail-risk",
+            "trade-health",
+            "upside-extension"
+          ],
+          "module-config": {
+            "wall-hl": {
+              "enabled": "true",
+              "allowed-states": "",
+              "block-states": "",
+              "mode": "off"
+            },
+            "es-vwap": {
+              "min-distance": "2",
+              "max-distance": "16",
+              "slope-min": "0.05",
+              "acceleration-min": "0.01"
+            },
+            "es-structure": {
+              "min-score": "3"
+            },
+            "adx": {
+              "threshold": "16"
+            },
+            "rsi-momentum": {
+              "threshold": "45"
+            },
+            "take-profit": {
+              "distance": "4",
+              "multiplier": "1.10",
+              "max-distance": "12"
+            },
+            "event-risk-gate": {
+              "enabled": "false",
+              "block-window-minutes": "15",
+              "minutes-to-event": "999999"
+            },
+            "gamma-regime-filter": {
+              "enabled": "true",
+              "neutral-band": "0.05",
+              "hard-block-opposite": "false"
+            },
+            "dealer-delta-pressure-score": {
+              "enabled": "false",
+              "min-call-put-imbalance": "0.15"
+            },
+            "charm-pin-filter": {
+              "enabled": "false",
+              "near-distance-points": "5",
+              "block-breakout-pin-risk": "false"
+            },
+            "vanna-iv-regime-filter": {
+              "enabled": "true",
+              "max-iv30d-change-60s": "0.02",
+              "max-skew-change-60s": "0.02"
+            },
+            "wall-breakout-classifier": {
+              "enabled": "true",
+              "block-failed-breakout": "true"
+            },
+            "trend-day-detector": {
+              "enabled": "true",
+              "min-vwap-distance": "3",
+              "min-vwap-slope": "0.05",
+              "min-adx": "18"
+            },
+            "late-day-pin-guard": {
+              "enabled": "false",
+              "start-time": "14:45:00",
+              "near-distance-points": "5",
+              "hard-block": "true"
+            },
+            "market-structure-modules": {
+              "log-decisions": "false"
+            }
+          }
+        },
+        "late_day_pin_fade": {
+          "enabled": "false",
+          "entry-modules": [
+            "calendar",
+            "es-vwap",
+            "es-vwap-slope",
+            "es-vwap-acceleration",
+            "es-structure",
+            "indicator-slope",
+            "rsi-momentum",
+            "adx",
+            "option-iv",
+            "option-strike-map",
+            "option-breakout",
+            "long-regime-filter",
+            "setup-quality",
+            "entry-veto",
+            "late-day-pin-guard",
+            "charm-pin-filter",
+            "gamma-regime-filter",
+            "wall-hl"
+          ],
+          "take-profit-modules": [
+            "setup-quality",
+            "option-iv",
+            "option-strike-map",
+            "long-regime-filter"
+          ],
+          "risk-modules": [
+            "max-adverse",
+            "tail-risk",
+            "trade-health",
+            "upside-extension"
+          ],
+          "module-config": {
+            "wall-hl": {
+              "enabled": "true",
+              "allowed-states": "",
+              "block-states": "",
+              "mode": "detect-only"
+            },
+            "es-vwap": {
+              "min-distance": "0.5",
+              "max-distance": "10",
+              "slope-min": "0",
+              "acceleration-min": "0"
+            },
+            "es-structure": {
+              "min-score": "3"
+            },
+            "adx": {
+              "threshold": "12"
+            },
+            "rsi-momentum": {
+              "threshold": "38"
+            },
+            "take-profit": {
+              "distance": "2.5",
+              "multiplier": "0.90",
+              "max-distance": "6"
+            },
+            "event-risk-gate": {
+              "enabled": "false",
+              "block-window-minutes": "15",
+              "minutes-to-event": "999999"
+            },
+            "gamma-regime-filter": {
+              "enabled": "true",
+              "neutral-band": "0.05",
+              "hard-block-opposite": "false"
+            },
+            "dealer-delta-pressure-score": {
+              "enabled": "false",
+              "min-call-put-imbalance": "0.15"
+            },
+            "charm-pin-filter": {
+              "enabled": "true",
+              "near-distance-points": "5",
+              "block-breakout-pin-risk": "false"
+            },
+            "vanna-iv-regime-filter": {
+              "enabled": "false",
+              "max-iv30d-change-60s": "0.02",
+              "max-skew-change-60s": "0.02"
+            },
+            "wall-breakout-classifier": {
+              "enabled": "false",
+              "block-failed-breakout": "true"
+            },
+            "trend-day-detector": {
+              "enabled": "false",
+              "min-vwap-distance": "3",
+              "min-vwap-slope": "0.05",
+              "min-adx": "18"
+            },
+            "late-day-pin-guard": {
+              "enabled": "true",
+              "start-time": "14:45:00",
+              "near-distance-points": "5",
+              "hard-block": "false"
+            },
+            "market-structure-modules": {
+              "log-decisions": "false"
+            }
+          }
+        },
+        "negative_gamma_momentum_long": {
+          "enabled": "false",
+          "entry-modules": [
+            "calendar",
+            "es-vwap",
+            "es-vwap-slope",
+            "es-vwap-acceleration",
+            "es-structure",
+            "indicator-slope",
+            "rsi-momentum",
+            "adx",
+            "option-iv",
+            "option-strike-map",
+            "option-breakout",
+            "long-regime-filter",
+            "setup-quality",
+            "entry-veto",
+            "gamma-regime-filter",
+            "dealer-delta-pressure-score",
+            "wall-breakout-classifier",
+            "trend-day-detector"
+          ],
+          "take-profit-modules": [
+            "setup-quality",
+            "option-iv",
+            "option-strike-map",
+            "long-regime-filter"
+          ],
+          "risk-modules": [
+            "max-adverse",
+            "tail-risk",
+            "trade-health",
+            "upside-extension"
+          ],
+          "module-config": {
+            "wall-hl": {
+              "enabled": "true",
+              "allowed-states": "",
+              "block-states": "",
+              "mode": "off"
+            },
+            "es-vwap": {
+              "min-distance": "3",
+              "max-distance": "16",
+              "slope-min": "0.05",
+              "acceleration-min": "0"
+            },
+            "es-structure": {
+              "min-score": "3"
+            },
+            "adx": {
+              "threshold": "18"
+            },
+            "rsi-momentum": {
+              "threshold": "48"
+            },
+            "take-profit": {
+              "distance": "4",
+              "multiplier": "1.25",
+              "max-distance": "12"
+            },
+            "long-regime-filter": {
+              "require-negative-gamma": "true"
+            },
+            "event-risk-gate": {
+              "enabled": "false",
+              "block-window-minutes": "15",
+              "minutes-to-event": "999999"
+            },
+            "gamma-regime-filter": {
+              "enabled": "true",
+              "neutral-band": "0.05",
+              "hard-block-opposite": "false"
+            },
+            "dealer-delta-pressure-score": {
+              "enabled": "true",
+              "min-call-put-imbalance": "0.15"
+            },
+            "charm-pin-filter": {
+              "enabled": "false",
+              "near-distance-points": "5",
+              "block-breakout-pin-risk": "false"
+            },
+            "vanna-iv-regime-filter": {
+              "enabled": "false",
+              "max-iv30d-change-60s": "0.02",
+              "max-skew-change-60s": "0.02"
+            },
+            "wall-breakout-classifier": {
+              "enabled": "true",
+              "block-failed-breakout": "true"
+            },
+            "trend-day-detector": {
+              "enabled": "true",
+              "min-vwap-distance": "3",
+              "min-vwap-slope": "0.05",
+              "min-adx": "18"
+            },
+            "late-day-pin-guard": {
+              "enabled": "false",
+              "start-time": "14:45:00",
+              "near-distance-points": "5",
+              "hard-block": "true"
+            },
+            "market-structure-modules": {
+              "log-decisions": "false"
+            }
+          }
+        },
+        "trend_day_pullback_long": {
+          "enabled": "false",
+          "entry-modules": [
+            "calendar",
+            "es-vwap",
+            "es-vwap-slope",
+            "es-vwap-acceleration",
+            "es-structure",
+            "indicator-slope",
+            "rsi-momentum",
+            "adx",
+            "option-iv",
+            "option-strike-map",
+            "option-breakout",
+            "long-regime-filter",
+            "setup-quality",
+            "entry-veto",
+            "trend-day-detector",
+            "wall-hl",
+            "dealer-delta-pressure-score",
+            "event-risk-gate"
+          ],
+          "take-profit-modules": [
+            "setup-quality",
+            "option-iv",
+            "option-strike-map",
+            "long-regime-filter"
+          ],
+          "risk-modules": [
+            "max-adverse",
+            "tail-risk",
+            "trade-health",
+            "upside-extension"
+          ],
+          "module-config": {
+            "wall-hl": {
+              "enabled": "true",
+              "allowed-states": "",
+              "block-states": "",
+              "mode": "detect-only"
+            },
+            "es-vwap": {
+              "min-distance": "0.5",
+              "max-distance": "10",
+              "slope-min": "0",
+              "acceleration-min": "0"
+            },
+            "es-structure": {
+              "min-score": "3"
+            },
+            "adx": {
+              "threshold": "12"
+            },
+            "rsi-momentum": {
+              "threshold": "38"
+            },
+            "take-profit": {
+              "distance": "2.5",
+              "multiplier": "0.90",
+              "max-distance": "6"
+            },
+            "event-risk-gate": {
+              "enabled": "true",
+              "block-window-minutes": "15",
+              "minutes-to-event": "999999"
+            },
+            "gamma-regime-filter": {
+              "enabled": "false",
+              "neutral-band": "0.05",
+              "hard-block-opposite": "false"
+            },
+            "dealer-delta-pressure-score": {
+              "enabled": "true",
+              "min-call-put-imbalance": "0.15"
+            },
+            "charm-pin-filter": {
+              "enabled": "false",
+              "near-distance-points": "5",
+              "block-breakout-pin-risk": "false"
+            },
+            "vanna-iv-regime-filter": {
+              "enabled": "false",
+              "max-iv30d-change-60s": "0.02",
+              "max-skew-change-60s": "0.02"
+            },
+            "wall-breakout-classifier": {
+              "enabled": "false",
+              "block-failed-breakout": "true"
+            },
+            "trend-day-detector": {
+              "enabled": "true",
+              "min-vwap-distance": "3",
+              "min-vwap-slope": "0.05",
+              "min-adx": "18"
+            },
+            "late-day-pin-guard": {
+              "enabled": "false",
+              "start-time": "14:45:00",
+              "near-distance-points": "5",
+              "hard-block": "true"
+            },
+            "market-structure-modules": {
+              "log-decisions": "false"
+            }
+          }
+        },
+        "call_wall_acceptance_long": {
+          "enabled": "true",
+          "entry-modules": [
+            "calendar",
+            "es-vwap",
+            "es-vwap-slope",
+            "es-structure",
+            "indicator-slope",
+            "rsi-momentum",
+            "adx",
+            "option-iv",
+            "option-strike-map",
+            "option-breakout",
+            "long-regime-filter",
+            "order-book",
+            "setup-quality",
+            "entry-veto"
+          ],
+          "take-profit-modules": [
+            "setup-quality",
+            "option-iv",
+            "option-strike-map",
+            "long-regime-filter"
+          ],
+          "risk-modules": [
+            "max-adverse",
+            "tail-risk",
+            "trade-health",
+            "upside-extension"
+          ],
+          "module-config": {
+            "wall-hl": {
+              "enabled": "true",
+              "allowed-states": "",
+              "block-states": "",
+              "mode": "off"
+            },
+            "option-call-volume": {
+              "use-expansion-filter": "true",
+              "min-increase": "1",
+              "min-increase-pct": "0.10"
+            },
+            "es-vwap": {
+              "min-distance": "1",
+              "max-distance": "16",
+              "slope-min": "0.03"
+            },
+            "es-structure": {
+              "min-score": "3"
+            },
+            "adx": {
+              "threshold": "14"
+            },
+            "rsi-momentum": {
+              "threshold": "42"
+            },
+            "order-book": {
+              "long-min-depth-imbalance-5": "0.08",
+              "long-min-ofi-1s-normalized": "0.20",
+              "long-min-edge-after-cost-points": "-0.20"
+            },
+            "dynamic-take-profit": {
+              "min": "2",
+              "max": "6"
+            },
+            "take-profit": {
+              "distance": "3.5"
+            },
+            "calendar": {
+              "block-before-option-expiration": "true",
+              "option-expiration-time": "16:00",
+              "minutes-before-option-expiration": "10"
+            },
+            "upside-extension": {
+              "enabled": "true"
+            },
+            "long-regime-filter": {
+              "positive-gamma-min": "0.15",
+              "heavy-call-buying-min-imbalance": "0.25",
+              "min-net-dex-volume": "1000000000",
+              "min-forward-dex-ratio-30m": "0.05"
+            },
+            "option-breakout": {
+              "use-strike-acceptance-filter": "true",
+              "use-early-strike-acceptance-entry": "true"
+            },
+            "option-strike": {
+              "acceptance-seconds": "45",
+              "acceptance-min-distance-points": "1"
+            },
+            "early-strike-acceptance": {
+              "seconds": "20",
+              "min-distance-points": "1"
+            },
+            "event-risk-gate": {
+              "enabled": "false",
+              "block-window-minutes": "15",
+              "minutes-to-event": "999999"
+            },
+            "gamma-regime-filter": {
+              "enabled": "false",
+              "neutral-band": "0.05",
+              "hard-block-opposite": "false"
+            },
+            "dealer-delta-pressure-score": {
+              "enabled": "false",
+              "min-call-put-imbalance": "0.15"
+            },
+            "charm-pin-filter": {
+              "enabled": "false",
+              "near-distance-points": "5",
+              "block-breakout-pin-risk": "false"
+            },
+            "vanna-iv-regime-filter": {
+              "enabled": "false",
+              "max-iv30d-change-60s": "0.02",
+              "max-skew-change-60s": "0.02"
+            },
+            "wall-breakout-classifier": {
+              "enabled": "false",
+              "block-failed-breakout": "true"
+            },
+            "trend-day-detector": {
+              "enabled": "false",
+              "min-vwap-distance": "3",
+              "min-vwap-slope": "0.05",
+              "min-adx": "18"
+            },
+            "late-day-pin-guard": {
+              "enabled": "false",
+              "start-time": "14:45:00",
+              "near-distance-points": "5",
+              "hard-block": "true"
+            },
+            "market-structure-modules": {
+              "log-decisions": "false"
+            }
+          }
+        },
+        "pullback_long": {
+          "enabled": "true",
+          "entry-modules": [
+            "calendar",
+            "es-vwap",
+            "es-reclaim",
+            "es-structure",
+            "es-higher-low",
+            "pullback",
+            "ema20-pullback",
+            "rsi-momentum",
+            "adx",
+            "option-iv",
+            "option-strike-map",
+            "long-regime-filter",
+            "setup-quality",
+            "entry-veto",
+            "gamma-regime-filter",
+            "dealer-delta-pressure-score",
+            "charm-pin-filter",
+            "trend-day-detector",
+            "late-day-pin-guard"
+          ],
+          "take-profit-modules": [
+            "setup-quality",
+            "option-iv",
+            "long-regime-filter"
+          ],
+          "risk-modules": [
+            "max-adverse",
+            "tail-risk",
+            "trade-health",
+            "stale-trade",
+            "upside-extension"
+          ],
+          "module-config": {
+            "rsi-momentum": {
+              "threshold": "38"
+            },
+            "adx": {
+              "threshold": "12"
+            },
+            "es-vwap": {
+              "min-distance": "0.5",
+              "max-distance": "10"
+            },
+            "es-structure": {
+              "min-score": "3"
+            },
+            "es-reclaim": {
+              "min-distance": "0.5"
+            },
+            "take-profit": {
+              "distance": "2"
+            },
+            "dynamic-take-profit": {
+              "max": "4"
+            },
+            "wall-hl": {
+              "enabled": "true",
+              "allowed-states": "",
+              "block-states": "",
+              "mode": "off"
+            },
+            "event-risk-gate": {
+              "enabled": "false",
+              "block-window-minutes": "15",
+              "minutes-to-event": "999999"
+            },
+"gamma-regime-filter": {
+  "enabled": "true",
+  "neutral-band": "0.05",
+  "hard-block-opposite": "false"
+},
+"dealer-delta-pressure-score": {
+  "enabled": "true",
+  "min-call-put-imbalance": "0.10"
+},
+"charm-pin-filter": {
+  "enabled": "true",
+  "near-distance-points": "5",
+  "block-breakout-pin-risk": "false"
+},
+            "vanna-iv-regime-filter": {
+              "enabled": "false",
+              "max-iv30d-change-60s": "0.02",
+              "max-skew-change-60s": "0.02"
+            },
+            "wall-breakout-classifier": {
+              "enabled": "false",
+              "block-failed-breakout": "true"
+            },
+"trend-day-detector": {
+  "enabled": "true",
+  "min-vwap-distance": "2",
+  "min-vwap-slope": "0.03",
+  "min-adx": "12"
+},
+"late-day-pin-guard": {
+  "enabled": "true",
+  "start-time": "14:45:00",
+  "near-distance-points": "5",
+  "hard-block": "false"
+},
+"market-structure-modules": {
+  "log-decisions": "false"
+}
+          }
+        },
+        "mean_reversion_long": {
+          "enabled": "false",
+          "entry-modules": [
+            "calendar",
+            "es-vwap",
+            "pullback",
+            "ema20-max-distance",
+            "option-iv",
+            "option-strike-map",
+            "long-regime-filter",
+            "setup-quality"
+          ],
+          "take-profit-modules": [
+            "setup-quality",
+            "long-regime-filter"
+          ],
+          "risk-modules": [
+            "max-adverse",
+            "tail-risk",
+            "stale-trade"
+          ],
+          "module-config": {
+            "es-vwap": {
+              "max-distance": "6"
+            },
+            "adx": {
+              "threshold": "10"
+            },
+            "rsi-momentum": {
+              "threshold": "35"
+            },
+            "take-profit": {
+              "distance": "1.5"
+            },
+            "dynamic-take-profit": {
+              "min": "1",
+              "max": "2.5"
+            },
+            "tail-risk": {
+              "min-age-minutes": "20"
+            },
+            "event-risk-gate": {
+              "enabled": "false",
+              "block-window-minutes": "15",
+              "minutes-to-event": "999999"
+            },
+            "gamma-regime-filter": {
+              "enabled": "false",
+              "neutral-band": "0.05",
+              "hard-block-opposite": "false"
+            },
+            "dealer-delta-pressure-score": {
+              "enabled": "false",
+              "min-call-put-imbalance": "0.15"
+            },
+            "charm-pin-filter": {
+              "enabled": "false",
+              "near-distance-points": "5",
+              "block-breakout-pin-risk": "false"
+            },
+            "vanna-iv-regime-filter": {
+              "enabled": "false",
+              "max-iv30d-change-60s": "0.02",
+              "max-skew-change-60s": "0.02"
+            },
+            "wall-breakout-classifier": {
+              "enabled": "false",
+              "block-failed-breakout": "true"
+            },
+            "trend-day-detector": {
+              "enabled": "false",
+              "min-vwap-distance": "3",
+              "min-vwap-slope": "0.05",
+              "min-adx": "18"
+            },
+            "late-day-pin-guard": {
+              "enabled": "false",
+              "start-time": "14:45:00",
+              "near-distance-points": "5",
+              "hard-block": "true"
+            },
+            "market-structure-modules": {
+              "log-decisions": "false"
+            }
+          }
+        },
+        "standard_long": {
+          "enabled": "false",
+          "entry-modules": [
+            "calendar",
+            "es-vwap",
+            "es-vwap-slope",
+            "es-structure",
+            "es-higher-low",
+            "pullback",
+            "rsi-momentum",
+            "adx",
+            "option-iv",
+            "option-strike-map",
+            "long-regime-filter",
+            "setup-quality",
+            "entry-veto"
+          ],
+          "take-profit-modules": [
+            "setup-quality",
+            "option-iv",
+            "option-strike-map",
+            "long-regime-filter"
+          ],
+          "risk-modules": [
+            "max-adverse",
+            "tail-risk",
+            "trade-health",
+            "stale-trade",
+            "upside-extension"
+          ],
+          "module-config": {
+            "wall-hl": {
+              "enabled": "true",
+              "allowed-states": "",
+              "block-states": "",
+              "mode": "off"
+            },
+            "event-risk-gate": {
+              "enabled": "false",
+              "block-window-minutes": "15",
+              "minutes-to-event": "999999"
+            },
+            "gamma-regime-filter": {
+              "enabled": "false",
+              "neutral-band": "0.05",
+              "hard-block-opposite": "false"
+            },
+            "dealer-delta-pressure-score": {
+              "enabled": "false",
+              "min-call-put-imbalance": "0.15"
+            },
+            "charm-pin-filter": {
+              "enabled": "false",
+              "near-distance-points": "5",
+              "block-breakout-pin-risk": "false"
+            },
+            "vanna-iv-regime-filter": {
+              "enabled": "false",
+              "max-iv30d-change-60s": "0.02",
+              "max-skew-change-60s": "0.02"
+            },
+            "wall-breakout-classifier": {
+              "enabled": "false",
+              "block-failed-breakout": "true"
+            },
+            "trend-day-detector": {
+              "enabled": "false",
+              "min-vwap-distance": "3",
+              "min-vwap-slope": "0.05",
+              "min-adx": "18"
+            },
+            "late-day-pin-guard": {
+              "enabled": "false",
+              "start-time": "14:45:00",
+              "near-distance-points": "5",
+              "hard-block": "true"
+            },
+            "market-structure-modules": {
+              "log-decisions": "false"
+            }
+          }
+        }
+      }
+    },
+    "vix": {
+      "enabled": "false",
+      "vix-normal-threshold": "18",
+      "vix-no-trade-threshold": "25",
+      "vix-elevated-rsi-threshold": "60",
+      "vix-elevated-pullback-distance": "3",
+      "vix-max-age-minutes": "30"
+    },
+    "calendar": {
+      "enabled": "false",
+      "entry-block-fomc-days": "false",
+      "entry-block-cpi-days": "false",
+      "entry-block-nfp-days": "false",
+      "entry-block-last-trading-day-of-month": "true",
+      "entry-block-time-windows": "16:50-17:00"   
+    },
+    "slow-risk-entry": {
+      "enabled": "true",
+      "slow-risk-min-points": "4",
+      "slow-risk-max-setup-quality-score": "40",
+      "slow-risk-vwap-distance-buffer": "4",
+      "slow-risk-vwap-slope-max": "0.02",
+      "slow-risk-adx-buffer": "4",
+      "slow-risk-rsi-buffer": "5",
+      "slow-risk-structure-max-score": "3",
+      "slow-risk-ema20-extension-min": "0"
+    },
+    "entry-sizing": {
+      "fixed-quantity": "0",
+      "fractional-kelly": "1",
+      "margin-required-for-instrument": "0.05",
+      "margin-usage-cap": "0.15",
+      "free-margin-reserve": "0.50"
+    },
+    "risk": {
+      "trade-risk-max-adverse-points": "0",
+      "tail-risk": {
+        "enabled": "true",
+        "require-positive-exit": "true",
+        "min-age-minutes": "12",
+        "max-favorable-points-before-exit": "4.5",
+        "adverse-increase-threshold-points": "0.50",
+        "min-exit-profit-points": "1.0",
+        "early-follow-through": {
+          "enabled": "true",
+          "minutes": "12",
+          "fraction": "0.4"
+        }
+      },
+      "stale-trade": {
+        "enabled": "false",
+        "stale-trade-tighten-after-minutes": "90",
+        "stale-trade-recovery-target": "0.8",
+        "stale-trade-max-loss": "80",
+        "stale-trade-max-loss-points": "80"
+      },
+      "trade-health": {
+        "enabled": "false",
+        "trade-health-min-age-minutes": "90",
+        "trade-health-max-adverse-points": "55",
+        "trade-health-min-mfe-points": "1.5",
+        "trade-health-tighten-target": "0.5",
+        "exit-on-htf-flip": "true",
+        "exit-on-vwap-break": "true",
+        "adx-decay-exit": "true"
+      }
+    },
+    "metrics": {
+      "enabled": "true",
+      "execution-metrics-sample-seconds": "15"
+    }
+  },
+  "debugging": false,
+  "debugging-method": "LocalCmdline",
+  "log-handler": "QuantConnect.Logging.CompositeLogHandler",
+  "messaging-handler": "QuantConnect.Messaging.Messaging",
+  "job-queue-handler": "QuantConnect.Queues.JobQueue",
+  "api-handler": "QuantConnect.Api.Api",
+  "map-file-provider": "QuantConnect.Data.Auxiliary.LocalDiskMapFileProvider",
+  "factor-file-provider": "QuantConnect.Data.Auxiliary.LocalDiskFactorFileProvider",
+  "_data-provider": "QuantConnect.Lean.Engine.DataFeeds.DefaultDataProvider",
+  "_data-channel-provider": "DataChannelProvider",
+  "object-store": "QuantConnect.Lean.Engine.Storage.LocalObjectStore",
+  "data-aggregator": "QuantConnect.Lean.Engine.DataFeeds.AggregationManager",
+  "symbol-minute-limit": 10000,
+  "symbol-second-limit": 10000,
+  "symbol-tick-limit": 10000,
+  "ignore-unknown-asset-holdings": true,
+  "show-missing-data-logs": false,
+  "maximum-warmup-history-days-look-back": 5,
+  "maximum-data-points-per-chart-series": 1000000,
+  "maximum-chart-series": 30,
+  "force-exchange-always-open": false,
+  "transaction-log": "",
+  "reserved-words-prefix": "@",
+  "job-user-id": "0",
+  "api-access-token": "",
+  "job-organization-id": "",
+  "_live-data-url": "ws://www.quantconnect.com/api/v2/live/data/",
+  "_live-data-port": 8020,
+  "live-cash-balance": "",
+  "live-holdings": "[]",
+  "ib-account": "",
+  "ib-user-name": "",
+  "ib-password": "",
+  "ib-host": "127.0.0.1",
+  "ib-port": "4001",
+  "ib-use-existing-gateway": true,
+  "ib-skip-subscription-validation": true,
+  "ib-agent-description": "Individual",
+  "ib-tws-dir": "/Users/erikbengtson/Jts",
+  "ib-trading-mode": "paper",
+  "ib-enable-delayed-streaming-data": true,
+  "ib-weekly-restart-utc-time": "22:00:00",
+  "ib-financial-advisors-group-filter": "",
+  "tradier-environment": "paper",
+  "tradier-account-id": "",
+  "tradier-access-token": "",
+  "oanda-environment": "Practice",
+  "oanda-access-token": "82dfe8879b41a13d66ce30901ce309ee-18df4a91f1fd84a26826aefe8206a3dd",
+  "oanda-data-access-token": "82dfe8879b41a13d66ce30901ce309ee-18df4a91f1fd84a26826aefe8206a3dd",
+  "oanda-account-id": "101-004-6022942-001",
+  "_oanda-environment": "Trade",
+  "_oanda-access-token": "e29b68690975334b792bc031b4b0f363-fee04acb0782c13cfb9ca64b922cc4aa",
+  "_oanda-data-access-token": "e29b68690975334b792bc031b4b0f363-fee04acb0782c13cfb9ca64b922cc4aa",
+  "_oanda-account-id": "001-004-1424578-001",
+  "regression-test-languages": [
+    "CSharp",
+    "Python"
+  ],
+  "python-additional-paths": [],
+  "environments": {
+    "backtesting": {
+      "live-mode": false,
+      "setup-handler": "QuantConnect.Lean.Engine.Setup.BacktestingSetupHandler",
+      "result-handler": "QuantConnect.Lean.Engine.Results.BacktestingResultHandler",
+      "data-feed-handler": "QuantConnect.Lean.Engine.DataFeeds.FileSystemDataFeed",
+      "real-time-handler": "QuantConnect.Lean.Engine.RealTime.BacktestingRealTimeHandler",
+      "history-provider": [
+        "QuantConnect.Lean.Engine.HistoricalData.SubscriptionDataReaderHistoryProvider"
+      ],
+      "transaction-handler": "QuantConnect.Lean.Engine.TransactionHandlers.BacktestingTransactionHandler"
+    },
+    "live-paper": {
+      "live-mode": true,
+      "live-mode-brokerage": "PaperBrokerage",
+      "setup-handler": "QuantConnect.Lean.Engine.Setup.BrokerageSetupHandler",
+      "result-handler": "QuantConnect.Lean.Engine.Results.LiveTradingResultHandler",
+      "data-feed-handler": "QuantConnect.Lean.Engine.DataFeeds.LiveTradingDataFeed",
+      "data-queue-handler": [
+        "QuantConnect.Lean.Engine.DataFeeds.Queues.LiveDataQueue"
+      ],
+      "real-time-handler": "QuantConnect.Lean.Engine.RealTime.LiveTradingRealTimeHandler",
+      "transaction-handler": "QuantConnect.Lean.Engine.TransactionHandlers.BacktestingTransactionHandler"
+    },
+    "live-interactive": {
+      "live-mode": true,
+      "live-mode-brokerage": "InteractiveBrokersBrokerage",
+      "setup-handler": "QuantConnect.Lean.Engine.Setup.BrokerageSetupHandler",
+      "result-handler": "QuantConnect.Lean.Engine.Results.LiveTradingResultHandler",
+      "data-feed-handler": "QuantConnect.Lean.Engine.DataFeeds.LiveTradingDataFeed",
+      "data-queue-handler": [
+        "InteractiveBrokersBrokerage"
+      ],
+      "real-time-handler": "QuantConnect.Lean.Engine.RealTime.LiveTradingRealTimeHandler",
+      "transaction-handler": "QuantConnect.Lean.Engine.TransactionHandlers.BrokerageTransactionHandler",
+      "history-provider": [
+        "BrokerageHistoryProvider",
+        "SubscriptionDataReaderHistoryProvider"
+      ]
+    },
+    "live-interactive-iqfeed": {
+      "live-mode": true,
+      "live-mode-brokerage": "InteractiveBrokersBrokerage",
+      "setup-handler": "QuantConnect.Lean.Engine.Setup.BrokerageSetupHandler",
+      "result-handler": "QuantConnect.Lean.Engine.Results.LiveTradingResultHandler",
+      "data-feed-handler": "QuantConnect.Lean.Engine.DataFeeds.LiveTradingDataFeed",
+      "data-queue-handler": [
+        "QuantConnect.IQFeed.IQFeedDataQueueHandler"
+      ],
+      "real-time-handler": "QuantConnect.Lean.Engine.RealTime.LiveTradingRealTimeHandler",
+      "transaction-handler": "QuantConnect.Lean.Engine.TransactionHandlers.BrokerageTransactionHandler",
+      "history-provider": [
+        "QuantConnect.IQFeed.IQFeedDataQueueHandler",
+        "SubscriptionDataReaderHistoryProvider"
+      ]
+    },
+    "live-oanda": {
+      "live-mode": true,
+      "live-mode-brokerage": "OandaBrokerage",
+      "data-queue-handler": [
+        "OandaBrokerage"
+      ],
+      "setup-handler": "QuantConnect.Lean.Engine.Setup.BrokerageSetupHandler",
+      "result-handler": "QuantConnect.Lean.Engine.Results.LiveTradingResultHandler",
+      "data-feed-handler": "QuantConnect.Lean.Engine.DataFeeds.LiveTradingDataFeed",
+      "real-time-handler": "QuantConnect.Lean.Engine.RealTime.LiveTradingRealTimeHandler",
+      "transaction-handler": "QuantConnect.Lean.Engine.TransactionHandlers.BrokerageTransactionHandler",
+      "history-provider": [
+        "BrokerageHistoryProvider",
+        "SubscriptionDataReaderHistoryProvider"
+      ]
+    },
+    "live-oanda-interactive-data": {
+      "live-mode": true,
+      "live-mode-brokerage": "OandaBrokerage",
+      "data-queue-handler": [
+        "OandaBrokerage",
+        "InteractiveBrokersBrokerage"
+      ],
+      "setup-handler": "QuantConnect.Lean.Engine.Setup.BrokerageSetupHandler",
+      "result-handler": "QuantConnect.Lean.Engine.Results.LiveTradingResultHandler",
+      "data-feed-handler": "QuantConnect.Lean.Engine.DataFeeds.LiveTradingDataFeed",
+      "real-time-handler": "QuantConnect.Lean.Engine.RealTime.LiveTradingRealTimeHandler",
+      "transaction-handler": "QuantConnect.Lean.Engine.TransactionHandlers.BrokerageTransactionHandler",
+      "history-provider": [
+        "BrokerageHistoryProvider",
+        "SubscriptionDataReaderHistoryProvider"
+      ]
+    }
+  }
+}

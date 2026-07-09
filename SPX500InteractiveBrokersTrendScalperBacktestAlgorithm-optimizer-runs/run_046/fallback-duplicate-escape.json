@@ -1,0 +1,9 @@
+{
+  "attempt": 1,
+  "changes": {
+    "adx-period": "10"
+  },
+  "reason": "advisor repeated already-tested experiments for 3 attempt(s)",
+  "signature": "[[\"adx-period\",\"10\"]]",
+  "source": "threshold"
+}

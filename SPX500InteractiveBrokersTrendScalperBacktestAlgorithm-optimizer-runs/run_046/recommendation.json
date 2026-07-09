@@ -1,0 +1,129 @@
+{
+  "changes": [
+    {
+      "key": "adx-period",
+      "reason": "deterministic fallback",
+      "value": "10"
+    }
+  ],
+  "duplicate_escape": {
+    "attempt": 1,
+    "reason": "advisor repeated already-tested experiments for 3 attempt(s)",
+    "signature": "[[\"adx-period\",\"10\"]]",
+    "source": "threshold"
+  },
+  "expected_effect": "Small config move for continued exploration.",
+  "label": "fallback-adxperiod-10",
+  "rationale": "Fallback deterministic recommendation because AI advisor was unavailable. Duplicate escape reason: advisor repeated already-tested experiments for 3 attempt(s).",
+  "strategy_hypotheses": [],
+  "strategy_plan_reference": {
+    "market_regime_read": "Short 12.3-day, high-win-rate, take-profit-only long scalper regime. Realized losses and slow >=12h trades are absent, but risk is hidden in MAE and long recovery paths: worst M...",
+    "new_strategy_ideas": [
+      {
+        "implementation_scope": "requires-code",
+        "name": "Early-Progress Heat Classifier",
+        "validation_metric": "Worst MAE improves toward <= -403 while retaining >=90% combined charm-pin/pullback PnL, >=95% protected fast winners, total net profit >=98% of robust leader, and slow_12h rema..."
+      },
+      {
+        "implementation_scope": "new-profile-config",
+        "name": "1DTE Pullback Companion Profile",
+        "validation_metric": "Combined 1DTE PnL >= $1305, 1DTE average MAE improves versus -123.9, breakout_long_1dte retained PnL is measured, total net profit >=98% of leader, and score flat or better."
+      },
+      {
+        "implementation_scope": "config-only",
+        "name": "Charm Wall Pin-Avoid Dormant Router Probe",
+        "validation_metric": "Activated dormant profile has positive standalone PnL or lowers combined charm/pin worst MAE, total net profit remains >=98% of leader, protected fast-winner retention >=95%, an..."
+      },
+      {
+        "implementation_scope": "config-only",
+        "name": "Call Wall Acceptance Isolated Sample Builder",
+        "validation_metric": "At least 3 total call_wall_acceptance_long trades, positive standalone PnL, PnL/exposure >=250 preferred, worst MAE <= -150, total net profit >=98% of leader."
+      },
+      {
+        "implementation_scope": "requires-code",
+        "name": "Pullback Deep-Heat Companion Classifier",
+        "validation_metric": "Retain >=90% pullback_long PnL while improving pullback worst MAE from -403.2 and keeping total PnL/exposure flat or better."
+      }
+    ],
+    "next_experiments": [
+      {
+        "config_bias": "Use a full valid-0DTE router-list activation for exactly one dormant pin-avoid concept, with minimal same-profile tuning only. Do not activate multiple dormant profiles in the s...",
+        "experiment_type": "new-strategy",
+        "name": "Dormant Pin-Avoid Attribution Split",
+        "primary_metric": "Activated profile standalone PnL, combined charm-pin/charm-wall worst MAE, protected fast-winner retention, total risk-adjusted score.",
+        "target_profiles": [
+          "charm_pin_pullback_long",
+          "charm_wall_breakaway_long"
+        ]
+      },
+      {
+        "config_bias": "Keep breakout_long_1dte baseline thresholds stable. Add/activate a one-dte pullback companion only if legal; otherwise leave 1DTE untouched.",
+        "experiment_type": "new-strategy",
+        "name": "1DTE Pullback Companion Split",
+        "primary_metric": "Combined 1DTE PnL, 1DTE average/worst MAE, breakout_long_1dte retained PnL/trades, total score.",
+        "target_profiles": [
+          "breakout_long_1dte"
+        ]
+      },
+      {
+        "config_bias": "Build sample only inside call_wall_acceptance_long. Avoid loosening global option-flow or DEX behavior across other profiles.",
+        "experiment_type": "new-strategy",
+        "name": "Call Wall Acceptance Sample Builder",
+        "primary_metric": "call_wall_acceptance_long trade count, standalone PnL, PnL/exposure, worst MAE, total PnL retention.",
+        "target_profiles": [
+          "call_wall_acceptance_long"
+        ]
+      },
+      {
+        "config_bias": "Study split-style profile attribution or narrow local guards only. Do not repeat broad setup-quality, RSI-slope, ADX-slope, or ES-VWAP caps that block protected winners.",
+        "experiment_type": "profile-specific",
+        "name": "Pullback Deep-Heat Split Study",
+        "primary_metric": "pullback_long PnL retention, pullback worst MAE, total PnL/exposure hour, protected winner retention, total score.",
+        "target_profiles": [
+          "pullback_long"
+        ]
+      },
+      {
+        "config_bias": "Continue only admission/sample-builder studies around supported wall-breakaway geometry. Freeze exit compression and keep the convex target philosophy intact.",
+        "experiment_type": "profile-specific",
+        "name": "Charm Wall Convex Admission Follow-Through",
+        "primary_metric": "charm_wall_breakaway_long PnL, trade count, PnL/exposure >=225, total net profit >=98% leader, global worst MAE no worse than -513.4.",
+        "target_profiles": [
+          "charm_wall_breakaway_long"
+        ]
+      },
+      {
+        "config_bias": "Treat STALE_0DTE separately from EXPIRED_0DTE if possible. Do not disturb VALID_0DTE routing or the single EXPIRED_0DTE winner.",
+        "experiment_type": "risk-reducer",
+        "name": "No-0DTE Data-State Efficiency Holdout",
+        "primary_metric": "Fallback PnL/exposure, fallback worst MAE, unchanged VALID_0DTE PnL/trade count, total net profit >=98%, slow_12h = 0.",
+        "target_profiles": [
+          "breakout_long_no_0dte",
+          "pullback_long_no_0dte",
+          "squeeze_long_no_0dte"
+        ]
+      }
+    ],
+    "plan_label": "new_regime_router_split_and_data_state_discovery",
+    "profiles_to_expand": [
+      "call_wall_acceptance_long",
+      "charm_wall_breakaway_long",
+      "breakout_long_1dte",
+      "pullback_long",
+      "charm_pin_pullback_long"
+    ],
+    "profiles_to_freeze": [
+      "breakout_long",
+      "wall_reclaim_long",
+      "wall_breakout_retest_long",
+      "late_day_pin_fade",
+      "negative_gamma_momentum_long",
+      "trend_day_pullback_long"
+    ],
+    "run": "run_046",
+    "strategy_track": "new-regime"
+  },
+  "validated_changes": {
+    "adx-period": "10"
+  }
+}

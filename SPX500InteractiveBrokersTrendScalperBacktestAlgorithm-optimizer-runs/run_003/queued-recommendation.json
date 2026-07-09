@@ -1,0 +1,137 @@
+{
+  "changes": [
+    {
+      "key": "profile.breakout_long_no_0dte.es-vwap.slope-min",
+      "reason": "STALE_0DTE breakout fallback is the weakest routed slice by efficiency: 2 trades, 40.5 PnL/exposure hour, 52.6m median hold, and -250.25 worst MAE. Raising slope from 0.08 to 0.10 keeps this as a momentum-only ES fallback instead of a stale-data drift entry.",
+      "value": "0.10"
+    },
+    {
+      "key": "profile.breakout_long_no_0dte.es-structure.min-score",
+      "reason": "The no-0DTE breakout fallback should require clean ES structure because it lacks live 0DTE confirmation. Moving from 4 to 5 is a narrow fallback-only quality test and does not alter VALID_0DTE profiles.",
+      "value": "5"
+    },
+    {
+      "key": "profile.breakout_long_no_0dte.dynamic-take-profit.max",
+      "reason": "Current stale breakout fallback uses a 6-point dynamic cap while producing low PnL/hour and high MAE. Reducing to 4 should shorten stale fallback exposure and test whether this profile is profitable only when it exits faster.",
+      "value": "4"
+    },
+    {
+      "key": "profile.pullback_long_no_0dte.es-structure.min-score",
+      "reason": "Pullback no-0DTE fallback is positive but low efficiency at 83.2 PnL/exposure hour. Tightening structure from 4 to 5 tests whether stale fallback trades need stronger ES confirmation without touching the main VALID_0DTE pullback edge.",
+      "value": "5"
+    }
+  ],
+  "expected_effect": "Should improve fallback exposure quality, reduce stale-state MAE/hold drag, and leave VALID_0DTE performance unchanged. Tradeoff is possible loss of a few positive stale fallback trades; reject if total net profit falls below 98% of run_001 or fallback trade count simply starves without PnL/exposure improvement.",
+  "label": "no-0dte-fallback-quality",
+  "rationale": "Iteration 2 should follow Batch G. The analyzer has option data-state slices, and the weak spot is not missing 0DTE itself but stale/expired fallback efficiency. This is one logical family using only routed no-0DTE profile keys, avoiding option-dependent profiles and avoiding global veto tightening. The sample is small, so this is a narrow risk-adjusted probe rather than a broad deletion filter.",
+  "strategy_hypotheses": [
+    {
+      "evidence": "STALE_0DTE produced only $162.8 over 5 trades. breakout_long_no_0dte stale trades had 52.6m median hold, -210.6 average MAE, -250.25 worst MAE, and only 40.5 PnL/exposure hour, while VALID_0DTE contributed $5450.6 and should be left untouched.",
+      "implementation_scope": "config-only",
+      "name": "Stale 0DTE Momentum-Only Fallback",
+      "risk": "Only 5 stale trades exist, so tightening may overfit and remove positive fallback PnL without improving full-sample objective.",
+      "trigger": "0DTE state is STALE_0DTE or EXPIRED_0DTE and routing selects no-0DTE ES fallback profiles.",
+      "validation_metric": "Fallback PnL/exposure hour rises above 150, fallback average MAE improves, VALID_0DTE PnL is unchanged, and total net profit remains at least 98% of run_001."
+    }
+  ],
+  "strategy_plan_reference": {
+    "market_regime_read": "The current leader is a high-win, long-only SPX continuation/pullback system over a short 12.3 calendar-day window. Most profit comes from VALID_0DTE and VALID_1DTE_ONLY states,...",
+    "new_strategy_ideas": [
+      {
+        "implementation_scope": "requires-code",
+        "name": "MAE-Aware Recovery Exit Overlay",
+        "validation_metric": "Worst MAE and exposure hours fall materially while net profit remains at least 95-98% of baseline and PnL/exposure hour improves."
+      },
+      {
+        "implementation_scope": "new-profile-config",
+        "name": "High-ADX Call Wall Acceptance Expansion",
+        "validation_metric": "At least 5-10 additional trades with PnL/exposure hour above 250, avg MAE below baseline, and no degradation in pullback_long fills."
+      },
+      {
+        "implementation_scope": "new-profile-config",
+        "name": "1DTE Pullback Companion Test",
+        "validation_metric": "VALID_1DTE_ONLY PnL rises without worsening worst MAE beyond -400 or reducing PnL/exposure hour below breakout_long_1dte baseline."
+      },
+      {
+        "implementation_scope": "new-profile-config",
+        "name": "Delta Charm Breakout Activation Probe",
+        "validation_metric": "Incremental trades show PnL/exposure hour above 225, median hold below 15m, and worst MAE below current system worst."
+      }
+    ],
+    "next_experiments": [
+      {
+        "config_bias": "Loosen profit capture only inside the strongest existing edges, not globally. Bias toward pullback_long and charm_wall_breakaway_long TP/quality bands where MFE materially excee...",
+        "experiment_type": "profit-expansion",
+        "name": "Winner TP Harvest Expansion",
+        "primary_metric": "risk-adjusted score with PnL/exposure hour above 210 and worst MAE not worse than -527",
+        "target_profiles": [
+          "pullback_long",
+          "charm_wall_breakaway_long",
+          "squeeze_long"
+        ]
+      },
+      {
+        "config_bias": "Run a narrow expansion around call_wall_acceptance_long entry permissiveness while keeping high-quality ADX/VWAP/acceptance constraints. Avoid enabling unrelated dormant profile...",
+        "experiment_type": "profile-specific",
+        "name": "Call Wall Acceptance Scale Test",
+        "primary_metric": "additional call_wall_acceptance_long trades with PnL/exposure hour above 250 and avg MAE below -75",
+        "target_profiles": [
+          "call_wall_acceptance_long"
+        ]
+      },
+      {
+        "config_bias": "Test 1DTE breadth by adding a controlled pullback_long_1dte router activation as a separate experiment, not mixed with VALID_0DTE changes. Keep breakout_long_1dte protected as t...",
+        "experiment_type": "new-strategy",
+        "name": "1DTE Pullback Router Probe",
+        "primary_metric": "VALID_1DTE_ONLY net PnL and PnL/exposure hour improve, with worst MAE no worse than -400",
+        "target_profiles": [
+          "breakout_long_1dte"
+        ]
+      },
+      {
+        "config_bias": "Use surgical charm_pin tail controls informed by extended-VWAP rejection near-misses, but avoid broad setup-quality floors that would remove too much PnL. Prefer thresholds that...",
+        "experiment_type": "risk-reducer",
+        "name": "Charm Pin Tail Isolation",
+        "primary_metric": "charm_pin_pullback_long worst MAE improves by at least 20% while total net profit remains at least 98% of baseline",
+        "target_profiles": [
+          "charm_pin_pullback_long"
+        ]
+      },
+      {
+        "config_bias": "Treat STALE_0DTE and EXPIRED_0DTE as separate from VALID_0DTE. Test stricter fallback routing/quality only for no-0DTE profiles, leaving VALID_0DTE profiles unchanged.",
+        "experiment_type": "risk-reducer",
+        "name": "No-0DTE Fallback Efficiency Gate",
+        "primary_metric": "fallback PnL/exposure hour above 150 with avg MAE below baseline fallback MAE and total net profit at least 98% of baseline",
+        "target_profiles": [
+          "breakout_long_no_0dte",
+          "pullback_long_no_0dte",
+          "squeeze_long_no_0dte"
+        ]
+      }
+    ],
+    "plan_label": "profit-expansion-risk-adjusted-v2",
+    "profiles_to_expand": [
+      "pullback_long",
+      "charm_wall_breakaway_long",
+      "squeeze_long",
+      "call_wall_acceptance_long",
+      "breakout_long_1dte"
+    ],
+    "profiles_to_freeze": [
+      "breakout_long",
+      "late_day_pin_fade",
+      "negative_gamma_momentum_long",
+      "trend_day_pullback_long",
+      "wall_breakout_retest_long",
+      "wall_reclaim_long"
+    ],
+    "run": "run_003",
+    "strategy_track": "profit-expansion"
+  },
+  "validated_changes": {
+    "profile.breakout_long_no_0dte.dynamic-take-profit.max": "4",
+    "profile.breakout_long_no_0dte.es-structure.min-score": "5",
+    "profile.breakout_long_no_0dte.es-vwap.slope-min": "0.1",
+    "profile.pullback_long_no_0dte.es-structure.min-score": "5"
+  }
+}

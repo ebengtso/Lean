@@ -1,0 +1,50 @@
+{
+  "acceptance_criteria": {
+    "max_trade_drop_pct": 10.0,
+    "min_mae_delta_for_mae_family": 0.0,
+    "min_net_profit_delta": -25.0,
+    "min_score_delta": 0.0
+  },
+  "base_context": {
+    "base_config": "/Users/erikbengtson/Lean2026/LeanCustom/LauncherBacktest/SPX500InteractiveBrokersTrendScalperBacktestAlgorithm-optimizer-runs/run_001/config.before.json",
+    "base_net_profit": 7125.8,
+    "base_run": "run_001",
+    "base_score": 9594.488580188678,
+    "candidate_base": "best-by-score",
+    "candidate_base_config": "before",
+    "description": "The next run will be this leader/base config plus ONLY the JSON changes returned by the advisor.",
+    "mode": "candidate-base"
+  },
+  "changes": {
+    "option-call-volume.min-increase-pct": "0.05",
+    "profile.call_wall_acceptance_long.dynamic-take-profit.max": "7",
+    "profile.call_wall_acceptance_long.long-regime-filter.min-forward-dex-ratio-30m": "0.03",
+    "profile.call_wall_acceptance_long.long-regime-filter.min-net-dex-volume": "7.5e+08"
+  },
+  "expected_direction": "increase net profit or PnL per exposure hour without worsening MAE",
+  "expected_effect": "Should increase call_wall_acceptance_long sample count from the current one-trade footprint while preserving valid-0DTE option confirmation. Expected upside is higher net profit and PnL per exposure hour from clean call-wall impulses; risk is wall-chase entries with higher MAE if the relaxed DEX and call-volume thresholds admit weak acceptance.",
+  "family": "take-profit",
+  "label": "promote",
+  "objective_mode": "risk-adjusted",
+  "primary_metric": "net_profit",
+  "rationale": "Use batch_a_call_wall_acceptance_long as the next isolated experiment. Prior fallback/take-profit work is saturated and recently hurt score, while call_wall_acceptance_long is underexplored and showed the best realized efficiency: 1 trade, $91 PnL, 455 PnL/exposure hour, and only -11.7 worst MAE. This is not a global filter and does not let option-confirmed profiles trade on missing or stale 0DTE data.",
+  "strategy_plan_label": "profit-expansion-edge-preservation-v1",
+  "strategy_plan_next_experiments": [
+    "Pullback Long Target Expansion Slice",
+    "Charm Wall Breakaway Runner Expansion",
+    "Call Wall Acceptance Sample Builder",
+    "Surgical Extended-VWAP Near-Miss Repair",
+    "1DTE Breakout Efficiency Lift",
+    "Single Dormant Concept Activation Probe"
+  ],
+  "strategy_plan_track": "profit-expansion",
+  "watch_metrics": [
+    "score",
+    "net_profit",
+    "trade_count",
+    "worst_mae",
+    "average_mae",
+    "drawdown",
+    "slow_trades"
+  ]
+}

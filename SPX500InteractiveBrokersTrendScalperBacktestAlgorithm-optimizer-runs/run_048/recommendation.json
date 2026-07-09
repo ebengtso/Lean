@@ -1,0 +1,146 @@
+{
+  "changes": [
+    {
+      "key": "profile.charm_wall_breakaway_long.es-structure.min-higher-high-distance",
+      "reason": "Batch D only. charm_wall_breakaway_long remains the cleanest convex VALID_0DTE sleeve by profile MAE and PnL/hour, but the base has loose structure admission at 1.0 higher-high. Raising to 1.5 tests whether the rare wall-breakaway trades need clearer continuation structure without touching pullback/charm-pin flow.",
+      "value": "1.5"
+    },
+    {
+      "key": "profile.charm_wall_breakaway_long.es-structure.min-higher-low-distance",
+      "reason": "Pair the higher-high requirement with a 1-point higher-low floor so the wall-breakaway branch admits only supported continuation rather than unsupported wall chases. This is profile-local and avoids global veto tightening.",
+      "value": "1"
+    },
+    {
+      "key": "profile.charm_wall_breakaway_long.es-vwap.max-distance",
+      "reason": "Keep the 12-point convex target behavior intact, but cap extreme ES-VWAP extension at 22 versus the current 25. Prior exit compression hurt; this tests admission quality instead of underpaying winners.",
+      "value": "22"
+    },
+    {
+      "key": "profile.charm_wall_breakaway_long.long-regime-filter.max-distance-above-charm-wall",
+      "reason": "Hold the charm-wall box at the current 20 rather than reopening the repeated 25-point experiment. This makes the test a supported-structure and extension-quality probe, not a duplicate of the prior supported-admission expansion.",
+      "value": "20"
+    }
+  ],
+  "expected_effect": "Should improve risk-adjusted quality by keeping the high-PnL charm-wall convex sleeve while reducing unsupported or overextended wall-breakaway heat. Main tradeoff is small-sample starvation: reject if charm_wall_breakaway_long PnL/hour falls below about 225, total net profit drops below 98% of run_044, or completed trades fall more than 10% without a material MAE/drawdown gain.",
+  "label": "charm-wall-supported-extension-box",
+  "rationale": "Use exactly one legal family: batch_d_charm_wall_breakaway_long. The leader base is strong, and broad entry filters have recently damaged profit and MAE. The best next test is a profile-local charm-wall admission-quality probe that preserves convex exits, avoids the duplicate 25-point charm-wall expansion keyset, and does not disturb VALID_0DTE pullback, charm-pin, or 1DTE fallback edges.",
+  "strategy_hypotheses": [
+    {
+      "evidence": "charm_wall_breakaway_long produced 7 VALID_0DTE trades, $1060.6 PnL, 224.54 PnL/exposure hour, no slow >=12h trades, and worst MAE -346.8, cleaner than pullback_long and charm_pin_pullback_long tails. Prior take-profit compression hurt, so admission quality is the cleaner mechanism.",
+      "implementation_scope": "config-only",
+      "name": "Charm Wall Structure-Confirmed Extension Box",
+      "risk": "Small-sample edge can be overfit; stricter structure plus a 22-point VWAP cap may remove rare convex winners or cannibalize nothing, yielding lower net profit without MAE improvement.",
+      "trigger": "VALID_0DTE charm-wall breakaway with price above charm wall, require-breakout true, confirmed ES higher-high/higher-low structure, and ES-VWAP extension below the overextension cap.",
+      "validation_metric": "Total risk-adjusted score improves versus run_044, total net profit remains >=98% of run_044, charm_wall_breakaway_long PnL/exposure remains >=225, slow_12h stays 0, and global worst MAE does not worsen."
+    }
+  ],
+  "strategy_plan_reference": {
+    "market_regime_read": "Current regime is a short 12.3-day, high-win-rate SPX500 long scalper with take-profit-only exits. There are no realized losses and no >=12h slow trades, but path stats show hid...",
+    "new_strategy_ideas": [
+      {
+        "implementation_scope": "new-profile-config",
+        "name": "1DTE Pullback Companion Split",
+        "validation_metric": "Combined 1DTE PnL >= current $1298.7, 1DTE average/worst MAE no worse than baseline, total net profit >=98% of leader, and total score flat or better."
+      },
+      {
+        "implementation_scope": "requires-code",
+        "name": "Early-Progress Heat Classifier",
+        "validation_metric": "Reduce worst MAE toward <= -513 and preferably <= -403, retain >=90% combined pullback/charm-pin PnL, retain >=95% protected fast winners, keep slow_12h at 0."
+      },
+      {
+        "implementation_scope": "config-only",
+        "name": "Charm Wall Pin-Avoid Dormant Attribution Probe",
+        "validation_metric": "Activated dormant profile has positive standalone PnL or lowers combined charm/pin worst MAE, total net profit >=98% of leader, protected fast-winner retention >=95%."
+      },
+      {
+        "implementation_scope": "config-only",
+        "name": "Call Wall Acceptance Isolated Sample Builder",
+        "validation_metric": "At least 3 call_wall_acceptance_long trades, positive standalone PnL, PnL/exposure >=150 initially, worst MAE <= -200, and total net profit >=98% of leader."
+      }
+    ],
+    "next_experiments": [
+      {
+        "config_bias": "Preserve wide/convex TP behavior and require-breakout. Explore only narrow admission/sample-builder variants around wall support, higher-high/higher-low confirmation, and bounde...",
+        "experiment_type": "profit-expansion",
+        "name": "Charm Wall Convex Admission Follow-Through",
+        "primary_metric": "Total risk-adjusted score, charm_wall_breakaway_long PnL/exposure >=225, total net profit >=98% of run_044, global worst MAE no worse than leader-family tolerance, slow_12h = 0.",
+        "target_profiles": [
+          "charm_wall_breakaway_long"
+        ]
+      },
+      {
+        "config_bias": "Use the enabled extended-VWAP rejection near-miss family as the research path. Bias toward tiny boundary nudges that catch the specific bad-MAE rows while explicitly protecting ...",
+        "experiment_type": "risk-reducer",
+        "name": "Protected-Winner Extended-VWAP Tail Boundary Study",
+        "primary_metric": "Worst MAE improvement, retained total PnL >=98% of leader, protected fast-winner retention >=95%, protected extended-VWAP winner retention >=95%, PnL/exposure flat or better.",
+        "target_profiles": [
+          "pullback_long",
+          "charm_pin_pullback_long"
+        ]
+      },
+      {
+        "config_bias": "Keep breakout_long_1dte baseline thresholds stable. If legal, route a companion 1DTE pullback split as an attribution experiment rather than tightening the existing breakout pro...",
+        "experiment_type": "new-strategy",
+        "name": "1DTE Companion Router Split",
+        "primary_metric": "Combined 1DTE PnL, 1DTE average/worst MAE, breakout_long_1dte retained trades/PnL, total score, total net profit >=98% of leader.",
+        "target_profiles": [
+          "breakout_long_1dte"
+        ]
+      },
+      {
+        "config_bias": "Run exactly one dormant valid-0DTE activation as an attribution probe if the optimizer supports full router-list replacement. Prefer charm_wall_pin_avoid_long or late_day_pin_av...",
+        "experiment_type": "new-strategy",
+        "name": "Dormant Pin-Avoid Attribution Probe",
+        "primary_metric": "Activated profile standalone PnL, combined charm-pin/charm-wall worst MAE, total net profit retention, protected fast-winner retention, total risk-adjusted score.",
+        "target_profiles": [
+          "charm_pin_pullback_long",
+          "charm_wall_breakaway_long"
+        ]
+      },
+      {
+        "config_bias": "Isolate STALE_0DTE and EXPIRED_0DTE behavior if possible. Do not disturb VALID_0DTE routing. Favor pullback_no_0dte over stale breakout if forced to choose, because stale breako...",
+        "experiment_type": "risk-reducer",
+        "name": "No-0DTE Data-State Efficiency Holdout",
+        "primary_metric": "Fallback PnL/exposure, fallback worst MAE, unchanged VALID_0DTE PnL/trade count, total net profit >=98% of leader, slow_12h = 0.",
+        "target_profiles": [
+          "breakout_long_no_0dte",
+          "pullback_long_no_0dte",
+          "squeeze_long_no_0dte"
+        ]
+      },
+      {
+        "config_bias": "Only attempt an isolated call_wall_acceptance_long sample builder if it does not loosen global option-flow behavior. Treat it as lower priority than charm-wall and tail-boundary...",
+        "experiment_type": "profile-specific",
+        "name": "Call Wall Reachability Attribution Holdout",
+        "primary_metric": "call_wall_acceptance_long trade count, standalone PnL, PnL/exposure, worst MAE, total PnL retention, and cannibalization of pullback/charm-wall trades.",
+        "target_profiles": [
+          "call_wall_acceptance_long"
+        ]
+      }
+    ],
+    "plan_label": "profit_expansion_convex_edges_with_protected_tail_boundaries",
+    "profiles_to_expand": [
+      "charm_wall_breakaway_long",
+      "breakout_long_1dte",
+      "charm_pin_pullback_long",
+      "pullback_long",
+      "call_wall_acceptance_long"
+    ],
+    "profiles_to_freeze": [
+      "breakout_long",
+      "squeeze_long",
+      "wall_reclaim_long",
+      "wall_breakout_retest_long",
+      "late_day_pin_fade",
+      "negative_gamma_momentum_long",
+      "trend_day_pullback_long"
+    ],
+    "run": "run_048",
+    "strategy_track": "profit-expansion"
+  },
+  "validated_changes": {
+    "profile.charm_wall_breakaway_long.es-structure.min-higher-high-distance": "1.5",
+    "profile.charm_wall_breakaway_long.es-structure.min-higher-low-distance": "1",
+    "profile.charm_wall_breakaway_long.es-vwap.max-distance": "22"
+  }
+}

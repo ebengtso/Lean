@@ -1,0 +1,149 @@
+{
+  "changes": [
+    {
+      "key": "profile.breakout_long_no_0dte.dynamic-take-profit.max",
+      "reason": "Batch G state-specific fallback test. breakout_long_no_0dte is positive overall because of one EXPIRED_0DTE winner, but the STALE_0DTE slice is low efficiency: 2 trades, $71 PnL, 40.5 PnL/exposure hour, 52.6 minute median hold, and -250.25 worst MAE. Reducing the adaptive cap from 6 to the grid value 4 tests faster realization in stale/no-0DTE breakout fallback without touching VALID_0DTE option-confirmed profiles.",
+      "value": "4"
+    },
+    {
+      "key": "profile.breakout_long_no_0dte.take-profit.distance",
+      "reason": "Keep the stale fallback from waiting for a 6-point target when no valid 0DTE map is available. A 4-point fixed target is still above the current pullback fallback target but should reduce exposure drag from stale breakout attempts.",
+      "value": "4"
+    },
+    {
+      "key": "profile.breakout_long_no_0dte.es-vwap.slope-min",
+      "reason": "Current stale breakout fallback has high RSI/ADX but poor exposure efficiency. Raising ES VWAP slope from 0.08 to 0.10 uses the Batch G grid to require stronger ES-only continuation when the 0DTE map is stale or expired, without changing VALID_0DTE routing.",
+      "value": "0.10"
+    }
+  ],
+  "expected_effect": "Should improve stale/no-0DTE fallback PnL per exposure hour and reduce hidden MAE/hold-time drag while leaving the 78 VALID_0DTE trades untouched. Tradeoff is possible loss of the single EXPIRED_0DTE convex winner or fewer fallback trades; reject if total net profit drops below 98% of run_044, fallback expectancy turns negative, or VALID_0DTE attribution changes materially.",
+  "label": "no-0dte-breakout-realization-tighten",
+  "rationale": "Use exactly one legal family: batch_g_missing_0dte_policy_adapted. The leader base is already strong, so the next experiment should avoid broad veto tightening and avoid disturbing the core VALID_0DTE engines. The cleanest remaining inefficiency is data-state-specific: STALE_0DTE fallback is positive but weak and slow, while VALID_0DTE and VALID_1DTE_ONLY carry the system. This tests whether the no-0DTE breakout fallback should be more momentum-confirmed and faster to realize when option confirmation is unavailable.",
+  "strategy_hypotheses": [
+    {
+      "evidence": "STALE_0DTE fallback produced 5 trades and $162.8 total, but breakout_long_no_0dte contributed only $71 over 2 trades with 40.5 PnL/exposure hour, 52.6 minute median hold, and -250.25 worst MAE. EXPIRED_0DTE had one strong trade, so this must be measured by state rather than promoted from aggregate PnL alone.",
+      "implementation_scope": "config-only",
+      "name": "No-0DTE Breakout Realization Box",
+      "risk": "Small sample risk is high; tighter slope and smaller targets can remove or underpay the single EXPIRED_0DTE winner, causing profit suppression without improving portfolio risk-adjusted score.",
+      "trigger": "STALE_0DTE or EXPIRED_0DTE routed breakout_long_no_0dte entries where no valid 0DTE option map is available and the trade must rely on ES continuation quality.",
+      "validation_metric": "Fallback PnL/exposure improves versus 83.2 aggregate and 40.5 breakout stale slice, fallback expectancy remains positive, VALID_0DTE PnL/trade count remains unchanged, total net profit retains at least 98% of run_044, and slow_12h remains 0."
+    }
+  ],
+  "strategy_plan_reference": {
+    "market_regime_read": "Short 12.3-day, high-win-rate, take-profit-only SPX500 long scalper regime. The objective is risk-adjusted, but realized losses and slow >=12h trades are absent, so the practica...",
+    "new_strategy_ideas": [
+      {
+        "implementation_scope": "new-profile-config",
+        "name": "1DTE Pullback Companion Profile",
+        "validation_metric": "Combined 1DTE PnL >= $1315, breakout_long_1dte retained PnL explicitly measured, 1DTE average/worst MAE flat or better, total score flat or better."
+      },
+      {
+        "implementation_scope": "requires-code",
+        "name": "Call-Wall Convex Recovery Monitor",
+        "validation_metric": "Call-wall worst MAE improves materially, >=70% call-wall PnL retained, total net profit >=98% of leader, protected fast-winner retention >=95%, slow_12h remains 0."
+      },
+      {
+        "implementation_scope": "requires-code",
+        "name": "Early Progress Heat Classifier",
+        "validation_metric": "Reduce worst MAE toward <= -513.4 and preferably <= -403 while retaining >=90% affected-profile PnL, >=95% protected fast winners, and total score flat or better."
+      },
+      {
+        "implementation_scope": "config-only",
+        "name": "Charm Wall Pin-Avoid Dormant Router Probe",
+        "validation_metric": "Activated dormant profile positive standalone PnL or lower combined charm/pin worst MAE, total net profit >=98% of leader, protected fast-winner retention >=95%."
+      },
+      {
+        "implementation_scope": "config-only",
+        "name": "Delta Charm Breakout Dormant Attribution Probe",
+        "validation_metric": "Positive standalone PnL, no more than 10% degradation in squeeze/charm-wall combined PnL, total net profit >=98% of leader, worst MAE no worse than -513.4."
+      }
+    ],
+    "next_experiments": [
+      {
+        "config_bias": "Isolated call_wall_acceptance_long branch. Prefer persistence/realization and TP-shape research over global filters or disabling. Keep explicit retention checks because the wors...",
+        "experiment_type": "profile-specific",
+        "name": "Call-Wall Convex Containment And Retention",
+        "primary_metric": "Total risk-adjusted score, call_wall_acceptance_long PnL retention >=70%, global worst MAE improvement or average MAE/exposure improvement, total net profit >=98% of run_044/run...",
+        "target_profiles": [
+          "call_wall_acceptance_long"
+        ]
+      },
+      {
+        "config_bias": "Keep breakout_long_1dte thresholds stable. Research router companion only if legal; measure cannibalization rather than tuning the current winner directly.",
+        "experiment_type": "new-strategy",
+        "name": "1DTE Companion Split Holdout",
+        "primary_metric": "Combined 1DTE PnL >= $1315, 1DTE worst/average MAE flat or better, breakout_long_1dte retained PnL, total score flat or better.",
+        "target_profiles": [
+          "breakout_long_1dte"
+        ]
+      },
+      {
+        "config_bias": "Do not broaden ES-VWAP caps or setup floors. Use only profile-aware near-miss research around the already-enabled extended-VWAP rejection family, with protected extended-VWAP wi...",
+        "experiment_type": "risk-reducer",
+        "name": "Extended-VWAP Near-Miss Micro Study",
+        "primary_metric": "Worst MAE and average MAE improvement, retained total PnL >=98%, protected extended_vwap_winner retention >=95%, total score flat or better.",
+        "target_profiles": [
+          "pullback_long",
+          "charm_pin_pullback_long",
+          "call_wall_acceptance_long",
+          "charm_wall_breakaway_long"
+        ]
+      },
+      {
+        "config_bias": "Protect existing strict option-map/order-book confirmation. Study exit/target philosophy only; avoid loosening squeeze admission until there is evidence of under-trading.",
+        "experiment_type": "profit-expansion",
+        "name": "Squeeze Clean Continuation Profit Probe",
+        "primary_metric": "squeeze_long PnL and PnL/exposure, squeeze worst MAE no worse than -225, total net profit >=98% of leader, total score flat or better.",
+        "target_profiles": [
+          "squeeze_long"
+        ]
+      },
+      {
+        "config_bias": "Use a full valid-0DTE router-list activation for exactly one dormant pin-avoid or delta/charm concept with minimal same-profile tuning. Treat as attribution, not promotion.",
+        "experiment_type": "new-strategy",
+        "name": "Dormant Valid-0DTE Attribution Probe",
+        "primary_metric": "Standalone dormant profile PnL, combined affected-profile PnL retention, global worst MAE, protected fast-winner retention, total score.",
+        "target_profiles": [
+          "charm_pin_pullback_long",
+          "charm_wall_breakaway_long",
+          "squeeze_long"
+        ]
+      },
+      {
+        "config_bias": "State-specific no-0DTE holdout only. Do not alter VALID_0DTE routing and do not remove the one EXPIRED_0DTE winner unless state targeting is explicit.",
+        "experiment_type": "router",
+        "name": "No-0DTE Data-State Efficiency Holdout",
+        "primary_metric": "Fallback PnL/hour, fallback worst MAE, unchanged VALID_0DTE PnL/trade count, total net profit >=98%, slow_12h = 0.",
+        "target_profiles": [
+          "breakout_long_no_0dte",
+          "pullback_long_no_0dte",
+          "squeeze_long_no_0dte"
+        ]
+      }
+    ],
+    "plan_label": "profit_expansion_protect_core_research_convex_and_companion_splits",
+    "profiles_to_expand": [
+      "call_wall_acceptance_long",
+      "squeeze_long",
+      "breakout_long_1dte",
+      "charm_pin_pullback_long",
+      "charm_wall_breakaway_long",
+      "pullback_long"
+    ],
+    "profiles_to_freeze": [
+      "breakout_long",
+      "wall_reclaim_long",
+      "wall_breakout_retest_long",
+      "late_day_pin_fade",
+      "negative_gamma_momentum_long",
+      "trend_day_pullback_long"
+    ],
+    "run": "run_051",
+    "strategy_track": "profit-expansion"
+  },
+  "validated_changes": {
+    "profile.breakout_long_no_0dte.dynamic-take-profit.max": "4",
+    "profile.breakout_long_no_0dte.es-vwap.slope-min": "0.1",
+    "profile.breakout_long_no_0dte.take-profit.distance": "4"
+  }
+}

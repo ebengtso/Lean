@@ -1,0 +1,7 @@
+{
+  "changes_file": "/Users/erikbengtson/Lean2026/LeanCustom/LauncherBacktest/SPX500InteractiveBrokersTrendScalperBacktestAlgorithm-optimizer-runs/run_004/queued-config-changes.json",
+  "description": "Generated after an empty-leaderboard bootstrap so this parallel worker can test a unique first candidate.",
+  "recommendation_file": "/Users/erikbengtson/Lean2026/LeanCustom/LauncherBacktest/SPX500InteractiveBrokersTrendScalperBacktestAlgorithm-optimizer-runs/run_004/queued-recommendation.json",
+  "source_run": "run_001",
+  "target_run": "run_004"
+}

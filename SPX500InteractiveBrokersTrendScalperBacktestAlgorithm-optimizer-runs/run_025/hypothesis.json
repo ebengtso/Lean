@@ -1,0 +1,47 @@
+{
+  "acceptance_criteria": {
+    "max_trade_drop_pct": 10.0,
+    "min_mae_delta_for_mae_family": 0.0,
+    "min_net_profit_delta": -25.0,
+    "min_score_delta": 0.0
+  },
+  "base_context": {
+    "base_config": "/Users/erikbengtson/Lean2026/LeanCustom/LauncherBacktest/SPX500InteractiveBrokersTrendScalperBacktestAlgorithm-optimizer-runs/run_001/config.before.json",
+    "base_net_profit": 7125.8,
+    "base_run": "run_001",
+    "base_score": 9594.488580188678,
+    "candidate_base": "best-by-score",
+    "candidate_base_config": "before",
+    "description": "The next run will be this leader/base config plus ONLY the JSON changes returned by the advisor.",
+    "mode": "candidate-base"
+  },
+  "changes": {
+    "profile.charm_pin_pullback_long.long-regime-filter.dynamic-vwap-volatility-multiplier": "0.25",
+    "profile.charm_pin_pullback_long.long-regime-filter.recent-high-rejection-min-pullback": "8"
+  },
+  "expected_direction": "improve selected objective by changing entry quality/profile selection without starving trades",
+  "expected_effect": "Should reduce or reroute the specific charm-pin high-extension/recent-high-rejection tail that produced -527 MAE, while preserving the 34-trade charm_pin_pullback_long edge as much as possible. Promotion requires total net profit >=98% of run_001, charm-pin PnL retention >=90%, trade count drop <=10%, pnl/exposure flat or better, and worst MAE improving toward <= -403. Main risk is that these dynamic-VWAP/rejection knobs are inactive or overlap too much with the protected fast extended-VWAP winners.",
+  "family": "strategy-profile",
+  "label": "charm-pin-dynamic-rejection-box",
+  "objective_mode": "risk-adjusted",
+  "primary_metric": "score",
+  "rationale": "The leader is plateaued at run_001/run_025 metrics, so the next useful experiment should not be another take-profit run or broad global filter. The best available config-only move is a profile-scoped charm_pin_pullback_long test because that profile contributes $1237.7 over 34 trades with fast median hold, but owns the global -527 MAE. This tests the strategist's charm-pin split thesis using existing profile keys rather than global extended-VWAP rejection tightening, which would conflict with protected extended-VWAP winners.",
+  "strategy_plan_label": "new-regime-profile-split-discovery-v1",
+  "strategy_plan_next_experiments": [
+    "1DTE Pullback Companion Activation",
+    "Charm Pin Avoid Dormant Split Probe",
+    "Extended VWAP Near-Miss Boundary Validation",
+    "Pullback Deep-Heat Split Research",
+    "Charm Wall Convexity Preservation Holdout"
+  ],
+  "strategy_plan_track": "new-regime",
+  "watch_metrics": [
+    "score",
+    "net_profit",
+    "trade_count",
+    "worst_mae",
+    "average_mae",
+    "drawdown",
+    "slow_trades"
+  ]
+}

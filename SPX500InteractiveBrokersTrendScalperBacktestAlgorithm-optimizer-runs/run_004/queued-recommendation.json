@@ -1,0 +1,135 @@
+{
+  "changes": [
+    {
+      "key": "profile.breakout_long_no_0dte.es-vwap.slope-min",
+      "reason": "STALE_0DTE breakout fallback is the weakest capital-efficiency slice: only 40.5 PnL/exposure hour with -210.6 average MAE and 52.6 minute median hold. Requiring a modestly stronger ES VWAP slope keeps this as a defensive fallback instead of a stale-data growth engine.",
+      "value": "0.10"
+    },
+    {
+      "key": "profile.breakout_long_no_0dte.es-structure.min-score",
+      "reason": "The stale breakout fallback tail should require cleaner ES structure than the current score 4. This targets the small stale/expired no-0DTE slice only and leaves VALID_0DTE option-confirmed profiles unchanged.",
+      "value": "5"
+    },
+    {
+      "key": "profile.breakout_long_no_0dte.take-profit.distance",
+      "reason": "Current stale breakout fallback uses a 6 point effective target and has poor PnL per exposure hour. Reducing the fixed TP toward the grid value should shorten stale-data holds and reduce underwater capital time.",
+      "value": "4"
+    },
+    {
+      "key": "profile.pullback_long_no_0dte.es-vwap.max-distance",
+      "reason": "Pullback no-0DTE stale trades are positive but low efficiency at 83.2 PnL/exposure hour. A tighter ES VWAP distance cap tests whether stale fallback pullbacks work best closer to VWAP while preserving the existing pullback fallback route.",
+      "value": "8"
+    }
+  ],
+  "expected_effect": "Should improve stale/no-0DTE fallback exposure efficiency, average MAE, and hold time without touching the VALID_0DTE engine. Tradeoff is possible loss of a few profitable fallback trades; reject if total net profit retention drops below 98% or fallback trade count is simply starved without objective improvement.",
+  "label": "stale-fallback-defensive-tighten",
+  "rationale": "This follows Batch G and the strategist's stale 0DTE defensive fallback refinement. The baseline edge is not loss-driven, so the safest next risk-adjusted test is to harden only the low-efficiency stale/no-0DTE fallback profiles. VALID_0DTE produces most PnL and should remain untouched; option-dependent profiles also remain gated away from missing/stale/thin states.",
+  "strategy_hypotheses": [
+    {
+      "evidence": "STALE_0DTE contributes $162.8 across 5 trades, but breakout_long_no_0dte stale trades have -210.6 average MAE, -250.25 worst MAE, 52.6 minute median hold, and only 40.5 PnL/exposure hour. VALID_0DTE remains the main engine with $5450.6 PnL across 81 trades.",
+      "implementation_scope": "config-only",
+      "name": "Stale 0DTE Defensive Fallback Refinement",
+      "risk": "Sample size is only five stale trades, so stricter filters may look good by removing noise but reduce future fallback coverage. Reject if improvement comes mainly from deleting fallback trades while full-sample objective, net profit, or PnL/exposure worsens.",
+      "trigger": "0DTE data state routes to STALE_0DTE, EXPIRED_0DTE, or no-0DTE fallback profiles while ES-only confirmation is available.",
+      "validation_metric": "Fallback average MAE and PnL/exposure hour improve, VALID_0DTE performance is unchanged, full-sample net profit retains at least 98% of run_001, and total PnL/exposure hour is flat or better."
+    }
+  ],
+  "strategy_plan_reference": {
+    "market_regime_read": "The current leader is a high-hit-rate long-only regime built around valid 0DTE option state, pullback continuation, and positive charm/gamma support. The run is not loss-driven;...",
+    "new_strategy_ideas": [
+      {
+        "implementation_scope": "requires-code",
+        "name": "Extended VWAP Rejection Classifier",
+        "validation_metric": "Reduce worst MAE and 60+ minute holds while preserving at least 90% of extended_vwap_winners PnL and keeping total PnL at least 98% of run_001."
+      },
+      {
+        "implementation_scope": "config-only",
+        "name": "Dormant pullback_long_1dte Activation Test",
+        "validation_metric": "Adds net PnL or improves PnL/exposure hour versus breakout_long_1dte alone, with average MAE no worse than breakout_long_1dte and no degradation in VALID_0DTE results."
+      },
+      {
+        "implementation_scope": "new-profile-config",
+        "name": "Dormant Pin-Avoid Concept Probe",
+        "validation_metric": "At least 5-10 trades in replay with positive PnL/exposure hour, worst MAE below current portfolio worst, and low overlap with pullback_long and charm_pin_pullback_long."
+      }
+    ],
+    "next_experiments": [
+      {
+        "config_bias": "Use router/profile split logic conceptually: preserve current VALID_0DTE pullback and charm engines, but test a stricter companion condition for extended/rejection charm_pin_pul...",
+        "experiment_type": "profile-specific",
+        "name": "Charm Pin Extended-Rejection Split",
+        "primary_metric": "Worst MAE and average MAE for charm_pin_pullback_long, with charm_pin PnL retention and median hold time as guardrails.",
+        "target_profiles": [
+          "charm_pin_pullback_long"
+        ]
+      },
+      {
+        "config_bias": "Compare current 1DTE-only routing against a controlled activation of the dormant pullback_long_1dte concept; keep VALID_0DTE profile behavior unchanged.",
+        "experiment_type": "new-strategy",
+        "name": "1DTE Pullback Router Expansion",
+        "primary_metric": "VALID_1DTE_ONLY PnL/exposure hour and average MAE versus run_001 breakout_long_1dte baseline.",
+        "target_profiles": [
+          "breakout_long_1dte",
+          "pullback_long_1dte"
+        ]
+      },
+      {
+        "config_bias": "Constrain stale/no-0DTE fallback research to stricter quality and shorter-hold behavior; do not chase PnL expansion in stale state yet.",
+        "experiment_type": "risk-reducer",
+        "name": "Stale 0DTE Defensive Fallback Refinement",
+        "primary_metric": "STALE_0DTE PnL/exposure hour and average MAE, with total PnL retention above 98%.",
+        "target_profiles": [
+          "breakout_long_no_0dte",
+          "pullback_long_no_0dte",
+          "squeeze_long_no_0dte"
+        ]
+      },
+      {
+        "config_bias": "Treat charm_wall_breakaway_long as an incubator: explore slight breadth or confirmation variants only if they preserve its high-MFE character.",
+        "experiment_type": "profit-expansion",
+        "name": "Charm Wall Breakaway Capacity Probe",
+        "primary_metric": "Incremental PnL and PnL/exposure hour with worst MAE not exceeding current charm_wall_breakaway_long worst MAE by more than 10%.",
+        "target_profiles": [
+          "charm_wall_breakaway_long"
+        ]
+      },
+      {
+        "config_bias": "Do not enable every zero-trade active profile. Select one dormant/disabled concept at a time, with router overlap analysis before activation.",
+        "experiment_type": "router",
+        "name": "Dead Profile Reachability Audit",
+        "primary_metric": "New unique trades, overlap rate with current profiles, PnL/exposure hour, and worst MAE by activated profile.",
+        "target_profiles": [
+          "wall_reclaim_long",
+          "wall_breakout_retest_long",
+          "late_day_pin_fade",
+          "negative_gamma_momentum_long",
+          "trend_day_pullback_long",
+          "breakout_long"
+        ]
+      }
+    ],
+    "plan_label": "new-regime discovery plan from run_001 leader",
+    "profiles_to_expand": [
+      "pullback_long",
+      "breakout_long_1dte",
+      "charm_wall_breakaway_long",
+      "call_wall_acceptance_long"
+    ],
+    "profiles_to_freeze": [
+      "breakout_long",
+      "wall_reclaim_long",
+      "wall_breakout_retest_long",
+      "late_day_pin_fade",
+      "negative_gamma_momentum_long",
+      "trend_day_pullback_long"
+    ],
+    "run": "run_004",
+    "strategy_track": "new-regime"
+  },
+  "validated_changes": {
+    "profile.breakout_long_no_0dte.es-structure.min-score": "5",
+    "profile.breakout_long_no_0dte.es-vwap.slope-min": "0.1",
+    "profile.breakout_long_no_0dte.take-profit.distance": "4",
+    "profile.pullback_long_no_0dte.es-vwap.max-distance": "8"
+  }
+}

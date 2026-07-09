@@ -1,0 +1,51 @@
+{
+  "changes": {
+    "profile.pullback_long.es-structure.min-score": "4",
+    "profile.pullback_long.es-vwap.max-distance": "8.5"
+  },
+  "duplicate_of": "run_012",
+  "error": "duplicate experiment",
+  "iteration": 14,
+  "recommendation": {
+    "changes": [
+      {
+        "key": "profile.pullback_long.es-structure.min-score",
+        "reason": "Batch C one-family pullback distance/structure test. The latest pathological run shows pullback_long is still the highest-PnL active VALID_0DTE profile, but its one slow/deep-heat tail occurred with ES structure score 3 and broken higher-low/high context. Moving the profile-specific structure floor from 3 to grid value 4 tests a narrower pullback admission rule without touching global vetoes or option-confirmed routing.",
+        "value": "4"
+      },
+      {
+        "key": "profile.pullback_long.es-vwap.max-distance",
+        "reason": "Keep the pullback-specific VWAP envelope at the previously successful grid value from the run_012 to run_015 improvement. That experiment paired structure score 4 with max distance 8.5 and improved objective materially, while later loosening the cap to 12 damaged drawdown and MAE.",
+        "value": "8.5"
+      },
+      {
+        "key": "profile.pullback_long.dynamic-take-profit.max",
+        "reason": "Current pullback_long dynamic TP max is 4. Holding it at the conservative grid floor avoids repeating the failed pullback profit-capture experiment that raised TP max to 5 and max VWAP distance to 12, which increased exposure and worsened worst MAE.",
+        "value": "4"
+      }
+    ],
+    "expected_effect": "Should reduce low-quality pullback admissions and tail exposure while preserving the core pullback edge that was improved by the prior structure-score 4 / VWAP-distance 8.5 combination. Success requires total net profit within 98% of run_029, pullback_long trade count down less than 10% unless objective materially improves, no new slow >=12h trades, and worst/average MAE no worse than the leader family. Main tradeoff is losing some profitable score-3 pullbacks if the pullback edge is broader than the prior isolated test suggested.",
+    "label": "promote",
+    "rationale": "Use Batch C as a profile-specific structure/distance repair rather than global veto tightening. The latest run_043 is a rejected timing-pathology run, but its diagnostics identify pullback_long as a live edge with tail risk: 26 trades, $1772.1 PnL, 41.8 PnL/exposure hour, but one slow trade and -1985.6 worst MAE. Historical experiment memory supports this exact mechanism: profile.pullback_long.es-structure.min-score=4 plus es-vwap.max-distance=8.5 improved objective by +4484.8 from run_012 to run_015, while later widening to 12 with richer TP hurt objective and worsened MAE. This is one legal family, avoids stop losses, avoids broad/global filters, and does not optimize option-dependent profiles for missing/stale 0DTE states.",
+    "strategy_hypotheses": [
+      {
+        "evidence": "run_043 bad-MAE diagnostics show deep heat concentrated in VALID_0DTE pullback/charm-pin entries, but protected fast winners overlap broad RSI, setup, and VWAP features. The clean separator is path-dependent early progress, not a static global floor.",
+        "implementation_scope": "requires-code",
+        "name": "Early Progress Heat Classifier",
+        "risk": "May overfit a small number of delayed recoveries or block clean extended-VWAP winners unless protected fast-winner UTC retention is enforced.",
+        "trigger": "VALID_0DTE pullback_long or charm_pin_pullback_long entries that fail to make meaningful positive progress before MAE in the first few minutes.",
+        "validation_metric": "Remove slow >=12h trades, reduce worst MAE toward leader-family levels, retain at least 90% pullback/charm-pin PnL, retain at least 95% protected fast winners, and keep total score flat or better versus run_029."
+      },
+      {
+        "evidence": "VALID_1DTE_ONLY breakout fallback remains clean in run_043 with 7 trades, $464.5 PnL, 145.99 PnL/exposure hour, no slow trades, and -327.25 worst MAE, while prior direct 1DTE tightening hurt score and net profit.",
+        "implementation_scope": "new-profile-config",
+        "name": "1DTE Pullback Companion Split",
+        "risk": "Router overlap may cannibalize profitable breakout_long_1dte trades or the companion may be unreachable with current profile triggers.",
+        "trigger": "0DTE unavailable, 1DTE map valid, and ES state resembles pullback/reclaim rather than breakout continuation.",
+        "validation_metric": "Combined 1DTE PnL stays at or above current baseline, 1DTE average/worst MAE improves, total net profit remains at least 98% of leader, and breakout_long_1dte retained PnL is measured separately."
+      }
+    ]
+  },
+  "run": "run_043",
+  "signature": "[[\"profile.pullback_long.es-structure.min-score\",\"4\"],[\"profile.pullback_long.es-vwap.max-distance\",\"8.5\"]]"
+}

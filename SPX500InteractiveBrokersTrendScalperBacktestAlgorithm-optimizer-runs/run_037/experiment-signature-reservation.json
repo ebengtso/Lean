@@ -1,0 +1,8 @@
+{
+  "changes": {
+    "profile.charm_pin_pullback_long.long-regime-filter.dynamic-vwap-max-distance": "25",
+    "profile.charm_pin_pullback_long.long-regime-filter.dynamic-vwap-volatility-multiplier": "0.4",
+    "profile.charm_pin_pullback_long.long-regime-filter.recent-high-rejection-min-pullback": "8"
+  },
+  "signature": "[[\"profile.charm_pin_pullback_long.long-regime-filter.dynamic-vwap-max-distance\",\"25\"],[\"profile.charm_pin_pullback_long.long-regime-filter.dynamic-vwap-volatility-multiplier\",\"0.4\"],[\"profile.charm_pin_pullback_long.long-regime-filter.recent-high-rejection-min-pullback\",\"8\"]]"
+}

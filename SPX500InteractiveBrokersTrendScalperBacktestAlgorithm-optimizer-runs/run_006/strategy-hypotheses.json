@@ -1,0 +1,10 @@
+[
+  {
+    "evidence": "call_wall_acceptance_long has only one VALID_0DTE trade, but that trade had $91 PnL, 455 PnL/exposure hour, -11.7 MAE, high setup quality, and strong ADX. This suggests the concept may be under-routed rather than unprofitable.",
+    "implementation_scope": "config-only",
+    "name": "Call Wall Acceptance Sample Builder",
+    "risk": "One-trade evidence can overfit; relaxed acceptance may add low-quality wall-chase entries or steal signals from stronger pullback profiles.",
+    "trigger": "VALID_0DTE sessions with positive net DEX, positive forward DEX, and expanding call volume near an upside call wall.",
+    "validation_metric": "Increase call_wall_acceptance_long to at least 5 trades with positive PnL, PnL per exposure hour above 250, worst MAE better than -100, total net profit at least 98% of run_001, and no degradation in VALID_0DTE performance."
+  }
+]

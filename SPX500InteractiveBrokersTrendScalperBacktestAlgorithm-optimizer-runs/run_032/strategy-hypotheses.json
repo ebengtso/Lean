@@ -1,0 +1,10 @@
+[
+  {
+    "evidence": "breakout_long_no_0dte in STALE_0DTE produced only 2 trades, $71 PnL, 40.5 PnL/exposure hour, 52.6 minute median hold, and -250.25 worst MAE, while VALID_0DTE profiles produced $5388.1 and should not be touched.",
+    "implementation_scope": "config-only",
+    "name": "Stale No-0DTE Breakout Efficiency Trim",
+    "risk": "Very small stale/expired sample; stricter slope and lower targets may remove or underpay fallback insurance, especially the one EXPIRED_0DTE winner with strong efficiency.",
+    "trigger": "0DTE map stale/expired and router selects breakout_long_no_0dte as ES-only fallback.",
+    "validation_metric": "Fallback PnL/exposure improves, fallback worst MAE does not worsen, VALID_0DTE PnL/trade count are unchanged, total net profit remains at least 98% of run_029, and slow_12h stays zero."
+  }
+]

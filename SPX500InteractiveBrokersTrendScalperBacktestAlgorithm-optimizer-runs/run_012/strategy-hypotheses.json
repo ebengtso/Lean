@@ -1,0 +1,10 @@
+[
+  {
+    "evidence": "pullback_long generated 39.3% of latest PnL but the worst trade entered with ES structure score 3, higher-low -0.5, higher-high -4.0, VWAP slope 0.0015, zero early MFE, and 132.9 minute hold. The profile remains profitable enough that a broad prune is unacceptable.",
+    "implementation_scope": "config-only",
+    "name": "Pullback Structure Floor Holdout",
+    "risk": "ES score-3 pullbacks are also a meaningful profit bucket; this may suppress the core edge if score does not truly separate tail from fast winners.",
+    "trigger": "VALID_0DTE pullback_long entries with weak ES structure score before reclaim continuation.",
+    "validation_metric": "Pullback_long average MAE and worst MAE improve while total net profit stays >=98% of run_001, pullback_long PnL retention stays >=90%, pnl_per_exposure_hour is flat or better, and completed trades drop <=10%."
+  }
+]

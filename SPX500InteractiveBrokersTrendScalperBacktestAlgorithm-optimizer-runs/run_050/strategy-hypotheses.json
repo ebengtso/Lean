@@ -1,0 +1,18 @@
+[
+  {
+    "evidence": "call_wall_acceptance_long contributes 8.5% of total PnL from only 2 trades, but owns the -655.2 portfolio worst MAE. The worst row had strong forward DEX but delayed realization, so static TP changes did not separate risk; stronger acceptance and call-flow confirmation may.",
+    "implementation_scope": "config-only",
+    "name": "Call-Wall Flow Persistence Box",
+    "risk": "Small sample risk is high; tighter DEX and call-volume expansion can delete the largest single winner and suppress net profit without improving kept worst MAE.",
+    "trigger": "VALID_0DTE call-wall acceptance with positive forward DEX, accepted strike context, and demonstrably expanding call volume.",
+    "validation_metric": "Global worst MAE improves toward <= -513.4, call_wall_acceptance_long retains at least 70% of PnL, total net profit remains >=98% of run_050, completed trades drop <=10%, and pnl_per_exposure_hour stays flat or better."
+  },
+  {
+    "evidence": "The worst call-wall trade made early progress but reached full target only after deep adverse excursion; this path distinction is not directly available as a current config key.",
+    "implementation_scope": "requires-code",
+    "name": "Call-Wall Convex Recovery Monitor",
+    "risk": "Path-aware logic can overfit a two-trade profile and cut rare convex winners unless validated against protected fast winners and out-of-sample days.",
+    "trigger": "call_wall_acceptance_long with wide target or high ES-VWAP extension that fails to convert early favorable movement into sustained continuation.",
+    "validation_metric": "Call-wall worst MAE improves materially while retaining >=70% call-wall PnL, total net profit >=98% of leader, protected fast-winner retention >=95%, and slow_12h remains 0."
+  }
+]

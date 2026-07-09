@@ -1,0 +1,182 @@
+[
+  {
+    "evidence": "charm_wall_breakaway_long has only 5 VALID_0DTE trades but contributes $985.6, 197.1 average PnL, 234.4 PnL/exposure hour, median MFE 146.2, and no slow >=12h trades. The run_02...",
+    "implementation_scope": "config-only",
+    "name": "Charm Wall Admission Follow-Through",
+    "risk": "Small sample risk is high; relaxing higher-low geometry may add lower-quality wall-chase entries or cannibalize existing charm-wall winners without improving total score.",
+    "run": "run_027",
+    "trigger": "VALID_0DTE charm-wall breakaway context with require-breakout true, distance above charm wall within the expanded 25-point box, and only marginal ES higher-low confirmation.",
+    "validation_metric": "charm_wall_breakaway_long PnL/exposure remains >=225, total net profit remains >=98% of run_001, completed trades do not drop more than 10%, slow_12h remains 0, and total worst ..."
+  },
+  {
+    "evidence": "charm_pin_pullback_long owns the current global worst MAE at -513.4 while still contributing $1261.5 over 34 trades. Static broad filters overlap protected extended-VWAP winners...",
+    "implementation_scope": "requires-code",
+    "name": "Charm Pin Early-Progress Tail Classifier",
+    "risk": "Can overfit a small number of delayed recoveries or block clean high-extension winners unless protected fast-winner retention is explicitly validated.",
+    "run": "run_029",
+    "trigger": "charm_pin_pullback_long high-extension or recent-high-rejection entries that fail to make early positive progress after entry.",
+    "validation_metric": "Reduce charm_pin_pullback_long worst MAE toward <= -403 while retaining >=90% charm-pin PnL, >=95% protected fast extended-VWAP winners, total net profit >=98% of leader, and sl..."
+  },
+  {
+    "evidence": "squeeze_long produced 10 VALID_0DTE trades, $721 PnL, no slow >=12h trades, worst MAE -208.25, median MFE 77.78, but only 187.16 PnL/exposure hour and 23.1 minute average hold. ...",
+    "implementation_scope": "config-only",
+    "name": "Squeeze Fast Realization Classifier",
+    "risk": "Lowering targets may cut profitable continuation tails and reduce total net profit even if exposure hours improve.",
+    "run": "run_030",
+    "trigger": "VALID_0DTE squeeze_long entries with confirmed option context and ES VWAP slope strong enough for continuation.",
+    "validation_metric": "squeeze_long PnL/exposure hour improves, total net profit remains >=98% of run_001, completed trades remain within 10%, worst MAE stays no worse than -225 for squeeze_long, and ..."
+  },
+  {
+    "evidence": "charm_pin_pullback_long remains profitable at $1217.3 over 33 trades but owns the global -527 MAE. Static config filters overlap protected extended-VWAP winners, so the clean se...",
+    "implementation_scope": "requires-code",
+    "name": "Charm Pin Early-Progress Tail Classifier",
+    "risk": "Path-aware logic can overfit a small number of delayed recoveries and block clean high-extension winners unless protected-winner retention is validated.",
+    "run": "run_030",
+    "trigger": "charm_pin_pullback_long high-extension or recent-high-rejection entry that fails to make early positive progress after entry.",
+    "validation_metric": "Reduce charm_pin_pullback_long worst MAE toward <= -403 while retaining >=90% charm-pin PnL, >=95% protected fast extended-VWAP winners, total PnL >=98% of leader, and slow trad..."
+  },
+  {
+    "evidence": "VALID_1DTE_ONLY breakout fallback contributes $1305 over 20 trades, but prior direct 1DTE tightening hurt score and net profit. That suggests a companion split, not stricter bre...",
+    "implementation_scope": "new-profile-config",
+    "name": "1DTE Pullback Companion Profile",
+    "risk": "Router overlap may cannibalize profitable breakout_long_1dte trades or the companion profile may be unreachable.",
+    "run": "run_031",
+    "trigger": "0DTE unavailable, 1DTE map valid, and ES state resembles pullback/reclaim rather than breakout continuation.",
+    "validation_metric": "Combined 1DTE PnL remains >= current $1305, 1DTE average MAE improves versus -123.9, total net profit remains >=98% of leader, and score is flat or better."
+  },
+  {
+    "evidence": "charm_pin_pullback_long contributes $1237.7 over 34 trades with fast median hold, but owns the -527 worst MAE. Protected extended-VWAP winners have median MAE around -14.9 and r...",
+    "implementation_scope": "requires-code",
+    "name": "Charm Pin Early-Progress Tail Classifier",
+    "risk": "Can overfit a small number of delayed recoveries or block clean high-extension winners unless protected fast-winner retention is explicitly validated.",
+    "run": "run_031",
+    "trigger": "charm_pin_pullback_long high-extension or recent-high-rejection entries that fail to show early positive progress after entry.",
+    "validation_metric": "Reduce charm_pin_pullback_long worst MAE toward <= -403 while retaining >=90% charm-pin PnL, >=95% protected fast extended-VWAP winners, total net profit >=98% of leader, and no..."
+  },
+  {
+    "evidence": "breakout_long_no_0dte in STALE_0DTE produced only 2 trades, $71 PnL, 40.5 PnL/exposure hour, 52.6 minute median hold, and -250.25 worst MAE, while VALID_0DTE profiles produced $...",
+    "implementation_scope": "config-only",
+    "name": "Stale No-0DTE Breakout Efficiency Trim",
+    "risk": "Very small stale/expired sample; stricter slope and lower targets may remove or underpay fallback insurance, especially the one EXPIRED_0DTE winner with strong efficiency.",
+    "run": "run_032",
+    "trigger": "0DTE map stale/expired and router selects breakout_long_no_0dte as ES-only fallback.",
+    "validation_metric": "Fallback PnL/exposure improves, fallback worst MAE does not worsen, VALID_0DTE PnL/trade count are unchanged, total net profit remains at least 98% of run_029, and slow_12h stay..."
+  },
+  {
+    "evidence": "charm_wall_breakaway_long produced 1120.6 PnL from only 7 VALID_0DTE trades, 160.1 average PnL, 240.5 PnL/exposure hour, median MFE 107.1, no slow >=12h trades, and better worst...",
+    "implementation_scope": "config-only",
+    "name": "Charm Wall Breakaway Supported Admission Expansion",
+    "risk": "Small-sample profile; relaxing wall geometry may admit lower-quality continuation attempts or cannibalize existing high-convexity entries without improving portfolio score.",
+    "run": "run_033",
+    "trigger": "VALID_0DTE charm-wall breakaway context with price still within a bounded distance above the charm wall and ES support confirmed by higher-low structure.",
+    "validation_metric": "charm_wall_breakaway_long trade count or PnL increases, profile PnL/exposure remains >=225, total net profit remains >=98% of run_029, slow_12h remains 0, and total worst MAE is..."
+  },
+  {
+    "evidence": "charm_pin_pullback_long contributes $1261.5 across 34 VALID_0DTE trades with fast median hold near 5 minutes, but owns the global -513.4 MAE. The worst row combines ES-VWAP 26.6...",
+    "implementation_scope": "config-only",
+    "name": "Charm Pin High-Extension Tail Box",
+    "risk": "The tail box can still remove profitable delayed recoveries because the bad trade ultimately closed green; require strict PnL and protected-winner retention before promotion.",
+    "run": "run_035",
+    "trigger": "VALID_0DTE charm_pin_pullback_long entries with high ES extension, recent-high rejection/pullback, weak momentum warnings, and stalled VWAP acceleration.",
+    "validation_metric": "Reduce charm_pin_pullback_long worst MAE toward <= -403 while retaining >=90% charm-pin PnL, >=95% protected fast extended-VWAP winners, total net profit >=98% of run_029, and s..."
+  },
+  {
+    "evidence": "Analyzer path stats show the worst tail had MFE after MAE and first +1.5 points only after 80 minutes, while protected fast extended-VWAP winners usually resolve quickly. Static...",
+    "implementation_scope": "requires-code",
+    "name": "Charm Pin Early-Progress Tail Classifier",
+    "risk": "Path-aware logic can overfit a small tail sample unless validated against protected fast-winner UTCS and out-of-sample days.",
+    "run": "run_035",
+    "trigger": "charm_pin_pullback_long high-extension entries that fail to make early positive progress after entry.",
+    "validation_metric": "Reduce charm_pin_pullback_long worst MAE below the current -513.4 while retaining >=90% profile PnL, >=95% protected fast-winner count, and total score flat or better."
+  },
+  {
+    "evidence": "charm_wall_breakaway_long produced 5 VALID_0DTE trades, $985.6 PnL, $197.1 average PnL, 234.36 PnL/exposure hour, median MFE 146.2, no slow >=12h trades, and worst MAE -346.8. T...",
+    "implementation_scope": "config-only",
+    "name": "Charm Wall Supported Admission Follow-Through",
+    "risk": "Small sample risk is high; the wider charm-wall box can admit lower-quality continuation attempts, while the VWAP cap or higher-low requirement can remove existing convex winners.",
+    "run": "run_036",
+    "trigger": "VALID_0DTE charm-wall breakaway context with price above the charm wall, require-breakout still true, and ES support confirmed by higher-low structure but not excessive VWAP ext...",
+    "validation_metric": "charm_wall_breakaway_long PnL/exposure remains >=225, total net profit remains >=98% of run_029, completed trades decline by no more than 10%, slow_12h remains 0, and total wors..."
+  },
+  {
+    "evidence": "charm_pin_pullback_long contributes $1261.5 across 34 VALID_0DTE trades with median hold near 5 minutes, but owns the global -513.4 MAE. The worst entry combined ES-VWAP 26.69, ...",
+    "implementation_scope": "requires-code",
+    "name": "Charm Pin Early-Progress Tail Classifier",
+    "risk": "Static config boundaries may still remove profitable delayed recoveries or fail to catch the path-dependent tail; a path-aware classifier can overfit unless validated against pr...",
+    "run": "run_037",
+    "trigger": "charm_pin_pullback_long high-extension or recent-high-rejection entries that fail to print early positive progress after entry.",
+    "validation_metric": "Reduce charm_pin_pullback_long worst MAE toward <= -403 while retaining >=90% charm-pin PnL, >=95% protected fast extended-VWAP winners, total net profit >=98% of run_029, and s..."
+  },
+  {
+    "evidence": "VALID_1DTE_ONLY breakout fallback produced 20 trades and $1305 PnL, while direct 1DTE quality tightening repeatedly hurt score and net profit. This suggests companion routing, n...",
+    "implementation_scope": "new-profile-config",
+    "name": "1DTE Pullback Companion Profile",
+    "risk": "Router overlap may cannibalize the profitable breakout_long_1dte baseline or the companion may be unreachable.",
+    "run": "run_037",
+    "trigger": "0DTE unavailable, 1DTE map valid, and ES state resembles pullback/reclaim rather than clean breakout continuation.",
+    "validation_metric": "Combined 1DTE PnL remains >= $1305, 1DTE average MAE improves versus -123.86, total net profit remains >=98% of run_029, and score is flat or better."
+  },
+  {
+    "evidence": "charm_wall_breakaway_long contributes $985.6 from only 5 VALID_0DTE trades, with $197.1 average PnL, 234.36 PnL/exposure hour, median MFE 146.2, no slow >=12h trades, but 50.5 m...",
+    "implementation_scope": "config-only",
+    "name": "Charm Wall Realization Efficiency Trim",
+    "risk": "The profile may require the 12-point expanded target to monetize rare convex wall-breakaway moves; compressing target geometry can reduce total PnL more than it improves exposur...",
+    "run": "run_038",
+    "trigger": "VALID_0DTE charm-wall breakaway with require-breakout true, bounded distance above charm wall, and ES support already admitted by current geometry.",
+    "validation_metric": "Profile PnL/exposure remains >=225, total net profit remains >=98% of run_029, completed trades remain within 10%, global worst MAE does not worsen beyond -513.4, and slow_12h r..."
+  },
+  {
+    "evidence": "The analyzer repeatedly identifies charm-pin MAE as path-dependent: the worst charm-pin trade reached first meaningful profit only after about 80 minutes, while protected extend...",
+    "implementation_scope": "requires-code",
+    "name": "Charm Pin Early-Progress Tail Classifier",
+    "risk": "Can overfit a small set of delayed recoveries or block profitable high-extension charm-pin winners unless validated against protected fast and extended-VWAP winner retention.",
+    "run": "run_038",
+    "trigger": "charm_pin_pullback_long high-extension or recent-high-rejection entries that fail to print early positive progress after entry.",
+    "validation_metric": "Reduce charm_pin_pullback_long worst MAE from -513.4 toward <= -403 while retaining >=90% charm-pin PnL, >=95% protected fast extended-VWAP winners, total net profit >=98% of le..."
+  },
+  {
+    "evidence": "charm_pin_pullback_long produced 38 trades and $1497.9 with median hold under 5 minutes, but owns the -513.4 global worst MAE. The worst tail had ES-VWAP distance 26.69, pullbac...",
+    "implementation_scope": "config-only",
+    "name": "Extended-VWAP Near-Miss Tail Repair",
+    "risk": "The same extended-above-VWAP regime contains protected fast winners, so widening the veto too far can suppress real edge. This micro-nudge should be rejected if protected extend...",
+    "run": "run_041",
+    "trigger": "VALID_0DTE charm_pin_pullback_long or related pullback entries already matching the extended-VWAP rejection signature except for a slightly too-tight max ES-VWAP distance boundary.",
+    "validation_metric": "Worst MAE improves from -513.4 toward <= -403, charm_pin_pullback_long retains >=90% PnL, protected extended-VWAP winner retention >=95%, total net profit >=98% of run_029, comp..."
+  },
+  {
+    "evidence": "The worst charm-pin tail reached meaningful profit only after about 80 minutes, while protected extended-VWAP winners generally resolve quickly; static config cannot directly ex...",
+    "implementation_scope": "requires-code",
+    "name": "Charm Pin Early-Progress Tail Classifier",
+    "risk": "Path-aware logic can overfit a small tail sample and block clean high-extension winners unless validated against protected winner UTCS and out-of-sample days.",
+    "run": "run_041",
+    "trigger": "charm_pin_pullback_long high-extension or recent-high-rejection entries that fail to print early positive progress after entry.",
+    "validation_metric": "Reduce charm_pin_pullback_long worst MAE toward <= -403 while retaining >=90% charm-pin PnL, >=95% protected fast extended-VWAP winners, total net profit >=98% of run_029, and s..."
+  },
+  {
+    "evidence": "call_wall_acceptance_long is enabled and valid-0DTE routed but produced zero trades, while charm-wall and charm-pin option-aware profiles remain efficient. This suggests call-wa...",
+    "implementation_scope": "config-only",
+    "name": "Call Wall Acceptance Isolated Sample Builder",
+    "risk": "Looser DEX and call-volume thresholds may admit call-wall chop or cannibalize stronger charm/pullback winners without adding net PnL.",
+    "run": "run_042",
+    "trigger": "VALID_0DTE call-wall acceptance context with moderate net DEX, positive forward DEX, call-volume expansion, and sustained strike acceptance.",
+    "validation_metric": "At least 3 standalone call_wall_acceptance_long trades, positive profile PnL, profile PnL/exposure >=150, total net profit >=98% of run_029, slow_12h remains 0, and worst MAE no..."
+  },
+  {
+    "evidence": "run_043 shows the bad tail regime is concentrated in pullback/charm-pin path behavior: two slow trades consumed 116.1 exposure hours, while protected fast winners overlap broad ...",
+    "implementation_scope": "requires-code",
+    "name": "Early Progress Heat Classifier",
+    "risk": "Can overfit a handful of delayed recoveries or block clean extended-VWAP winners unless protected fast-winner UTC retention is explicitly validated.",
+    "run": "run_043",
+    "trigger": "VALID_0DTE pullback_long or charm_pin_pullback_long entries that fail to make meaningful positive progress before MAE in the first few minutes.",
+    "validation_metric": "Remove slow >=12h trades, reduce worst MAE toward leader-family levels, retain >=90% pullback/charm-pin PnL, retain >=95% protected fast winners, and keep total score flat or be..."
+  },
+  {
+    "evidence": "VALID_1DTE_ONLY remains efficient in run_043 with 7 trades, $464.5 PnL, 145.99 PnL/exposure hour, no slow trades, and -327.25 worst MAE, while prior direct 1DTE tightening hurt ...",
+    "implementation_scope": "new-profile-config",
+    "name": "1DTE Pullback Companion Split",
+    "risk": "Router overlap may cannibalize profitable breakout_long_1dte trades or the companion profile may be unreachable with current triggers.",
+    "run": "run_043",
+    "trigger": "0DTE unavailable, 1DTE map valid, and ES state resembles pullback/reclaim rather than clean breakout continuation.",
+    "validation_metric": "Combined 1DTE PnL stays at or above current 1DTE baseline, 1DTE average/worst MAE improves, breakout_long_1dte retained PnL is measured, and total net profit remains >=98% of le..."
+  }
+]

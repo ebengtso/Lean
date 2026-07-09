@@ -1,0 +1,9 @@
+{
+  "attempt": 3,
+  "changes": {
+    "drift-trade-quantity-multiplier": "0.5"
+  },
+  "reason": "advisor repeated already-tested experiments for 3 attempt(s)",
+  "signature": "[[\"drift-trade-quantity-multiplier\",\"0.5\"]]",
+  "source": "single"
+}

@@ -1,0 +1,6 @@
+{
+  "changes": {
+    "drift-trade-quantity-multiplier": "0.5"
+  },
+  "signature": "[[\"drift-trade-quantity-multiplier\",\"0.5\"]]"
+}

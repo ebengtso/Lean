@@ -1,0 +1,205 @@
+{
+  "enabled": true,
+  "recent_window": 50,
+  "recent_count": 4,
+  "family_max_share": 0.55,
+  "family_hard_max_share": 0.7,
+  "profile_max_share": 0.65,
+  "reject_repeated_keysets": true,
+  "family_summary": [
+    {
+      "family": "take-profit",
+      "count": 3,
+      "share": 0.75
+    },
+    {
+      "family": "runtime-risk",
+      "count": 1,
+      "share": 0.25
+    }
+  ],
+  "profile_summary": [
+    {
+      "profile": "pullback_long_no_0dte",
+      "count": 2,
+      "share": 0.3333333333333333
+    },
+    {
+      "profile": "breakout_long_no_0dte",
+      "count": 2,
+      "share": 0.3333333333333333
+    },
+    {
+      "profile": "squeeze_long_no_0dte",
+      "count": 1,
+      "share": 0.16666666666666666
+    },
+    {
+      "profile": "breakout_long_1dte",
+      "count": 1,
+      "share": 0.16666666666666666
+    }
+  ],
+  "top_family": {
+    "family": "take-profit",
+    "count": 3,
+    "share": 0.75
+  },
+  "top_profile": {
+    "profile": "pullback_long_no_0dte",
+    "count": 2,
+    "share": 0.3333333333333333
+  },
+  "saturated_families": [
+    "take-profit"
+  ],
+  "hard_saturated_families": [
+    "take-profit"
+  ],
+  "saturated_profiles": [],
+  "underexplored_profiles": [
+    "breakout_long",
+    "call_wall_acceptance_long",
+    "charm_pin_pullback_long",
+    "charm_wall_breakaway_long",
+    "late_day_pin_fade",
+    "negative_gamma_momentum_long",
+    "pullback_long",
+    "squeeze_long",
+    "trend_day_pullback_long",
+    "wall_breakout_retest_long",
+    "wall_reclaim_long"
+  ],
+  "target_families": [
+    "surgical-veto",
+    "runtime-risk",
+    "option-strike-map",
+    "strategy-profile",
+    "upstream-entry",
+    "general"
+  ],
+  "recent_keyset_signatures": {
+    "[\"profile.breakout_long_no_0dte.es-structure.min-score\",\"profile.breakout_long_no_0dte.es-vwap.slope-min\",\"profile.breakout_long_no_0dte.take-profit.distance\",\"profile.pullback_long_no_0dte.es-structure.min-score\"]": 1,
+    "[\"entry-veto-charm-pin-tail-risk-max-adx\",\"entry-veto-charm-pin-tail-risk-max-rolling-high-distance\",\"entry-veto-charm-pin-tail-risk-min-setup-quality-score\",\"use-entry-veto-charm-pin-tail-risk-signature\"]": 1,
+    "[\"profile.breakout_long_no_0dte.enabled\",\"profile.pullback_long_no_0dte.es-vwap.max-distance\",\"profile.pullback_long_no_0dte.take-profit.distance\",\"profile.squeeze_long_no_0dte.enabled\"]": 1,
+    "[\"profile.breakout_long_1dte.es-structure.min-score\",\"profile.breakout_long_1dte.es-vwap.slope-min\",\"profile.breakout_long_1dte.long-regime-filter-1dte.min-forward-dex-ratio-30m\",\"profile.breakout_long_1dte.take-profit.max-distance\"]": 1
+  },
+  "top_change_keys": [
+    {
+      "key": "profile.breakout_long_no_0dte.es-structure.min-score",
+      "count": 1
+    },
+    {
+      "key": "profile.breakout_long_no_0dte.es-vwap.slope-min",
+      "count": 1
+    },
+    {
+      "key": "profile.breakout_long_no_0dte.take-profit.distance",
+      "count": 1
+    },
+    {
+      "key": "profile.pullback_long_no_0dte.es-structure.min-score",
+      "count": 1
+    },
+    {
+      "key": "entry-veto-charm-pin-tail-risk-max-adx",
+      "count": 1
+    },
+    {
+      "key": "entry-veto-charm-pin-tail-risk-max-rolling-high-distance",
+      "count": 1
+    },
+    {
+      "key": "entry-veto-charm-pin-tail-risk-min-setup-quality-score",
+      "count": 1
+    },
+    {
+      "key": "use-entry-veto-charm-pin-tail-risk-signature",
+      "count": 1
+    },
+    {
+      "key": "profile.breakout_long_no_0dte.enabled",
+      "count": 1
+    },
+    {
+      "key": "profile.pullback_long_no_0dte.es-vwap.max-distance",
+      "count": 1
+    },
+    {
+      "key": "profile.pullback_long_no_0dte.take-profit.distance",
+      "count": 1
+    },
+    {
+      "key": "profile.squeeze_long_no_0dte.enabled",
+      "count": 1
+    }
+  ],
+  "recent_rows": [
+    {
+      "from_run": "run_001",
+      "to_run": "run_002",
+      "family": "take-profit",
+      "profiles": [
+        "breakout_long_no_0dte",
+        "pullback_long_no_0dte"
+      ],
+      "change_keys": [
+        "profile.breakout_long_no_0dte.es-structure.min-score",
+        "profile.breakout_long_no_0dte.es-vwap.slope-min",
+        "profile.breakout_long_no_0dte.take-profit.distance",
+        "profile.pullback_long_no_0dte.es-structure.min-score"
+      ],
+      "delta_score": -240.0367588211575,
+      "delta_net_profit": -241.40000000000055
+    },
+    {
+      "from_run": "run_002",
+      "to_run": "run_005",
+      "family": "runtime-risk",
+      "profiles": [],
+      "change_keys": [
+        "entry-veto-charm-pin-tail-risk-max-adx",
+        "entry-veto-charm-pin-tail-risk-max-rolling-high-distance",
+        "entry-veto-charm-pin-tail-risk-min-setup-quality-score",
+        "use-entry-veto-charm-pin-tail-risk-signature"
+      ],
+      "delta_score": 240.0367588211575,
+      "delta_net_profit": 241.40000000000055
+    },
+    {
+      "from_run": "run_003",
+      "to_run": "run_006",
+      "family": "take-profit",
+      "profiles": [
+        "breakout_long_no_0dte",
+        "pullback_long_no_0dte",
+        "squeeze_long_no_0dte"
+      ],
+      "change_keys": [
+        "profile.breakout_long_no_0dte.enabled",
+        "profile.pullback_long_no_0dte.es-vwap.max-distance",
+        "profile.pullback_long_no_0dte.take-profit.distance",
+        "profile.squeeze_long_no_0dte.enabled"
+      ],
+      "delta_score": -21.432798076923063,
+      "delta_net_profit": -23.399999999999636
+    },
+    {
+      "from_run": "run_004",
+      "to_run": "run_007",
+      "family": "take-profit",
+      "profiles": [
+        "breakout_long_1dte"
+      ],
+      "change_keys": [
+        "profile.breakout_long_1dte.es-structure.min-score",
+        "profile.breakout_long_1dte.es-vwap.slope-min",
+        "profile.breakout_long_1dte.long-regime-filter-1dte.min-forward-dex-ratio-30m",
+        "profile.breakout_long_1dte.take-profit.max-distance"
+      ],
+      "delta_score": -355.72553225108277,
+      "delta_net_profit": -317.09999999999945
+    }
+  ],
+  "rule": "When a family is saturated, avoid repeated keysets in that family. When a family is hard-saturated, pause that family and explore target_families instead."
+}

@@ -1,0 +1,49 @@
+{
+  "acceptance_criteria": {
+    "max_trade_drop_pct": 10.0,
+    "min_mae_delta_for_mae_family": 0.0,
+    "min_net_profit_delta": -25.0,
+    "min_score_delta": 0.0
+  },
+  "base_context": {
+    "base_config": "/Users/erikbengtson/Lean2026/LeanCustom/LauncherBacktest/SPX500InteractiveBrokersTrendScalperBacktestAlgorithm-optimizer-runs/run_029/config.before.json",
+    "base_net_profit": 7149.6,
+    "base_run": "run_029",
+    "base_score": 9623.090019916142,
+    "candidate_base": "best-by-score",
+    "candidate_base_config": "before",
+    "description": "The next run will be this leader/base config plus ONLY the JSON changes returned by the advisor.",
+    "mode": "candidate-base"
+  },
+  "changes": {
+    "profile.squeeze_long.dynamic-take-profit.max": "5.5",
+    "profile.squeeze_long.es-vwap.slope-min": "0.05",
+    "profile.squeeze_long.take-profit.distance": "3.25"
+  },
+  "expected_direction": "increase net profit or PnL per exposure hour without worsening MAE",
+  "expected_effect": "Expected to improve squeeze_long PnL per exposure hour and average hold while keeping its low MAE profile intact. Tradeoff is possible truncation of a few convex squeeze winners; reject if squeeze PnL falls materially, completed trades drop more than 10%, total net profit falls below 98% of run_001, or VALID_0DTE performance deteriorates.",
+  "family": "take-profit",
+  "label": "squeeze-fast-realization",
+  "objective_mode": "risk-adjusted",
+  "primary_metric": "net_profit",
+  "rationale": "Use exactly one legal family: batch_b_squeeze_long_take_profit. The prior accepted squeeze package expanded targets and helped from a weaker base, but the current leader already has large selected TP distances, no upside-extension candidates, and squeeze_long average hold is longer than desired. This tests a different mechanism: stronger continuation admission plus faster monetization, while avoiding global vetoes, 1DTE tightening, call-wall loosening, stale-data changes, and repeated charm-wall max-distance follow-through.",
+  "strategy_plan_label": "profit_expansion_protect_fast_edges_split_lower_efficiency_states",
+  "strategy_plan_next_experiments": [
+    "Squeeze Clean Continuation Efficiency Expansion",
+    "Charm Wall Adjacent Geometry Expansion",
+    "1DTE Pullback Companion Router Split",
+    "Protected Extended-VWAP Boundary Holdout",
+    "Dormant Charm Pin Avoid Split Probe",
+    "Stale No-0DTE Fallback Efficiency Holdout"
+  ],
+  "strategy_plan_track": "profit-expansion",
+  "watch_metrics": [
+    "score",
+    "net_profit",
+    "trade_count",
+    "worst_mae",
+    "average_mae",
+    "drawdown",
+    "slow_trades"
+  ]
+}

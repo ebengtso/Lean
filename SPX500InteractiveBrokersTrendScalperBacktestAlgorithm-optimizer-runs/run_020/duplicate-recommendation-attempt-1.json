@@ -1,0 +1,37 @@
+{
+  "changes": {
+    "__router.one-dte-profiles": "breakout_long_1dte,pullback_long_1dte"
+  },
+  "duplicate_of": "run_010",
+  "error": "duplicate experiment",
+  "iteration": 7,
+  "recommendation": {
+    "changes": [
+      {
+        "key": "__router.one-dte-profiles",
+        "reason": "Test the dormant 1DTE pullback companion as a router-level split rather than repeating failed direct tightening of breakout_long_1dte. Prior evidence says breakout_long_1dte is profitable but tail-heavy; adding pullback_long_1dte is a different mechanism that may route reclaim-like 1DTE states separately while preserving the existing breakout fallback.",
+        "value": "breakout_long_1dte,pullback_long_1dte"
+      },
+      {
+        "key": "profile.pullback_long_1dte.enabled",
+        "reason": "Enable the dormant 1DTE pullback profile only after adding it to the one-DTE router list. This is a config-only discovery test for VALID_1DTE_ONLY states where ES behavior is more pullback/reclaim than breakout continuation.",
+        "value": "true"
+      }
+    ],
+    "expected_effect": "Should reveal whether a 1DTE pullback companion can reduce average/worst 1DTE MAE without suppressing the profitable 20-trade breakout_long_1dte fallback. Accept only if combined VALID_1DTE_ONLY PnL remains at least current level or total net profit stays within 2% of run_001, while 1DTE average MAE improves and VALID_0DTE performance is unchanged. Main tradeoff is cannibalizing breakout_long_1dte winners or being unreachable.",
+    "label": "one-dte-pullback-router-split",
+    "rationale": "Choose the general/router strategy-profile experiment from the strategist plan. The current leader is already at the run_001 anchor, and recent take-profit, call-wall relaxation, direct 1DTE tightening, pullback expansion, and runtime exits either hurt or were flat. VALID_1DTE_ONLY contributes 20 trades and $1305, but with -123.86 average MAE and -375.7 worst MAE. Prior direct 1DTE gates cut profit and worsened MAE, so the cleaner next test is a router split that gives existing 1DTE pullback logic a chance without changing breakout_long_1dte thresholds.",
+    "strategy_hypotheses": [
+      {
+        "evidence": "VALID_1DTE_ONLY breakout_long_1dte produced 20 trades and $1305 PnL, but average MAE was -123.86 and worst MAE -375.7. Direct 1DTE tightening previously reduced score and net profit, suggesting a companion route is preferable to more threshold tightening.",
+        "implementation_scope": "new-profile-config",
+        "name": "1DTE Pullback Companion",
+        "risk": "The profile may be unreachable, or it may cannibalize profitable breakout_long_1dte trades if router precedence and profile triggers overlap too broadly.",
+        "trigger": "0DTE unavailable, 1DTE map valid, and ES state resembles pullback/reclaim rather than breakout continuation.",
+        "validation_metric": "Combined VALID_1DTE_ONLY PnL remains at least $1305 or total net profit remains >=98% of run_001, 1DTE average MAE improves versus -123.86, 1DTE worst MAE improves versus -375.7, and VALID_0DTE PnL/trade count are unchanged."
+      }
+    ]
+  },
+  "run": "run_020",
+  "signature": "[[\"__router.one-dte-profiles\",\"breakout_long_1dte,pullback_long_1dte\"]]"
+}

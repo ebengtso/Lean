@@ -1,0 +1,152 @@
+{
+  "changes": [
+    {
+      "key": "entry-veto-charm-pin-tail-risk-max-rolling-high-distance",
+      "reason": "The -527 charm_pin_pullback_long tail occurred with rolling-high distance 14.75; the current 6-point ceiling excludes it from the already profile-scoped charm-pin tail box. Expanding only this charm-pin veto boundary tests the known near-miss without broad ES structure pruning.",
+      "value": "15"
+    },
+    {
+      "key": "entry-veto-charm-pin-tail-risk-max-pullback-from-high",
+      "reason": "The same charm-pin tail had pullback-from-high 9.75, outside the current 4.5 ceiling. Raising the ceiling lets the veto cover the extended rejection/recovery pattern seen in the worst charm-pin row.",
+      "value": "10"
+    },
+    {
+      "key": "entry-veto-charm-pin-tail-risk-max-vwap-acceleration",
+      "reason": "Current max VWAP acceleration is 0, while the bad charm-pin row had negative acceleration and remains eligible. Keeping this at 0 preserves the weak/negative acceleration requirement and avoids widening into clean positive-acceleration continuation winners.",
+      "value": "0"
+    },
+    {
+      "key": "entry-veto-charm-pin-tail-risk-min-setup-quality-score",
+      "reason": "Keep the tail guard scoped to mid/high setup-quality charm-pin entries rather than low-quality generic pullbacks; the worst charm-pin row had setup quality 61.99, so 60 captures it while avoiding a broad low-quality veto.",
+      "value": "60"
+    }
+  ],
+  "expected_effect": "Should reduce charm_pin_pullback_long tail heat, specifically targeting the -527 MAE extended rejection row, with minimal impact on pullback_long, 1DTE, and no-0DTE routing. Tradeoff is possible loss of a few profitable charm-pin recoveries; reject if total PnL drops below 98% of run_001 or charm-pin profile PnL retention falls below 90%.",
+  "label": "charm-pin-tail-box-nudge",
+  "rationale": "Use one surgical-veto family, not another take-profit or call-wall expansion. Prior charm-pin tail-risk activation was the only accepted recent hypothesis, improving score and net profit without trade starvation. The latest diagnostic shows charm_pin_pullback_long remains profitable and fast, but its worst tail is a near-box miss caused by rolling-high and pullback ceilings, so the next test should widen that profile-scoped tail box rather than globally tightening structure or extended-VWAP gates.",
+  "strategy_hypotheses": [
+    {
+      "evidence": "charm_pin_pullback_long produced 34 VALID_0DTE trades, $1236.70 PnL, 164.53 PnL/exposure hour, and 5.3 minute median hold, but one extended/rejected entry produced -527 MAE with rolling-high distance 14.75, pullback-from-high 9.75, ADX 17.95, and setup quality 61.99.",
+      "implementation_scope": "config-only",
+      "name": "Charm Pin Tail Box Refinement",
+      "risk": "Some extended charm-pin recoveries are profitable; if the widened box blocks too many fast winners, score and profile PnL will fall despite lower MAE.",
+      "trigger": "VALID_0DTE charm_pin_pullback_long entries with high VWAP extension/rejection, large rolling-high distance, large pullback-from-high, weak or negative VWAP acceleration, and mid/high setup quality.",
+      "validation_metric": "charm_pin_pullback_long worst MAE improves from -527 toward <= -375, profile PnL retained >=90%, total net profit retained >=98% of run_001, and completed trades down no more than 5."
+    }
+  ],
+  "strategy_plan_reference": {
+    "market_regime_read": "The sample is an unusually favorable long-only momentum/pullback tape: 97 completed trades, 100% win rate, no slow >=12h trades, drawdown around 0.5%, and strong fast-trade cont...",
+    "new_strategy_ideas": [
+      {
+        "implementation_scope": "new-profile-config",
+        "name": "Pullback Deep-Heat Companion Split",
+        "validation_metric": "Retain >=90% of pullback_long PnL while improving pullback worst MAE from -638.75 toward <= -527 and improving PnL/exposure hour."
+      },
+      {
+        "implementation_scope": "new-profile-config",
+        "name": "1DTE Pullback Companion",
+        "validation_metric": "Combined 1DTE PnL >= current $1227.30, 1DTE avg MAE improves versus -123.94, and total net profit remains >=98% of leader."
+      },
+      {
+        "implementation_scope": "requires-code",
+        "name": "Runtime Heat Containment Layer",
+        "validation_metric": "Worst MAE improves toward <= -527 with net profit >=98% of leader and no material realized loss introduction."
+      },
+      {
+        "implementation_scope": "config-only",
+        "name": "Dormant Pin-Avoid Holdout Activation",
+        "validation_metric": "Activated dormant profile positive over at least 5 trades, average MAE better than active-profile median, and total score not below leader."
+      }
+    ],
+    "next_experiments": [
+      {
+        "config_bias": "Nudge the already-enabled extended-VWAP-rejection family around missed bad-MAE rows, especially boundary misses on RSI slope, max VWAP distance, and minimum pullback-from-high. ...",
+        "experiment_type": "risk-reducer",
+        "name": "Extended VWAP Rejection Boundary Nudge v2",
+        "primary_metric": "Worst MAE improvement toward <= -527, retained total PnL >=97%, completed trades down <=5, fast winners down <=3.",
+        "target_profiles": [
+          "pullback_long",
+          "charm_pin_pullback_long",
+          "breakout_long_1dte",
+          "charm_wall_breakaway_long"
+        ]
+      },
+      {
+        "config_bias": "Test risk tiering or veto consequence escalation only when multiple existing warnings fire and the profile is pullback_long or charm_pin_pullback_long. Avoid applying this to al...",
+        "experiment_type": "risk-reducer",
+        "name": "Profile-Scoped Veto Consequence Test",
+        "primary_metric": "Worst MAE and average MAE improve, total PnL retained >=98%, protected fast/low-MAE entries mostly preserved.",
+        "target_profiles": [
+          "pullback_long",
+          "charm_pin_pullback_long"
+        ]
+      },
+      {
+        "config_bias": "Focus on pullback_long weak-structure plus no-early-profit states rather than raising structure score globally. Use combinations that resemble the worst tail: structure score 3,...",
+        "experiment_type": "profile-specific",
+        "name": "Pullback Deep-Heat Isolation",
+        "primary_metric": "pullback_long worst MAE improves from -638.75 toward <= -527, pullback PnL retained >=90%, total score improves or stays flat.",
+        "target_profiles": [
+          "pullback_long"
+        ]
+      },
+      {
+        "config_bias": "For charm_pin_pullback_long, refine only the tail box around high VWAP extension, large rolling-high distance, weak momentum/rejection, and mid setup quality. Do not lower throu...",
+        "experiment_type": "profile-specific",
+        "name": "Charm Pin Tail Box Refinement",
+        "primary_metric": "charm_pin_pullback_long worst MAE <= -375, profile PnL retained >=90%, total PnL retained >=98%.",
+        "target_profiles": [
+          "charm_pin_pullback_long"
+        ]
+      },
+      {
+        "config_bias": "Do not retest prior broad 1DTE structure/slope tightening. If experimenting, compare a router/profile split such as 1DTE pullback companion versus current breakout-only handling...",
+        "experiment_type": "new-strategy",
+        "name": "1DTE Pullback Companion Holdout",
+        "primary_metric": "Combined 1DTE PnL >= current $1227.30, 1DTE avg MAE better than -123.94, total net profit >=98% of leader.",
+        "target_profiles": [
+          "breakout_long_1dte",
+          "pullback_long_1dte"
+        ]
+      },
+      {
+        "config_bias": "Freeze no-0DTE fallback edits and call-wall acceptance expansion in the next batch. They have already produced flat or harmful objective outcomes and distract from the active ta...",
+        "experiment_type": "risk-reducer",
+        "name": "Unsupported Family Freeze",
+        "primary_metric": "No regression in leader score, no worsening of worst MAE, no unnecessary trade loss.",
+        "target_profiles": [
+          "call_wall_acceptance_long",
+          "breakout_long_no_0dte",
+          "pullback_long_no_0dte",
+          "squeeze_long_no_0dte"
+        ]
+      }
+    ],
+    "plan_label": "risk-reducer-surgical-tail-v3",
+    "profiles_to_expand": [
+      "pullback_long",
+      "charm_pin_pullback_long",
+      "breakout_long_1dte",
+      "charm_wall_breakaway_long"
+    ],
+    "profiles_to_freeze": [
+      "breakout_long",
+      "squeeze_long",
+      "wall_reclaim_long",
+      "wall_breakout_retest_long",
+      "late_day_pin_fade",
+      "negative_gamma_momentum_long",
+      "trend_day_pullback_long",
+      "call_wall_acceptance_long",
+      "breakout_long_no_0dte",
+      "pullback_long_no_0dte bargain squeeze_long_no_0dte"
+    ],
+    "run": "run_011",
+    "strategy_track": "risk-reducer"
+  },
+  "validated_changes": {
+    "entry-veto-charm-pin-tail-risk-max-pullback-from-high": "10",
+    "entry-veto-charm-pin-tail-risk-max-rolling-high-distance": "15",
+    "entry-veto-charm-pin-tail-risk-min-setup-quality-score": "60"
+  }
+}

@@ -1,0 +1,10 @@
+[
+  {
+    "evidence": "charm_pin_pullback_long produced 34 VALID_0DTE trades, $1236.70 PnL, 164.53 PnL/exposure hour, and 5.3 minute median hold, but one extended/rejected entry produced -527 MAE with rolling-high distance 14.75, pullback-from-high 9.75, ADX 17.95, and setup quality 61.99.",
+    "implementation_scope": "config-only",
+    "name": "Charm Pin Tail Box Refinement",
+    "risk": "Some extended charm-pin recoveries are profitable; if the widened box blocks too many fast winners, score and profile PnL will fall despite lower MAE.",
+    "trigger": "VALID_0DTE charm_pin_pullback_long entries with high VWAP extension/rejection, large rolling-high distance, large pullback-from-high, weak or negative VWAP acceleration, and mid/high setup quality.",
+    "validation_metric": "charm_pin_pullback_long worst MAE improves from -527 toward <= -375, profile PnL retained >=90%, total net profit retained >=98% of run_001, and completed trades down no more than 5."
+  }
+]

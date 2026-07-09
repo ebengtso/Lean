@@ -1,0 +1,47 @@
+{
+  "acceptance_criteria": {
+    "max_trade_drop_pct": 10.0,
+    "min_mae_delta_for_mae_family": 0.0,
+    "min_net_profit_delta": -25.0,
+    "min_score_delta": 0.0
+  },
+  "base_context": {
+    "base_config": "/Users/erikbengtson/Lean2026/LeanCustom/LauncherBacktest/SPX500InteractiveBrokersTrendScalperBacktestAlgorithm-optimizer-runs/run_001/config.before.json",
+    "base_net_profit": 7125.8,
+    "base_run": "run_001",
+    "base_score": 9594.488580188678,
+    "candidate_base": "best-by-score",
+    "candidate_base_config": "before",
+    "description": "The next run will be this leader/base config plus ONLY the JSON changes returned by the advisor.",
+    "mode": "candidate-base"
+  },
+  "changes": {
+    "profile.pullback_long.es-structure.min-score": "4",
+    "profile.pullback_long.es-vwap.max-distance": "8.5"
+  },
+  "expected_direction": "improve selected objective by changing entry quality/profile selection without starving trades",
+  "expected_effect": "Should reduce pullback_long deep-heat entries and improve average/worst MAE without touching fallback routing or option-confirmed profiles. Main risk is cutting profitable score-3 pullbacks, so reject if total net profit falls below 98% of run_001, pullback PnL drops materially, or trade count falls more than 10%.",
+  "family": "strategy-profile",
+  "label": "promote",
+  "objective_mode": "risk-adjusted",
+  "primary_metric": "score",
+  "rationale": "Use batch_c_pullback_long_distance as a narrow upstream-entry experiment on the only profile that both dominates profit and owns the latest worst MAE. The latest pullback_long produced 31 trades, $2294.6 PnL, 249.7 PnL/exposure hour, but also worst MAE -392. Broad hidden signatures were destructive, so this is a small profile-specific structure test rather than global veto tightening or runtime exits. Data-state classification is available; this only touches VALID_0DTE pullback_long and leaves MISSING/STALE/1DTE routing unchanged.",
+  "strategy_plan_label": "profit-expansion-restore-leader-plus-monetize-v1",
+  "strategy_plan_next_experiments": [
+    "High-MFE Winner Monetization",
+    "Extended-Rejection Near-Miss Micro Nudge",
+    "1DTE Companion Routing Probe",
+    "Call-Wall Precision Sample Builder",
+    "Regression Guardrail Batch"
+  ],
+  "strategy_plan_track": "profit-expansion",
+  "watch_metrics": [
+    "score",
+    "net_profit",
+    "trade_count",
+    "worst_mae",
+    "average_mae",
+    "drawdown",
+    "slow_trades"
+  ]
+}

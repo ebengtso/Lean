@@ -1,0 +1,10 @@
+[
+  {
+    "evidence": "charm_pin_pullback_long produced 34 trades and $1237.7 PnL but owns the global worst MAE at -527.0; the worst row is an extended-above-VWAP charm-pin pullback with weak momentum and delayed TP.",
+    "implementation_scope": "config-only",
+    "name": "Charm Pin Conditional Tail Gate",
+    "risk": "The signature may block some profitable charm-pin recoveries; reject if charm-pin retained PnL or total net profit falls materially without improving worst MAE.",
+    "trigger": "VALID_0DTE charm_pin_pullback_long entries with high VWAP extension, weak momentum, significant pullback/rejection distance, and moderate setup quality.",
+    "validation_metric": "Worst MAE improves from -527 toward <= -403 while total net profit stays >=98% of run_001 and fast_under_15m trades remain within 3 of baseline."
+  }
+]

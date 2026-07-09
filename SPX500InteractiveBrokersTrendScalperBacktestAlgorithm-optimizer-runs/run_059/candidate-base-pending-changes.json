@@ -1,0 +1,8 @@
+{
+  "applied_after_base_run": "run_044",
+  "changes": {
+    "higher-timeframe-resolution": "30min"
+  },
+  "source_changes": "/Users/erikbengtson/Lean2026/LeanCustom/LauncherBacktest/SPX500InteractiveBrokersTrendScalperBacktestAlgorithm-optimizer-runs/run_056/config-changes-applied.json",
+  "source_run": "run_056"
+}

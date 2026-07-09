@@ -1,0 +1,9 @@
+{
+  "attempt": 1,
+  "changes": {
+    "scalp-es-vwap-distance-min": "20"
+  },
+  "reason": "advisor repeated already-tested experiments for 3 attempt(s)",
+  "signature": "[[\"scalp-es-vwap-distance-min\",\"20\"]]",
+  "source": "threshold"
+}

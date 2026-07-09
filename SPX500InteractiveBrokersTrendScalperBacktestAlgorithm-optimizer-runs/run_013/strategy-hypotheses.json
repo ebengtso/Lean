@@ -1,0 +1,18 @@
+[
+  {
+    "evidence": "charm_wall_breakaway_long generated only 5 VALID_0DTE trades but contributed $985.6 with high PnL/exposure. Its worst MAE is -346.8, and the representative high-heat entry had very large extension and higher-high distance. A local structure/wall-distance box can test whether the profile is a clean convex edge or just a small-sample payoff artifact.",
+    "implementation_scope": "config-only",
+    "name": "Charm Wall Breakaway Structure Box",
+    "risk": "Sample size is small; stricter ES structure may remove one large winner and reduce total PnL without materially improving MAE.",
+    "trigger": "VALID_0DTE charm-wall breakaway entries where price is above the charm wall but ES structure confirmation is marginal or the entry is too far above the wall.",
+    "validation_metric": "Profile PnL/exposure remains above 200, worst MAE does not worsen, total net profit stays at least 98% of run_001, and completed trades decline by no more than 3."
+  },
+  {
+    "evidence": "The analyzer's extended-VWAP near-miss family covers most bad-MAE rows, but protected extended-VWAP winners account for meaningful fast PnL. Current legal Batch D keys can only express a local wall-distance/structure boundary, not the full surgical veto split.",
+    "implementation_scope": "requires-code",
+    "name": "Extended VWAP Tail-State Split",
+    "risk": "A blunt config translation would block profitable extended-VWAP winners; a code-level state split needs normalized, profile-aware features and out-of-sample validation.",
+    "trigger": "Entries matching repeated extended-VWAP rejection near misses with delayed early progress, weak support, or excessive distance from the relevant option wall.",
+    "validation_metric": "Worst MAE improves toward <= -403 with retained total PnL >=97%, protected fast winners mostly retained, and PnL/exposure hour flat or better."
+  }
+]

@@ -1,0 +1,5 @@
+{
+  "profile.pullback_long.dynamic-take-profit.max": "5",
+  "profile.pullback_long.es-vwap.max-distance": "12",
+  "profile.pullback_long.take-profit.distance": "2.5"
+}

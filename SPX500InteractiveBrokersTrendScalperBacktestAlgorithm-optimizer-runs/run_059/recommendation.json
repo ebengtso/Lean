@@ -1,0 +1,142 @@
+{
+  "changes": [
+    {
+      "key": "profile.breakout_long_no_0dte.es-structure.min-score",
+      "reason": "STALE_0DTE breakout fallback is the weakest active fallback sleeve: 2 trades, only 40.5 PnL/exposure hour, 52.6 minute median hold, and -250.25 worst MAE. Raising structure from 4 to the grid value 5 tests whether stale-data breakout entries need top-tier ES structure confirmation without touching VALID_0DTE profiles.",
+      "value": "5"
+    },
+    {
+      "key": "profile.breakout_long_no_0dte.rsi-momentum.threshold",
+      "reason": "The stale breakout slice shows high RSI but weak realization efficiency; increasing the fallback RSI threshold from 48 to 52 keeps only stronger ES momentum when option evidence is unavailable or stale.",
+      "value": "52"
+    },
+    {
+      "key": "profile.breakout_long_no_0dte.take-profit.distance",
+      "reason": "Lowering fixed TP from 3 to 2.5 is a narrow stale/no-0DTE realization test intended to reduce long recovery exposure in breakout fallback trades while preserving the ES-only fallback role.",
+      "value": "2.5"
+    }
+  ],
+  "expected_effect": "Should improve no-0DTE fallback exposure efficiency and reduce stale breakout MAE/hold drag while leaving VALID_0DTE and 1DTE option-confirmed edges unchanged. Main tradeoff is losing or underpaying the tiny stale breakout sample; reject if fallback expectancy turns negative or total net profit retention falls below 98%.",
+  "label": "promote",
+  "rationale": "Use batch_g_missing_0dte_policy_adapted, focused only on breakout_long_no_0dte. The current leader is strong overall, but STALE_0DTE fallback is low-efficiency and breakout_long_no_0dte is the worst stale fallback sleeve. This is not a global veto or option-profile change; it isolates stale/no-0DTE ES confirmation quality after prior broad pruning and extended-VWAP veto repair failed to improve score.",
+  "strategy_hypotheses": [
+    {
+      "evidence": "STALE_0DTE has 5 trades and $162.8, but breakout_long_no_0dte contributes only $71 over 2 trades with 40.5 PnL/exposure hour, 52.6 minute median hold, and -250.25 worst MAE. VALID_0DTE remains the core edge and should be unaffected by no-0DTE profile tuning.",
+      "implementation_scope": "config-only",
+      "name": "Stale No-0DTE Breakout Quality Box",
+      "risk": "Sample size is tiny; stricter structure and RSI can remove positive fallback insurance or underpay the single cleaner expired/no-0DTE breakout pattern.",
+      "trigger": "STALE_0DTE or EXPIRED_0DTE router selects breakout_long_no_0dte and the trade must rely on ES continuation rather than valid 0DTE option confirmation.",
+      "validation_metric": "Fallback PnL/exposure improves versus 83.2 aggregate and 40.5 breakout stale slice, fallback worst MAE improves or stays flat, VALID_0DTE trades/PnL remain unchanged, total net profit stays >=98% of leader, and slow_12h remains 0."
+    }
+  ],
+  "strategy_plan_reference": {
+    "market_regime_read": "Short 12.3-day, high-win-rate, take-profit-only SPX500 long scalper regime. Realized losses and slow >=12h trades are zero, so the risk-reducer target is hidden MAE, long recove...",
+    "new_strategy_ideas": [
+      {
+        "implementation_scope": "new-profile-config",
+        "name": "1DTE Pullback Companion Profile",
+        "validation_metric": "Combined 1DTE PnL >= $1315, 1DTE average/worst MAE flat or better than -124.6/-386.75, breakout_long_1dte retained PnL explicitly measured, total score flat or better."
+      },
+      {
+        "implementation_scope": "requires-code",
+        "name": "Early Progress Heat Classifier",
+        "validation_metric": "Worst MAE improves below -655.2 toward <= -513.4 while retaining >=98% total PnL, >=90% affected-profile PnL, >=95% protected fast winners, and slow_12h remains 0."
+      },
+      {
+        "implementation_scope": "config-only",
+        "name": "Dormant Pin-Avoid Router Attribution Probe",
+        "validation_metric": "Activated dormant profile positive standalone PnL or lower combined charm/pin/wall worst MAE, total net profit >=98% of leader, protected fast-winner retention >=95%, no slow tr..."
+      },
+      {
+        "implementation_scope": "requires-code",
+        "name": "Call-Wall Convex Recovery Monitor",
+        "validation_metric": "Call-wall worst MAE improves materially while retaining >=70% call-wall PnL, total net profit >=98% of leader, PnL/hour flat or better, and no slow trades."
+      }
+    ],
+    "next_experiments": [
+      {
+        "config_bias": "Isolate call_wall_acceptance_long only. Prefer persistence, acceptance-quality, and realization-shape research over disabling the profile or broad option-flow tightening. Treat ...",
+        "experiment_type": "risk-reducer",
+        "name": "Call-Wall Tail Containment Holdout",
+        "primary_metric": "Worst MAE, call_wall_acceptance_long PnL retention >=70%, total net profit >=98% of leader, completed trade drop <=10%, slow_12h = 0.",
+        "target_profiles": [
+          "call_wall_acceptance_long"
+        ]
+      },
+      {
+        "config_bias": "Use only narrow, profile-aware boundary research around already-enabled extended-VWAP rejection behavior. Do not use global ES-VWAP caps, setup-quality floors, or broad structur...",
+        "experiment_type": "risk-reducer",
+        "name": "Extended-VWAP Near-Miss Guard Retest",
+        "primary_metric": "Worst MAE and average MAE improvement with total PnL >=98%, protected fast-winner retention >=95%, extended-VWAP-winner retention >=95%, score flat or better.",
+        "target_profiles": [
+          "pullback_long",
+          "charm_pin_pullback_long",
+          "call_wall_acceptance_long",
+          "charm_wall_breakaway_long"
+        ]
+      },
+      {
+        "config_bias": "Research local weak-structure and early-heat boxes inside pullback_long only. Avoid global setup-quality/RSI/ADX/structure filters because pullback is the top PnL source and pro...",
+        "experiment_type": "profile-specific",
+        "name": "Pullback Weak-Structure Heat Box",
+        "primary_metric": "pullback_long worst MAE, pullback PnL retention >=90%, total PnL/hour flat or better, total net profit >=98%, protected winner retention >=95%.",
+        "target_profiles": [
+          "pullback_long"
+        ]
+      },
+      {
+        "config_bias": "Keep breakout_long_1dte baseline thresholds stable. If legal, test companion one-dte routing/activation as attribution; otherwise freeze direct 1DTE tuning and collect split dia...",
+        "experiment_type": "new-strategy",
+        "name": "1DTE Companion Split Attribution",
+        "primary_metric": "Combined 1DTE PnL, 1DTE average/worst MAE, breakout_long_1dte retained trades/PnL, total risk-adjusted score.",
+        "target_profiles": [
+          "breakout_long_1dte"
+        ]
+      },
+      {
+        "config_bias": "Treat STALE_0DTE and EXPIRED_0DTE separately if expressible. Preserve VALID_0DTE routing and avoid removing the single EXPIRED_0DTE winner; focus on weak STALE breakout efficiency.",
+        "experiment_type": "router",
+        "name": "No-0DTE Data-State Efficiency Holdout",
+        "primary_metric": "Fallback PnL/hour, fallback worst MAE, VALID_0DTE PnL/trade count unchanged, total net profit >=98%, slow_12h = 0.",
+        "target_profiles": [
+          "breakout_long_no_0dte",
+          "pullback_long_no_0dte",
+          "squeeze_long_no_0dte"
+        ]
+      },
+      {
+        "config_bias": "Preserve require-breakout and convex target behavior. Research only wall-structure and wall-distance admission/sample-building; avoid exit compression unless total PnL improves.",
+        "experiment_type": "profit-expansion",
+        "name": "Charm-Wall Structure-Confirmed Retention",
+        "primary_metric": "charm_wall_breakaway_long PnL/hour >=225, profile worst MAE no worse than -357, total net profit >=98%, total score flat or better.",
+        "target_profiles": [
+          "charm_wall_breakaway_long"
+        ]
+      }
+    ],
+    "plan_label": "risk_reducer_tail_containment_preserve_fast_convex_edges",
+    "profiles_to_expand": [
+      "call_wall_acceptance_long",
+      "pullback_long",
+      "charm_pin_pullback_long",
+      "breakout_long_1dte",
+      "charm_wall_breakaway_long",
+      "squeeze_long"
+    ],
+    "profiles_to_freeze": [
+      "breakout_long",
+      "wall_reclaim_long",
+      "wall_breakout_retest_long",
+      "late_day_pin_fade",
+      "negative_gamma_momentum_long",
+      "trend_day_pullback_long"
+    ],
+    "run": "run_059",
+    "strategy_track": "risk-reducer"
+  },
+  "validated_changes": {
+    "profile.breakout_long_no_0dte.es-structure.min-score": "5",
+    "profile.breakout_long_no_0dte.rsi-momentum.threshold": "52",
+    "profile.breakout_long_no_0dte.take-profit.distance": "2.5"
+  }
+}

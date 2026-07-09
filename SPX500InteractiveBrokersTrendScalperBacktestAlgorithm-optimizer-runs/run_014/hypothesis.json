@@ -1,0 +1,48 @@
+{
+  "acceptance_criteria": {
+    "max_trade_drop_pct": 10.0,
+    "min_mae_delta_for_mae_family": 0.0,
+    "min_net_profit_delta": -25.0,
+    "min_score_delta": 0.0
+  },
+  "base_context": {
+    "base_config": "/Users/erikbengtson/Lean2026/LeanCustom/LauncherBacktest/SPX500InteractiveBrokersTrendScalperBacktestAlgorithm-optimizer-runs/run_001/config.before.json",
+    "base_net_profit": 7125.8,
+    "base_run": "run_001",
+    "base_score": 9594.488580188678,
+    "candidate_base": "best-by-score",
+    "candidate_base_config": "before",
+    "description": "The next run will be this leader/base config plus ONLY the JSON changes returned by the advisor.",
+    "mode": "candidate-base"
+  },
+  "changes": {
+    "entry-veto-charm-pin-tail-risk-max-rolling-high-distance": "14.75",
+    "entry-veto-charm-pin-tail-risk-min-setup-quality-score": "60",
+    "entry-veto-charm-pin-tail-risk-min-vwap-distance": "20"
+  },
+  "expected_direction": "reduce tail MAE without materially reducing net profit or trade count",
+  "expected_effect": "Should reduce or isolate the remaining -527 charm_pin_pullback_long tail while preserving most fast charm-pin winners. Tradeoff is a small loss of profitable extended charm-pin recoveries if the high-extension box overlaps more than expected; reject if total PnL retention falls below 98% or fast_under_15m drops by more than 3.",
+  "family": "runtime-risk",
+  "label": "charm-pin-high-extension-tail-box",
+  "objective_mode": "risk-adjusted",
+  "primary_metric": "worst_mae",
+  "rationale": "Use one surgical-veto/runtime-risk family: refine the already accepted charm-pin tail-risk box instead of repeating failed 1DTE, fallback, call-wall, or broad entry-pruning experiments. The current leader's main defect is hidden heat, and the worst trade is a VALID_0DTE charm_pin_pullback_long threshold-box case: VWAP distance 26.20, rolling-high distance 14.75, pullback 9.75, weak RSI slope, ADX under 18, and -527 MAE. Prior charm-pin tail-box changes improved score and net profit, so this is the highest-evidence next move, but scoped tightly to avoid blocking protected extended-VWAP winners.",
+  "strategy_plan_label": "risk-reducer-surgical-tail-v3",
+  "strategy_plan_next_experiments": [
+    "Surgical Extended-VWAP Threshold Nudge",
+    "Charm-Pin Tail Box Refinement v2",
+    "Contextual Veto Consequence Test",
+    "Pullback Weak-Structure Tail Holdout",
+    "1DTE Router Split Holdout"
+  ],
+  "strategy_plan_track": "risk-reducer",
+  "watch_metrics": [
+    "score",
+    "net_profit",
+    "trade_count",
+    "worst_mae",
+    "average_mae",
+    "drawdown",
+    "slow_trades"
+  ]
+}

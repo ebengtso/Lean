@@ -1,0 +1,222 @@
+{
+  "best_edges": [
+    {
+      "action": "protect",
+      "edge": "VALID_0DTE pullback_long core edge",
+      "evidence": "pullback_long is the largest PnL contributor: 32 trades, $2455.4 PnL, $233.84/exposure hour, 100% win rate, no slow >=12h trades. Worst MAE is material at -403.2 but not the portfolio worst.",
+      "profile": "pullback_long"
+    },
+    {
+      "action": "protect",
+      "edge": "Charm-pin fast pullback edge",
+      "evidence": "charm_pin_pullback_long has 32 trades, $1271.8 PnL, $228.73/exposure hour, median hold 4.23 minutes, avg MAE only -58.3, and worst MAE -335.75. It is cleaner than prior charm-pin branches and should not be broadly filtered.",
+      "profile": "charm_pin_pullback_long"
+    },
+    {
+      "action": "expand-carefully",
+      "edge": "Charm-wall breakaway efficiency edge",
+      "evidence": "charm_wall_breakaway_long is small sample but highly efficient: 6 trades, $593.4 PnL, $487.84/exposure hour, no slow trades. Current worst MAE -357 is acceptable relative to the call-wall tail.",
+      "profile": "charm_wall_breakaway_long"
+    },
+    {
+      "action": "protect",
+      "edge": "1DTE fallback breakout edge",
+      "evidence": "VALID_1DTE_ONLY contributes 20 trades and $1315.3 PnL with no slow trades. Direct 1DTE tightening has repeatedly been risky, so the live breakout_long_1dte baseline should be preserved while companion splits are tested separately.",
+      "profile": "breakout_long_1dte"
+    },
+    {
+      "action": "isolate",
+      "edge": "Call-wall convex winner edge",
+      "evidence": "call_wall_acceptance_long produced only 2 trades but $640.5 and $290.29/exposure hour. It also owns the -655.2 worst MAE, so the edge is real but tail-heavy and needs split/containment research rather than broad removal.",
+      "profile": "call_wall_acceptance_long"
+    },
+    {
+      "action": "hold",
+      "edge": "Squeeze continuation edge",
+      "evidence": "squeeze_long produced 10 trades, $723.0 PnL, no slow trades, and worst MAE only -214.2. It is not the immediate risk source, but remains a useful medium-convexity contributor.",
+      "profile": "squeeze_long"
+    }
+  ],
+  "broken_edges": [
+    {
+      "action": "do-not-broadly-promote",
+      "evidence": "breakout_long, wall_reclaim_long, wall_breakout_retest_long, late_day_pin_fade, negative_gamma_momentum_long, and trend_day_pullback_long are configured but disabled or produced zero trades in this run. No evidence supports optimizing them in the current router state.",
+      "problem": "Dormant/dead active-router concepts have no current attribution and should not consume optimization budget except as explicitly isolated activation tests.",
+      "profile": "multiple inactive valid-0DTE profiles"
+    },
+    {
+      "action": "quarantine-research",
+      "evidence": "call_wall_acceptance_long has only 2 trades but contributes the portfolio worst MAE -655.2 and average MAE -333.68. The worst tail was profitable at +$546, so simple removal would sacrifice a major convex winner.",
+      "problem": "Tail-heavy convex profile with too little sample for hard pruning.",
+      "profile": "call_wall_acceptance_long"
+    },
+    {
+      "action": "holdout-only",
+      "evidence": "STALE_0DTE has 5 trades and $162.8 PnL, but breakout_long_no_0dte stale trades have weak efficiency: 2 trades, $71.0 PnL, $40.5/exposure hour, avg MAE -210.6. EXPIRED_0DTE has a single strong winner and should not be generalized.",
+      "problem": "No-0DTE fallback data states are profitable but under-sampled and mixed; avoid changes that leak into VALID_0DTE routing.",
+      "profile": "breakout_long_no_0dte,pullback_long_no_0dte,squeeze_long_no_0dte"
+    },
+    {
+      "action": "avoid-repeat",
+      "evidence": "Historical experiments show upstream timing/indicator changes were damaging: indicator-register-resolution=Second, ema-period=12, and adx-period=10 all caused large score and MAE degradation.",
+      "problem": "Global upstream-entry regime shifts are fragile and should be frozen.",
+      "profile": "global"
+    }
+  ],
+  "market_regime_read": "Current regime is a short-sample, high-win-rate, take-profit-only long scalper over roughly 12.3 calendar days. The live edge is broad enough across pullback, charm-pin, 1DTE fallback, squeeze, charm-wall, and call-wall profiles, but risk is hidden in intratrade MAE and recovery time rather than realized losses. The latest run improves PnL/hour versus the leader family but still carries the same -655.2 call-wall worst MAE and slightly lower net profit than run_044/run_050. New-regime work should therefore focus on profile splits and data-state attribution: isolate convex call-wall tails, test companion 1DTE routing, and probe dormant pin-avoid concepts without disturbing the protected fast-winner population.",
+  "new_strategy_ideas": [
+    {
+      "edge": "Separates 1DTE pullback/reclaim states from clean 1DTE breakout continuation while preserving the profitable breakout_long_1dte baseline.",
+      "failure_mode": "Companion routing may cannibalize the existing 20-trade breakout_long_1dte edge or be unreachable under current data-state routing.",
+      "implementation_scope": "new-profile-config",
+      "name": "1DTE Pullback Companion Profile",
+      "required_data": "VALID_1DTE_ONLY entries with ES pullback/reclaim structure, existing option strike map fields, 1DTE PnL/MAE attribution, and cannibalization versus breakout_long_1dte.",
+      "trigger": "0DTE unavailable, 1DTE map valid, and ES state resembles pullback/reclaim rather than clean breakout continuation.",
+      "validation_metric": "Combined 1DTE PnL >= $1315, 1DTE average MAE better than -124.6, breakout_long_1dte retained PnL explicitly measured, total net profit >=98% of leader, and risk-adjusted score flat or better."
+    },
+    {
+      "edge": "Uses intratrade path behavior to distinguish delayed convex recoveries from clean fast winners in call-wall and pullback families.",
+      "failure_mode": "Path-aware logic can overfit a few profitable delayed recoveries and cut the largest winners unless validated against protected fast winners and out-of-sample days.",
+      "implementation_scope": "requires-code",
+      "name": "Convex Recovery Monitor",
+      "required_data": "Intratrade first-profit timing, half-TP touch time, MFE before MAE, first 15m MFE/MAE, profile, target distance, and option-flow context.",
+      "trigger": "call_wall_acceptance_long or pullback-family entry with wide target or weak early progress before adverse expansion.",
+      "validation_metric": "Reduce worst MAE below -655.2 toward <= -513.4 while retaining >=70% call-wall PnL, >=90% combined pullback/charm PnL, >=95% protected fast-winner UTCs, and slow_12h remains 0."
+    },
+    {
+      "edge": "Config-only dormant split to test whether existing pin-avoid playbook can absorb charm/pin tail states without changing core profiles.",
+      "failure_mode": "Dormant profile may be unreachable or may steal profitable charm_pin_pullback_long/charm_wall_breakaway_long trades without improving MAE.",
+      "implementation_scope": "config-only",
+      "name": "Charm Wall Pin-Avoid Dormant Router Probe",
+      "required_data": "VALID_0DTE router attribution, dormant charm_wall_pin_avoid_long standalone PnL, combined charm/pin PnL and MAE, protected fast-winner retention.",
+      "trigger": "VALID_0DTE charm/pin/wall context where current charm_pin_pullback_long or charm_wall_breakaway_long admits extended or pin-risk entries.",
+      "validation_metric": "Activated dormant profile has positive standalone PnL or lowers combined charm/pin worst MAE, total net profit >=98% of leader, protected fast-winner retention >=95%, and no slow trades."
+    },
+    {
+      "edge": "Separates deep-heat pullback entries from clean fast pullbacks using path and structure context.",
+      "failure_mode": "The worst pullback tails are still winners; over-tightening can lose high-throughput $2455 pullback core PnL.",
+      "implementation_scope": "requires-code",
+      "name": "Pullback Deep-Heat Companion Classifier",
+      "required_data": "pullback_long trade paths, ES structure score and higher-low/high distances, early MFE/MAE, entry veto reasons, and protected fast-winner UTCs.",
+      "trigger": "pullback_long entry with poor early positive progress, weak structure, or low MFE-before-MAE signature.",
+      "validation_metric": "Retain >=90% pullback_long PnL, improve pullback worst MAE from -403.2, keep total PnL/exposure flat or better, and preserve >=95% fast winners."
+    },
+    {
+      "edge": "Tests whether delta/charm breakout is a distinct continuation regime separate from squeeze and charm-wall breakaway.",
+      "failure_mode": "May duplicate squeeze_long or charm_wall_breakaway_long and add complexity without standalone PnL.",
+      "implementation_scope": "config-only",
+      "name": "Delta Charm Breakout Dormant Attribution Probe",
+      "required_data": "VALID_0DTE router activation, delta_charm_breakout_long standalone trades/PnL, overlap/cannibalization against squeeze_long and charm_wall_breakaway_long.",
+      "trigger": "Strong option-flow continuation with charm/delta support and breakout structure, currently likely routed into squeeze_long or charm_wall_breakaway_long.",
+      "validation_metric": "Positive standalone PnL, no more than 10% degradation in squeeze/charm-wall combined PnL, total net profit >=98% of leader, and worst MAE no worse than -513.4."
+    }
+  ],
+  "next_experiments": [
+    {
+      "config_bias": "Use an isolated call_wall_acceptance_long research branch. Prefer smaller realization/acceptance containment or split-style attribution, not broad global filters. Require explicit retention of the $546 convex winner economics if the MAE does not improve enough.",
+      "experiment_type": "profile-specific",
+      "goal": "Discover whether call-wall can be split into clean convex continuation versus dangerous delayed recovery.",
+      "hypothesis": "The -655.2 worst MAE is a call-wall-specific convex recovery state, not a portfolio-wide entry-quality failure. A local call-wall acceptance/realization box can reduce tail heat without sacrificing the core pullback/charm edges.",
+      "name": "Call-Wall Convex Tail Split",
+      "primary_metric": "Worst MAE, call_wall_acceptance_long PnL retention, total net profit retention, and total risk-adjusted score.",
+      "risk": "Only 2 call-wall trades exist; any improvement may be noise and may underpay the largest winner.",
+      "target_profiles": [
+        "call_wall_acceptance_long"
+      ]
+    },
+    {
+      "config_bias": "Activate exactly one dormant pin-avoid concept through the full valid-0DTE router replacement if legal, with minimal same-profile tuning only. Treat as attribution research, not promotion by default.",
+      "experiment_type": "new-strategy",
+      "goal": "Test whether an existing dormant pin-avoid profile can capture or quarantine charm/pin tail states.",
+      "hypothesis": "Some charm-pin/charm-wall entries are distinct pin-avoid states that should be routed to a specialized dormant profile rather than globally filtered.",
+      "name": "Dormant Pin-Avoid Attribution Split",
+      "primary_metric": "Activated profile standalone PnL, combined charm-pin/charm-wall/pin-avoid worst MAE, total score, and protected fast-winner retention.",
+      "risk": "Router activation can cannibalize profitable charm_pin_pullback_long or charm_wall_breakaway_long trades and reduce sample quality.",
+      "target_profiles": [
+        "charm_pin_pullback_long",
+        "charm_wall_breakaway_long"
+      ]
+    },
+    {
+      "config_bias": "Keep breakout_long_1dte thresholds stable. Test companion one-dte routing only if legal; do not tighten the existing 1DTE breakout edge directly.",
+      "experiment_type": "new-strategy",
+      "goal": "Discover a separate 1DTE pullback/reclaim regime while preserving the profitable 1DTE breakout fallback.",
+      "hypothesis": "The 20-trade, $1315 1DTE edge may contain multiple ES regimes; a companion profile can improve MAE or add trades without damaging breakout_long_1dte.",
+      "name": "1DTE Companion Split Holdout",
+      "primary_metric": "Combined 1DTE PnL, 1DTE average/worst MAE, breakout_long_1dte retained PnL, and total score.",
+      "risk": "The companion can be unreachable or cannibalize the profitable baseline.",
+      "target_profiles": [
+        "breakout_long_1dte"
+      ]
+    },
+    {
+      "config_bias": "Use only narrow boundary research around the already-enabled extended-VWAP rejection family. Avoid broad ES-VWAP caps because extended_vwap_winners produced 18 trades and $840.7 with fast resolution.",
+      "experiment_type": "risk-reducer",
+      "goal": "Validate whether near-miss extended-VWAP veto boundaries can reduce MAE while preserving fast extended winners.",
+      "hypothesis": "The enabled extended-VWAP rejection signature nearly matched all 24 bad-MAE rows; surgical boundary nudges may catch tail entries better than global structure or setup filters.",
+      "name": "Extended-VWAP Near-Miss Validation",
+      "primary_metric": "Worst MAE, retained total PnL >=98%, protected extended-VWAP winner retention >=95%, and PnL/exposure hour.",
+      "risk": "The same extension regime is a real edge, so widening veto thresholds can remove profitable fast winners.",
+      "target_profiles": [
+        "call_wall_acceptance_long",
+        "pullback_long",
+        "charm_pin_pullback_long",
+        "charm_wall_breakaway_long"
+      ]
+    },
+    {
+      "config_bias": "Keep current squeeze admission strict and test only continuation/target philosophy around the existing profile. Do not loosen option-map or order-book confirmation.",
+      "experiment_type": "profit-expansion",
+      "goal": "Determine whether squeeze_long can add convex PnL without increasing hidden MAE.",
+      "hypothesis": "squeeze_long has low worst MAE (-214.2) and positive PnL but only 10 trades; it may support isolated continuation expansion better than tail-heavy call-wall changes.",
+      "name": "Squeeze Clean Continuation Probe",
+      "primary_metric": "squeeze_long PnL, squeeze worst MAE, total PnL/exposure hour, and total score.",
+      "risk": "Prior TP/entry changes can shift exposure without improving total objective; small sample risk remains.",
+      "target_profiles": [
+        "squeeze_long"
+      ]
+    },
+    {
+      "config_bias": "Treat STALE_0DTE, EXPIRED_0DTE, and MISSING_0DTE separately if the optimizer can express that. Avoid any change that reduces VALID_0DTE flow or removes the single EXPIRED_0DTE winner.",
+      "experiment_type": "router",
+      "goal": "Understand whether no-0DTE fallback deserves stricter or separate routing.",
+      "hypothesis": "No-0DTE fallback is profitable but mixed: EXPIRED_0DTE is a single strong winner, pullback stale is efficient, breakout stale is weak and MAE-heavy. Data-state-specific handling may improve risk-adjusted score.",
+      "name": "No-0DTE Data-State Holdout",
+      "primary_metric": "Fallback PnL/exposure, fallback worst MAE, unchanged VALID_0DTE PnL/trade count, total net profit >=98%, and slow_12h = 0.",
+      "risk": "Only 6 fallback trades exist, so overfitting is likely; state leakage into VALID_0DTE would be unacceptable.",
+      "target_profiles": [
+        "breakout_long_no_0dte",
+        "pullback_long_no_0dte",
+        "squeeze_long_no_0dte"
+      ]
+    }
+  ],
+  "plan_label": "new_regime_profile_split_data_state_and_convex_tail_discovery",
+  "profiles_to_expand": [
+    "call_wall_acceptance_long",
+    "charm_wall_breakaway_long",
+    "charm_pin_pullback_long",
+    "breakout_long_1dte",
+    "squeeze_long",
+    "pullback_long"
+  ],
+  "profiles_to_freeze": [
+    "breakout_long",
+    "wall_reclaim_long",
+    "wall_breakout_retest_long",
+    "late_day_pin_fade",
+    "negative_gamma_momentum_long",
+    "trend_day_pullback_long"
+  ],
+  "research_notes": "The key research tension is that the current leader family is profitable because it allows delayed green recoveries, but those recoveries hide large MAE. Single-threshold filters are weak: the report found no useful broad candidate, and hidden signatures that improve worst MAE retain only about 70-83% of PnL. The optimizer should prefer isolated profile splits, dormant activation attribution, and narrow veto-boundary validation over global entry changes. Protected good-trade fingerprints are critical: fast winners contribute $5023.3, low-MAE winners $4108.8, high-PnL winners $3766.0, and extended-VWAP winners $840.7. Any research branch that blocks these without a large MAE and score improvement should be rejected.",
+  "risk_controls": [
+    "Reject broad setup-quality floors: setup_quality_score >=73.5 would block 86 trades and retain only 17.3% of PnL despite removing the worst tail.",
+    "Do not repeat global upstream changes such as EMA period, ADX period, or indicator resolution; historical memory shows severe score, drawdown, and MAE degradation.",
+    "Preserve protected fast-winner and extended-VWAP winner UTCs unless worst MAE improves materially and total PnL retention remains high.",
+    "Keep slow_12h trades at 0; any branch that creates slow holds is invalid regardless of net PnL.",
+    "Require total net profit retention >=98% of the leader for risk-reducer and split experiments unless the explicit purpose is pure attribution discovery.",
+    "Measure cannibalization for any dormant or companion profile activation, especially against charm_pin_pullback_long, charm_wall_breakaway_long, squeeze_long, and breakout_long_1dte.",
+    "Do not optimize inactive standard valid-0DTE profiles with zero attribution unless the experiment is a single isolated dormant activation with router-list replacement."
+  ],
+  "strategy_track": "new-regime"
+}

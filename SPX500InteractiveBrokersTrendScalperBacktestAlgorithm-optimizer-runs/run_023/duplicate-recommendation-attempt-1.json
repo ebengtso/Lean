@@ -1,0 +1,52 @@
+{
+  "changes": {
+    "entry-veto-charm-pin-tail-risk-max-pullback-from-high": "10",
+    "entry-veto-charm-pin-tail-risk-max-rolling-high-distance": "15",
+    "entry-veto-charm-pin-tail-risk-min-setup-quality-score": "60"
+  },
+  "duplicate_of": "run_011",
+  "error": "duplicate experiment",
+  "iteration": 8,
+  "recommendation": {
+    "changes": [
+      {
+        "key": "entry-veto-charm-pin-tail-risk-max-pullback-from-high",
+        "reason": "Restore the previously successful charm-pin tail box boundary so the 2026-06-26 worst tail with pullback-from-high 9.75 is inside the surgical veto envelope instead of being excluded by the current 4.5 cap.",
+        "value": "10"
+      },
+      {
+        "key": "entry-veto-charm-pin-tail-risk-max-rolling-high-distance",
+        "reason": "The worst charm-pin tail had rolling-high distance 14.75; prior memory shows 15 was accepted and improved objective/net profit versus the weaker tail configuration, while the current 6 cap misses this state.",
+        "value": "15"
+      },
+      {
+        "key": "entry-veto-charm-pin-tail-risk-min-setup-quality-score",
+        "reason": "Lower the charm-pin tail-risk setup floor from 70 to 60 so the worst tail at setup 61.99 is captured without using a destructive broad setup-quality filter that would retain only 40.4% PnL.",
+        "value": "60"
+      }
+    ],
+    "expected_effect": "Should retest the accepted charm-pin high-extension tail box against the current best-by-score base: target lower worst/average MAE by catching the -527 charm-pin near-miss, while preserving the fast charm-pin book. Tradeoff is possible loss of a few profitable high-extension charm-pin recoveries; reject if total PnL retention falls below 98% or fast winners are materially reduced.",
+    "label": "charm-pin-tail-box-restore",
+    "rationale": "Use one surgical-veto family, not another saturated take-profit or broad entry-pruning run. The latest worst tail is charm_pin_pullback_long with ES-VWAP 26.2, rolling-high distance 14.75, pullback-from-high 9.75, weak RSI/ADX warnings, and setup 61.99. Prior experiment memory shows this exact charm-pin tail-risk box direction improved score by +908, net profit by +864, and worst MAE by +111.75 from a weaker configuration, while broad scalar filters would over-delete protected winners.",
+    "strategy_hypotheses": [
+      {
+        "evidence": "charm_pin_pullback_long produced $1474.1 over 38 trades with median hold 5.3 minutes, but owns the global -527 MAE. The worst row missed current tail-risk bounds by rolling-high/pullback/setup thresholds, while protected extended-VWAP winners argue against broad VWAP-distance pruning.",
+        "implementation_scope": "config-only",
+        "name": "Charm Pin High-Extension Tail Box",
+        "risk": "The box can still overlap profitable high-extension charm-pin recoveries; reject if charm_pin_pullback_long PnL retention falls below 90%, total net profit below 98% of run_001, or fast-under-15m trades drop materially.",
+        "trigger": "VALID_0DTE charm_pin_pullback_long with high ES-VWAP extension, large rolling-high/pullback distance, weak momentum warnings, and setup quality high enough to be a tail-risk near-miss rather than a low-quality generic filter.",
+        "validation_metric": "Worst MAE improves from -527 toward <= -403, average MAE improves or stays flat, total PnL remains >=98% of run_001, completed trades drop <=5, and protected fast/extended-VWAP winner retention remains >=90%."
+      },
+      {
+        "evidence": "The analyzer shows the current config lacks early-path features; the worst charm-pin trade had no positive progress before MAE and first +1.5 points only after 80 minutes, while many protected extended-VWAP winners resolve quickly.",
+        "implementation_scope": "requires-code",
+        "name": "Charm Pin Early-Progress Tail Classifier",
+        "risk": "Requires intratrade path-aware logic; a config-only proxy may block clean high-extension winners that would have resolved quickly.",
+        "trigger": "charm_pin_pullback_long high-extension/rejection entries that fail to make early positive progress after entry.",
+        "validation_metric": "Reduce charm_pin_pullback_long worst MAE below -403 while retaining >=90% charm-pin PnL and >=95% protected fast-winner count."
+      }
+    ]
+  },
+  "run": "run_023",
+  "signature": "[[\"entry-veto-charm-pin-tail-risk-max-pullback-from-high\",\"10\"],[\"entry-veto-charm-pin-tail-risk-max-rolling-high-distance\",\"15\"],[\"entry-veto-charm-pin-tail-risk-min-setup-quality-score\",\"60\"]]"
+}

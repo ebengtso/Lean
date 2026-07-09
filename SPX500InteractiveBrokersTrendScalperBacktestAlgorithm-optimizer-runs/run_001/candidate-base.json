@@ -1,0 +1,15 @@
+{
+  "base_config": "/Users/erikbengtson/Lean2026/LeanCustom/LauncherBacktest/config.json",
+  "base_drawdown": "",
+  "base_growth_quality_score": "",
+  "base_net_profit": "",
+  "base_run": "",
+  "base_score": "",
+  "bootstrap": true,
+  "candidate_base": "best-by-score",
+  "candidate_base_config": "before",
+  "description": "No valid leaderboard runs yet; using the current config as the first candidate.",
+  "iteration": 1,
+  "objective_mode": "risk-adjusted",
+  "run_number": 1
+}

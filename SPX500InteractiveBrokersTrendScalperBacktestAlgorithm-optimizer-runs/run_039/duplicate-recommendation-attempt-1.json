@@ -1,0 +1,38 @@
+{
+  "changes": {
+    "__router.valid-0dte-profiles": "breakout_long,pullback_long,squeeze_long,wall_reclaim_long,wall_breakout_retest_long,late_day_pin_fade,negative_gamma_momentum_long,trend_day_pullback_long,charm_pin_pullback_long,charm_wall_breakaway_long,call_wall_acceptance_long,charm_wall_pin_avoid_long",
+    "profile.charm_wall_pin_avoid_long.enabled": "true"
+  },
+  "duplicate_of": "run_022",
+  "error": "duplicate experiment",
+  "iteration": 13,
+  "recommendation": {
+    "changes": [
+      {
+        "key": "__router.valid-0dte-profiles",
+        "reason": "Activate the dormant charm-wall pin-avoid concept only inside the VALID_0DTE router, preserving all existing productive valid-0DTE profiles and avoiding any missing/stale 0DTE option-confirmed behavior change.",
+        "value": "breakout_long,pullback_long,squeeze_long,wall_reclaim_long,wall_breakout_retest_long,late_day_pin_fade,negative_gamma_momentum_long,trend_day_pullback_long,charm_pin_pullback_long,charm_wall_breakaway_long,call_wall_acceptance_long,charm_wall_pin_avoid_long"
+      },
+      {
+        "key": "profile.charm_wall_pin_avoid_long.enabled",
+        "reason": "Run a pure attribution probe for the existing dormant pin-avoid playbook logic. Current tail risk clusters in charm/pin profiles, especially charm_pin_pullback_long worst MAE -513.4 and charm_wall_breakaway_long average MAE -213.3, while broad filters remove too much protected PnL.",
+        "value": "true"
+      }
+    ],
+    "expected_effect": "This should reveal whether the existing pin-avoid profile can absorb or reclassify tail-heavy charm/pin states without tightening global vetoes or damaging the pullback/squeeze/1DTE engines. Main tradeoff is cannibalization of profitable charm_pin_pullback_long or charm_wall_breakaway_long flow; reject unless total net profit retains at least 98% of run_029, protected fast winners are preserved, and combined charm/pin MAE or attribution improves.",
+    "label": "promote",
+    "rationale": "Use the strategist's Dormant Pin-Avoid Attribution Probe as one config-only strategy-profile family. The best-by-score base is already strong, and recent direct charm-wall geometry, 1DTE tightening, no-0DTE tightening, and broad hidden-signature pruning either hurt score or risk over-filtering. This activation is additive and diagnostic: it changes routing attribution for VALID_0DTE only, does not touch missing/stale fallback policy, and does not impose a global entry veto.",
+    "strategy_hypotheses": [
+      {
+        "evidence": "charm_pin_pullback_long contributes $1325.1 over 34 VALID_0DTE trades with fast 3.8 minute median hold but owns the global -513.4 MAE. charm_wall_breakaway_long is profitable but tail-heavy, with 3 trades, $532.6 PnL, -346.8 worst MAE, and low 140.8 PnL/exposure in the latest run. Static filters overlap protected extended-VWAP winners, so router-level attribution is the cleaner next probe.",
+        "implementation_scope": "config-only",
+        "name": "Charm Wall Pin-Avoid Attribution Probe",
+        "risk": "The dormant profile may be unreachable, or it may cannibalize high-quality charm-pin/charm-wall winners without reducing MAE or exposure. Treat this as discovery, not promotion, unless standalone attribution is positive and portfolio score improves.",
+        "trigger": "VALID_0DTE charm/pin context where the existing playbook identifies pin-avoid risk that currently routes into charm_pin_pullback_long or charm_wall_breakaway_long.",
+        "validation_metric": "Activated profile has positive standalone PnL or reduces combined charm/pin worst MAE, total net profit remains >=98% of run_029, completed trades do not fall more than 10%, pnl_per_exposure_hour is flat or better, and protected fast/extended-VWAP winner retention remains >=95%."
+      }
+    ]
+  },
+  "run": "run_039",
+  "signature": "[[\"__router.valid-0dte-profiles\",\"breakout_long,pullback_long,squeeze_long,wall_reclaim_long,wall_breakout_retest_long,late_day_pin_fade,negative_gamma_momentum_long,trend_day_pullback_long,charm_pin_pullback_long,charm_wall_breakaway_long,call_wall_acceptance_long,charm_wall_pin_avoid_long\"],[\"profile.charm_wall_pin_avoid_long.enabled\",\"true\"]]"
+}

@@ -1,0 +1,48 @@
+{
+  "acceptance_criteria": {
+    "max_trade_drop_pct": 10.0,
+    "min_mae_delta_for_mae_family": 0.0,
+    "min_net_profit_delta": -25.0,
+    "min_score_delta": 0.0
+  },
+  "base_context": {
+    "base_config": "/Users/erikbengtson/Lean2026/LeanCustom/LauncherBacktest/SPX500InteractiveBrokersTrendScalperBacktestAlgorithm-optimizer-runs/run_044/config.before.json",
+    "base_net_profit": 7532.8,
+    "base_run": "run_044",
+    "base_score": 9940.283058006535,
+    "candidate_base": "best-by-score",
+    "candidate_base_config": "before",
+    "description": "The next run will be this leader/base config plus ONLY the JSON changes returned by the advisor.",
+    "mode": "candidate-base"
+  },
+  "changes": {
+    "__router.valid-0dte-profiles": "breakout_long,pullback_long,squeeze_long,wall_reclaim_long,wall_breakout_retest_long,late_day_pin_fade,negative_gamma_momentum_long,trend_day_pullback_long,charm_pin_pullback_long,charm_wall_breakaway_long,call_wall_acceptance_long,delta_charm_breakout_long",
+    "profile.delta_charm_breakout_long.enabled": "true"
+  },
+  "expected_direction": "improve selected objective by changing entry quality/profile selection without starving trades",
+  "expected_effect": "Should reveal whether delta/charm breakout captures incremental VALID_0DTE continuation PnL or reroutes low-quality entries away from existing squeeze/charm-wall/call-wall profiles. Accept only if total net profit stays within 98% of run_055, completed trades do not drop more than 10%, slow_12h remains 0, and squeeze plus charm_wall_breakaway combined PnL is not materially cannibalized. Main tradeoff is duplicate routing of an already-covered option-flow state.",
+  "family": "strategy-profile",
+  "label": "delta-charm-breakout-attribution-probe",
+  "objective_mode": "risk-adjusted",
+  "primary_metric": "score",
+  "rationale": "The leader is plateaued across run_044/run_050/run_055, and repeated call-wall/charm-wall/take-profit keysets are now either flat or profit-suppressive. The strategist track explicitly calls for new-regime router attribution. Activating delta_charm_breakout_long is the cleanest legal config-only discovery experiment: it changes no global vetoes, does not loosen missing/stale 0DTE behavior, and tests an underexplored VALID_0DTE option-flow concept against protected squeeze and charm-wall continuation edges.",
+  "strategy_plan_label": "new_regime_router_data_state_and_tail_split_discovery",
+  "strategy_plan_next_experiments": [
+    "Dormant Pin-Avoid Attribution Split",
+    "1DTE Companion Split Holdout",
+    "Call-Wall Convex Tail Split",
+    "Extended-VWAP Near-Miss Boundary Study",
+    "No-0DTE Data-State Efficiency Holdout",
+    "Squeeze Clean Continuation Benchmark"
+  ],
+  "strategy_plan_track": "new-regime",
+  "watch_metrics": [
+    "score",
+    "net_profit",
+    "trade_count",
+    "worst_mae",
+    "average_mae",
+    "drawdown",
+    "slow_trades"
+  ]
+}

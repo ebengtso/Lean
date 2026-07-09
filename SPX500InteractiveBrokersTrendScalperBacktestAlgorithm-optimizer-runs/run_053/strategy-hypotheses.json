@@ -1,0 +1,18 @@
+[
+  {
+    "evidence": "pullback_long is the top PnL source with $2413.2 over 31 trades but owns the -638.75 worst MAE. Static broad filters either retain only 70-87% PnL or leave worst MAE unresolved, while the enabled extended-VWAP rejection signature has exact near-miss diagnostics.",
+    "implementation_scope": "config-only",
+    "name": "Extended-VWAP Near-Miss Tail Repair",
+    "risk": "Over-widening the veto can block clean extended-above-VWAP winners; validate protected fast-winner and extended-VWAP-winner retention explicitly.",
+    "trigger": "VALID_0DTE pullback/charm-pin entries with extended-VWAP rejection geometry that miss the existing surgical veto by only RSI-slope, pullback-from-high, or higher-high boundary.",
+    "validation_metric": "Worst MAE improves toward <= -513.4, total PnL remains >=98% of run_044, completed trades drop <=10%, pnl_per_exposure_hour stays flat or better, and slow_12h remains 0."
+  },
+  {
+    "evidence": "The worst heat rows often failed to make meaningful early progress before adverse expansion, while protected fast winners typically resolved quickly. This distinction is visible in intratrade path columns but not fully expressible with current static config.",
+    "implementation_scope": "requires-code",
+    "name": "Early Progress Heat Classifier",
+    "risk": "Can overfit a small tail sample and block delayed-but-profitable recoveries unless validated against protected UTCs and out-of-sample slices.",
+    "trigger": "pullback_long or charm_pin_pullback_long entries that fail to print early positive progress or half-TP progress before adverse expansion.",
+    "validation_metric": "Reduce worst MAE below current tail levels while retaining >=90% affected-profile PnL and >=95% protected fast-winner entries."
+  }
+]

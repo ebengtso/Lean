@@ -1,0 +1,18 @@
+[
+  {
+    "evidence": "charm_pin_pullback_long contributes $1261.5 across 34 VALID_0DTE trades with fast median hold near 5 minutes, but owns the global -513.4 MAE. The worst row combines ES-VWAP 26.69, pullback-from-high 9.25, rolling-high distance 14.25, negative VWAP acceleration, RSI 42.42, ADX 17.95, and delayed TP after 80 minutes.",
+    "implementation_scope": "config-only",
+    "name": "Charm Pin High-Extension Tail Box",
+    "risk": "The tail box can still remove profitable delayed recoveries because the bad trade ultimately closed green; require strict PnL and protected-winner retention before promotion.",
+    "trigger": "VALID_0DTE charm_pin_pullback_long entries with high ES extension, recent-high rejection/pullback, weak momentum warnings, and stalled VWAP acceleration.",
+    "validation_metric": "Reduce charm_pin_pullback_long worst MAE toward <= -403 while retaining >=90% charm-pin PnL, >=95% protected fast extended-VWAP winners, total net profit >=98% of run_029, and slow_12h remains 0."
+  },
+  {
+    "evidence": "Analyzer path stats show the worst tail had MFE after MAE and first +1.5 points only after 80 minutes, while protected fast extended-VWAP winners usually resolve quickly. Static config can only approximate this behavior.",
+    "implementation_scope": "requires-code",
+    "name": "Charm Pin Early-Progress Tail Classifier",
+    "risk": "Path-aware logic can overfit a small tail sample unless validated against protected fast-winner UTCS and out-of-sample days.",
+    "trigger": "charm_pin_pullback_long high-extension entries that fail to make early positive progress after entry.",
+    "validation_metric": "Reduce charm_pin_pullback_long worst MAE below the current -513.4 while retaining >=90% profile PnL, >=95% protected fast-winner count, and total score flat or better."
+  }
+]

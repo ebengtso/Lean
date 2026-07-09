@@ -1,0 +1,137 @@
+{
+  "changes": [
+    {
+      "key": "trade-risk-max-adverse-points",
+      "reason": "Validate the dormant hard-risk module at a deliberately loose 12-point adverse threshold. This is not a realized stop-loss recommendation; it is a bounded risk-module experiment to determine whether the platform treats this value as a disabled/diagnostic adverse threshold or an active hard exit. Reject immediately if it creates realized-loss exits or suppresses the pullback/charm-pin recovery edge.",
+      "value": "12"
+    },
+    {
+      "key": "use-stale-trade-exit",
+      "reason": "Run the stale-trade maintenance module as an isolated risk-family test. Latest tails are slow-to-profit recoveries with no >=12h holds, so the hypothesis is that stale-trade logic can trim pathological capital lockup without changing entry selection.",
+      "value": "true"
+    },
+    {
+      "key": "use-trade-health-exit",
+      "reason": "Enable trade-health validation to test whether existing health signals can distinguish the worst no-stop tail recoveries from normal profitable pullbacks. Prior entry/take-profit families are saturated and harmful; this tests runtime risk diagnostics instead of another entry prune.",
+      "value": "true"
+    }
+  ],
+  "expected_effect": "Should reveal whether runtime risk modules improve drawdown, exposure hours, and worst/average MAE without starving trades. Reject if realized losses appear, net profit falls below 98% of run_001, trade count falls more than 10%, pnl_per_exposure_hour falls, or the module merely exits recoverable winners earlier.",
+  "label": "runtime-risk-validation",
+  "rationale": "Use batch_f_risk_module_validation because take-profit experiments are hard-saturated and recent call-wall/1DTE/fallback tightening hurt score and net profit. The latest run has no realized losses and no >=12h trades, but worst MAE deteriorated to -638.75 and several winners required long underwater recovery. This is the cleanest non-entry, non-TP experiment to test whether existing runtime health/stale logic can reduce hidden no-stop tail cost while preserving the profitable entry population.",
+  "strategy_hypotheses": [
+    {
+      "evidence": "run_009 has 98 winners and zero realized losses, but worst MAE is -638.75, average MAE is about -106, exposure is 35.6 hours, and worst tails took 80-188 minutes to recover. Trade-health signals were logged as zero in the current run, so enabling the module is a direct validation of whether the switch is currently inert or genuinely protective.",
+      "implementation_scope": "config-only",
+      "name": "Runtime Health Tail Containment",
+      "risk": "The module may convert recoverable no-stop winners into premature realized losses or reduce net profit without improving score; reject on any meaningful profit suppression or realized-loss creation.",
+      "trigger": "Open long trade develops stale/poor health characteristics after entry rather than being filtered pre-entry.",
+      "validation_metric": "Risk-adjusted score improves with net profit >=98% of run_001, pnl_per_exposure_hour flat or better, no material trade starvation, and worst MAE improving toward <= -527 without realized-loss proliferation."
+    }
+  ],
+  "strategy_plan_reference": {
+    "market_regime_read": "The latest run remains a favorable long-only momentum/pullback sample: 98 trades, 100% realized win rate, no slow >=12h trades, and 12.0% calendar exposure. However, it is below...",
+    "new_strategy_ideas": [
+      {
+        "implementation_scope": "new-profile-config",
+        "name": "1DTE Pullback Companion Revival",
+        "validation_metric": "Combined 1DTE PnL >= current $1298.7, PnL/exposure hour >170, average MAE improves versus breakout_long_1dte, and total leader score is not diluted."
+      },
+      {
+        "implementation_scope": "new-profile-config",
+        "name": "Dormant Pin-Avoid Split Test",
+        "validation_metric": "New dormant pin-avoid profile must be independently PnL positive, keep average MAE below active-profile median, and avoid reducing charm_pin/charm_wall combined PnL."
+      },
+      {
+        "implementation_scope": "requires-code",
+        "name": "Early Path Heat Classifier",
+        "validation_metric": "Reduce worst MAE toward <= -527 or better while preserving >=95% total PnL and >=95% fast-winner count."
+      }
+    ],
+    "next_experiments": [
+      {
+        "config_bias": "Reverse the latest call-wall expansion direction and restore the optimizer toward leader behavior before testing new profit expansion. Keep call_wall_acceptance_long in observat...",
+        "experiment_type": "risk-reducer",
+        "name": "Revert Failed Call-Wall Promotion Bias",
+        "primary_metric": "Risk-adjusted score versus run_009 and distance back to run_001/run_005 net profit, with worst MAE no worse than -527.",
+        "target_profiles": [
+          "call_wall_acceptance_long"
+        ]
+      },
+      {
+        "config_bias": "Explore profit expansion through dynamic/take-profit behavior for proven active profiles rather than new filters. Bias toward slightly more room only where MFE materially exceed...",
+        "experiment_type": "profit-expansion",
+        "name": "MFE-Harvest TP Expansion On Proven Profiles",
+        "primary_metric": "Total PnL and PnL/exposure hour, with median hold <= current 12 minutes and worst MAE not worse than leader -527.",
+        "target_profiles": [
+          "pullback_long",
+          "charm_wall_breakaway_long",
+          "breakout_long_1dte"
+        ]
+      },
+      {
+        "config_bias": "Do not tighten 1DTE quality gates. Instead test whether 1DTE can earn more per trade through modest target/exit expansion while preserving entry population.",
+        "experiment_type": "profile-specific",
+        "name": "1DTE Target-Side Expansion",
+        "primary_metric": "breakout_long_1dte PnL, PnL/exposure hour, and total score; reject if trades fall materially or worst MAE worsens beyond current -375.7.",
+        "target_profiles": [
+          "breakout_long_1dte"
+        ]
+      },
+      {
+        "config_bias": "Give charm_wall_breakaway_long more opportunity only inside its existing continuation identity: preserve breakout/charm wall requirements, avoid broad router changes, and measur...",
+        "experiment_type": "profit-expansion",
+        "name": "Charm Wall Breakaway Sample Expansion",
+        "primary_metric": "Profile PnL/exposure hour remains >200, profile PnL increases, total worst MAE remains no worse than -527, and average hold remains near current 15 minutes.",
+        "target_profiles": [
+          "charm_wall_breakaway_long"
+        ]
+      },
+      {
+        "config_bias": "Use a narrow pullback_long tail partition as a guardrail for profit expansion, not a broad prune. Avoid structure-score-only filters because weak structure buckets still generat...",
+        "experiment_type": "risk-reducer",
+        "name": "Pullback Slow-To-Profit Tail Guard",
+        "primary_metric": "Worst MAE improves from -638.75 toward <= -527, retained pullback_long PnL >=90%, and total PnL/exposure hour improves versus run_009.",
+        "target_profiles": [
+          "pullback_long"
+        ]
+      },
+      {
+        "config_bias": "If testing dormant activation, use one isolated router activation for pullback_long_1dte only, with minimal profile tuning and no simultaneous changes to proven 0DTE profiles.",
+        "experiment_type": "new-strategy",
+        "name": "Pullback 1DTE Dormant Activation Probe",
+        "primary_metric": "Incremental 1DTE PnL, combined 1DTE PnL/exposure hour, and no degradation in existing breakout_long_1dte trade quality.",
+        "target_profiles": [
+          "breakout_long_1dte",
+          "pullback_long_1dte"
+        ]
+      }
+    ],
+    "plan_label": "profit-expansion-proven-edge-recovery-v1",
+    "profiles_to_expand": [
+      "pullback_long",
+      "charm_wall_breakaway_long",
+      "breakout_long_1dte",
+      "charm_pin_pullback_long"
+    ],
+    "profiles_to_freeze": [
+      "call_wall_acceptance_long",
+      "breakout_long_no_0dte",
+      "pullback_long_no_0dte",
+      "squeeze_long_no_0dte",
+      "breakout_long",
+      "squeeze_long",
+      "wall_reclaim_long",
+      "wall_breakout_retest_long",
+      "late_day_pin_fade",
+      "negative_gamma_momentum_longering_long"
+    ],
+    "run": "run_009",
+    "strategy_track": "profit-expansion"
+  },
+  "validated_changes": {
+    "trade-risk-max-adverse-points": "12",
+    "use-stale-trade-exit": "true",
+    "use-trade-health-exit": "true"
+  }
+}

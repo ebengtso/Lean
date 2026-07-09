@@ -1,0 +1,44 @@
+{
+  "changes": {
+    "profile.charm_wall_breakaway_long.es-structure.min-higher-high-distance": "1.5",
+    "profile.charm_wall_breakaway_long.es-structure.min-higher-low-distance": "1",
+    "profile.charm_wall_breakaway_long.long-regime-filter.max-distance-above-charm-wall": "25"
+  },
+  "duplicate_of": "run_043",
+  "error": "duplicate experiment",
+  "iteration": 15,
+  "recommendation": {
+    "changes": [
+      {
+        "key": "profile.charm_wall_breakaway_long.es-structure.min-higher-high-distance",
+        "reason": "Batch D only. The current leader base already contains the profitable charm-wall admission expansion, but the latest attribution shows only 6 charm_wall_breakaway_long trades with very high expectancy, strong PnL/hour, no slow holds, and materially better worst MAE than the pullback/charm-pin tails. Moving the higher-high hurdle from 1.0 to 1.5 re-tests the promoted run_046 boundary on top of the run_044 leader base, preserving convexity while requiring more actual breakout structure.",
+        "value": "1.5"
+      },
+      {
+        "key": "profile.charm_wall_breakaway_long.es-structure.min-higher-low-distance",
+        "reason": "Pair the stronger higher-high requirement with the promoted supported-admission boundary. The profile is high-value but small-sample; requiring a 1-point higher-low confirms support under the charm-wall breakaway and avoids admitting unsupported wall chases without touching global filters.",
+        "value": "1"
+      },
+      {
+        "key": "profile.charm_wall_breakaway_long.long-regime-filter.max-distance-above-charm-wall",
+        "reason": "Keep the bounded 25-point charm-wall box from the promoted admission experiment. Prior take-profit compression hurt net profit, so this keeps the rare convex wall-breakaway target behavior intact while testing whether the stronger structure pair improves risk-adjusted score from the current leader base.",
+        "value": "25"
+      }
+    ],
+    "expected_effect": "Should preserve or expand the high-convexity charm_wall_breakaway_long sleeve while improving admission quality versus weaker wall-chase entries. Tradeoff is small-sample trade loss if the leader base already benefits from looser 1.0/0.5 structure; reject if total net profit falls below 98% of run_044, trade count drops more than 10%, or profile PnL/hour falls below roughly 225.",
+    "label": "charm-wall-supported-admission-retest",
+    "rationale": "Use exactly one legal family: batch_d_charm_wall_breakaway_long. The best candidate base is run_044, but the strongest recent causal improvement was the charm-wall supported admission experiment from run_043 to run_046, which repaired drawdown, slow exposure, net profit, and worst MAE without stop losses. Because prior charm-wall exit compression hurt, this retests only admission geometry and preserves the 12-point convex target behavior. It avoids global veto tightening, avoids direct 1DTE tightening, and does not touch missing/stale 0DTE policy.",
+    "strategy_hypotheses": [
+      {
+        "evidence": "charm_wall_breakaway_long remains the cleanest active VALID_0DTE convex profile in latest attribution: 6 trades, $1015.1 PnL, $231.03/hour, median TP 12.0, no slow >=12h trades, and worst MAE -346.8 versus portfolio worst -638.75. Experiment memory shows this exact admission family was the largest recent repair, improving score by 15551 from a damaged base while restoring net profit and eliminating slow exposure.",
+        "implementation_scope": "config-only",
+        "name": "Charm Wall Supported Admission Follow-Through",
+        "risk": "Small sample risk is high; stronger structure requirements can remove rare convex winners or fail to improve the leader if run_044 already has the best balance. Reject on any meaningful net-profit or PnL/exposure deterioration.",
+        "trigger": "VALID_0DTE charm-wall breakaway context with price above the charm wall, require-breakout still true, distance above charm wall within a bounded 25-point box, and ES support confirmed by both higher-high and higher-low structure.",
+        "validation_metric": "Total risk-adjusted score improves versus run_044, net profit remains >=98% of run_044, completed trades remain within 10%, charm_wall_breakaway_long PnL/hour remains >=225, slow_12h stays 0, and global worst MAE does not materially worsen."
+      }
+    ]
+  },
+  "run": "run_045",
+  "signature": "[[\"profile.charm_wall_breakaway_long.es-structure.min-higher-high-distance\",\"1.5\"],[\"profile.charm_wall_breakaway_long.es-structure.min-higher-low-distance\",\"1\"],[\"profile.charm_wall_breakaway_long.long-regime-filter.max-distance-above-charm-wall\",\"25\"]]"
+}

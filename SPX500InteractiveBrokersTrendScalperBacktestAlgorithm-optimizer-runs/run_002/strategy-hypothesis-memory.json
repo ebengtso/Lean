@@ -1,0 +1,11 @@
+[
+  {
+    "evidence": "STALE_0DTE contributed only $162.8 over 5 trades; breakout_long_no_0dte stale trades had -210.6 average MAE, -250.25 worst MAE, 52.6 minute median hold, and only 40.5 PnL/exposu...",
+    "implementation_scope": "new-profile-config",
+    "name": "Stale 0DTE Defensive Fallback",
+    "risk": "Sample is small, so tighter fallback structure may overfit and remove positive stale trades without improving full-sample objective.",
+    "run": "run_001",
+    "trigger": "0DTE state is STALE_0DTE or EXPIRED_0DTE and routing uses ES-only no-0DTE fallback profiles.",
+    "validation_metric": "Fallback average MAE improves and fallback PnL/exposure hour rises while total net profit remains at least 98% of run_001 and VALID_0DTE metrics are unchanged."
+  }
+]

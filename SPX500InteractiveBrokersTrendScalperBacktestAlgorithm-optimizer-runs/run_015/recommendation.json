@@ -1,0 +1,141 @@
+{
+  "changes": [
+    {
+      "key": "profile.pullback_long.es-vwap.max-distance",
+      "reason": "Pullback_long is the cleanest scalable active edge: 14 trades, $1129.1 PnL, 417.6 PnL/exposure hour, and only -138.25 worst MAE. Expanding the VWAP distance one grid step tests selective throughput recovery without touching global filters or stale-data routing.",
+      "value": "12"
+    },
+    {
+      "key": "profile.pullback_long.take-profit.distance",
+      "reason": "Pullback_long median MFE is 102.1 with low tail risk versus other active profiles, so moving the fixed TP from 2 toward the 2.5 grid tests whether the profile can harvest more of its favorable excursion without changing entry logic.",
+      "value": "2.5"
+    },
+    {
+      "key": "profile.pullback_long.dynamic-take-profit.max",
+      "reason": "Raise the profile-local dynamic TP cap from 4 to 5 so high-quality pullback winners are not capped too tightly; this pairs with the modest fixed TP increase while staying inside Batch C.",
+      "value": "5"
+    }
+  ],
+  "expected_effect": "Should recover some profitable throughput and improve pullback_long PnL contribution while preserving its strong PnL/exposure profile. Main risk is longer holds from larger targets, so reject if total net profit stays below 98% of run_001, pullback_long PnL/exposure falls below roughly 300, or worst MAE worsens beyond -527.",
+  "label": "promote",
+  "rationale": "Use Batch C as a profile-local pullback throughput and reward-capture experiment. The latest run improved exposure efficiency but starved profit versus run_001; pullback_long is the best candidate for cautious expansion because it has the highest active-profile efficiency, materially lower worst MAE than charm_pin_pullback_long and breakout_long_1dte, and strong MFE support. This avoids the failed broad 1DTE tightening, call-wall loosening, fallback pruning, and runtime health-exit paths.",
+  "strategy_hypotheses": [
+    {
+      "evidence": "pullback_long produced $1129.1 over 14 VALID_0DTE trades, 417.6 PnL/exposure hour, median MFE 102.1, median hold 11.1 minutes, and worst MAE only -138.25, while latest total PnL remains $977.2 below run_001 despite slightly better PnL/exposure hour.",
+      "implementation_scope": "config-only",
+      "name": "Pullback Throughput Re-Expansion",
+      "risk": "Wider VWAP distance and larger TP may admit lower-quality pullbacks or extend hold time; reject if profile efficiency falls materially or total worst MAE worsens.",
+      "trigger": "VALID_0DTE pullback_long entries with acceptable ES structure and pullback/reclaim behavior but slightly wider ES-VWAP distance than the current profile allows.",
+      "validation_metric": "Total net profit returns toward run_001 with pullback_long PnL/exposure >=300, total pnl_per_exposure_hour flat or better versus run_001, trade count not down more than 10%, and worst MAE no worse than -527."
+    }
+  ],
+  "strategy_plan_reference": {
+    "market_regime_read": "The current sample is a favorable long-only, take-profit-only regime with 96 completed trades, 100% realized win rate, no >=12h slow trades, 0.4% drawdown, and $6148.6 PnL. The ...",
+    "new_strategy_ideas": [
+      {
+        "implementation_scope": "new-profile-config",
+        "name": "1DTE Pullback Companion",
+        "validation_metric": "Combined 1DTE PnL >= current breakout_long_1dte PnL, 1DTE average MAE better than -123.7, total PnL >= 98% of leader, and no worse worst MAE."
+      },
+      {
+        "implementation_scope": "requires-code",
+        "name": "Charm Pin Heat Classifier",
+        "validation_metric": "Reduce charm_pin_pullback_long worst MAE toward <= -375 while retaining >=90% of charm-pin PnL and preserving fast winner count."
+      },
+      {
+        "implementation_scope": "new-profile-config",
+        "name": "Call Wall Acceptance Micro-Sample Split",
+        "validation_metric": "At least 5 trades, positive PnL, PnL/exposure hour >250, average MAE better than -60, and no total-score regression beyond 2%."
+      },
+      {
+        "implementation_scope": "config-only",
+        "name": "Dormant pullback_long_1dte Activation Probe",
+        "validation_metric": "New profile adds or reallocates 1DTE trades with combined 1DTE PnL >= current $1304, better average MAE, and total score not worse than -2%."
+      }
+    ],
+    "next_experiments": [
+      {
+        "config_bias": "Profile-specific profit expansion: loosen or restore only the least risky pullback_long entry boundaries around structure/VWAP distance that were tightened in the latest lower-P...",
+        "experiment_type": "profit-expansion",
+        "name": "Pullback Throughput Re-Expansion",
+        "primary_metric": "Total score and net PnL versus leader, with pullback_long PnL/exposure hour >=300 and worst MAE not worse than -200.",
+        "target_profiles": [
+          "pullback_long"
+        ]
+      },
+      {
+        "config_bias": "Do not prune charm_pin_pullback_long broadly. Test only a narrow profit-expansion variant that preserves high-extension fast winners while slightly improving exits/TP opportunit...",
+        "experiment_type": "profit-expansion",
+        "name": "Charm Pin TP Harvest Probe",
+        "primary_metric": "charm_pin_pullback_long PnL, PnL/exposure hour, median hold, and average MAE; reject if worst MAE worsens or fast_under_15m trades fall by more than 3.",
+        "target_profiles": [
+          "charm_pin_pullback_long"
+        ]
+      },
+      {
+        "config_bias": "Isolate breakout_long_1dte profit expansion from quality tightening. Keep the profile active and avoid raising structure/slope floors. Explore only modest reward/throughput impr...",
+        "experiment_type": "profile-specific",
+        "name": "1DTE Preserve-And-Harvest",
+        "primary_metric": "breakout_long_1dte PnL >= current $1304, PnL/exposure hour >180, average MAE no worse than -125, total PnL >=98% of leader.",
+        "target_profiles": [
+          "breakout_long_1dte"
+        ]
+      },
+      {
+        "config_bias": "Small sample-builder only: activate or lightly expand call_wall_acceptance_long without changing global option-call-volume thresholds that previously hurt score. Keep any experi...",
+        "experiment_type": "profile-specific",
+        "name": "Call Wall Local Sample Builder",
+        "primary_metric": "At least 3-5 call_wall_acceptance_long trades, positive profile PnL, average MAE better than -60, and total score drawdown less than 2%.",
+        "target_profiles": [
+          "call_wall_acceptance_long"
+        ]
+      },
+      {
+        "config_bias": "Router experiment only if legal as one logical dormant activation: add pullback_long_1dte to the one-DTE router alongside breakout_long_1dte and tune only that same dormant prof...",
+        "experiment_type": "new-strategy",
+        "name": "Dormant 1DTE Pullback Activation Probe",
+        "primary_metric": "Combined VALID_1DTE_ONLY PnL, average MAE, worst MAE, trade count, and total score versus leader.",
+        "target_profiles": [
+          "breakout_long_1dte",
+          "pullback_long_1dte"
+        ]
+      },
+      {
+        "config_bias": "Keep fallback profiles unchanged unless the optimizer runs a dedicated stale-data holdout. Do not mix fallback pruning with main profit-expansion tests.",
+        "experiment_type": "risk-reducer",
+        "name": "Fallback Freeze Control",
+        "primary_metric": "No unintended change in STALE_0DTE/EXPIRED_0DTE trade attribution while primary profile experiments run.",
+        "target_profiles": [
+          "breakout_long_no_0dte",
+          "pullback_long_no_0dte",
+          "squeeze_long_no_0dte"
+        ]
+      }
+    ],
+    "plan_label": "profit-expansion-selective-throughput-v1",
+    "profiles_to_expand": [
+      "pullback_long",
+      "charm_pin_pullback_long",
+      "breakout_long_1dte",
+      "call_wall_acceptance_long"
+    ],
+    "profiles_to_freeze": [
+      "breakout_long",
+      "wall_reclaim_long",
+      "wall_breakout_retest_long",
+      "late_day_pin_fade",
+      "negative_gamma_momentum_long",
+      "trend_day_pullback_long",
+      "breakout_long_no_0dte",
+      "pullback_long_no_0dte",
+      "squeeze_long_no_0dte"
+    ],
+    "run": "run_015",
+    "strategy_track": "profit-expansion"
+  },
+  "validated_changes": {
+    "profile.pullback_long.dynamic-take-profit.max": "5",
+    "profile.pullback_long.es-vwap.max-distance": "12",
+    "profile.pullback_long.take-profit.distance": "2.5"
+  }
+}

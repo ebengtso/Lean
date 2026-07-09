@@ -1,0 +1,44 @@
+{
+  "changes": {
+    "profile.squeeze_long.dynamic-take-profit.max": "7.5",
+    "profile.squeeze_long.es-vwap.slope-min": "0.05",
+    "profile.squeeze_long.take-profit.distance": "4.25"
+  },
+  "duplicate_of": "run_016",
+  "error": "duplicate experiment",
+  "iteration": 6,
+  "recommendation": {
+    "changes": [
+      {
+        "key": "profile.squeeze_long.dynamic-take-profit.max",
+        "reason": "Batch B is the cleanest legal family now: squeeze_long is small but highly efficient, with 7 VALID_0DTE trades, $604.5 PnL, 344.8 PnL/exposure hour, no slow trades, and worst MAE only -194.25. Raising the adaptive cap one grid step tests upside capture without adding trades or entry filters.",
+        "value": "7.5"
+      },
+      {
+        "key": "profile.squeeze_long.take-profit.distance",
+        "reason": "Current fixed TP is 3.75 while median selected TP distance is very large and median MFE is 66.3, so a modest grid increase to 4.25 should let clean squeeze entries harvest slightly more without turning this into a long-hold profile.",
+        "value": "4.25"
+      },
+      {
+        "key": "profile.squeeze_long.es-vwap.slope-min",
+        "reason": "Keep the squeeze expansion tied to actual continuation momentum. Raising slope from 0.04 to 0.05 is a light confirmation nudge, not a broad global filter, and should protect against higher targets being applied to flat VWAP squeezes.",
+        "value": "0.05"
+      }
+    ],
+    "expected_effect": "Should improve squeeze_long average PnL and possibly total net profit while preserving its high PnL/exposure and low MAE profile. Tradeoff is fewer or slower squeeze exits if the higher target is too ambitious; reject if squeeze PnL/exposure falls materially, completed trades drop more than 10%, total net profit drops below 98% of run_001, or worst MAE worsens beyond the leader band.",
+    "label": "squeeze-upside-capture-v2",
+    "rationale": "Use exactly one legal family: batch_b_squeeze_long_take_profit. The latest pullback expansion failed badly by adding low-quality exposure, while direct 1DTE tightening and call-wall loosening have already hurt objective. Squeeze_long is underexplored, high-efficiency, and clean, so the next best experiment is a bounded profit-capture test on that profile only, using grid values and avoiding global veto tightening or missing-0DTE behavior changes.",
+    "strategy_hypotheses": [
+      {
+        "evidence": "squeeze_long generated 7 VALID_0DTE trades, $604.5 PnL, 344.83 PnL/exposure hour, 12.1 minute median hold, no slow >=12h trades, worst MAE -194.25, and median MFE 66.3. This is materially cleaner than the latest pullback_long expansion, which introduced a -2026.5 MAE slow tail.",
+        "implementation_scope": "config-only",
+        "name": "Squeeze Continuation Upside Capture",
+        "risk": "Higher targets can lengthen hold time and reduce realized TP frequency, lowering risk-adjusted score despite strong MFE. The added slope confirmation may also remove a small number of profitable early squeeze entries.",
+        "trigger": "VALID_0DTE squeeze_long entries with confirmed option/squeeze context and ES VWAP slope strong enough for continuation.",
+        "validation_metric": "squeeze_long PnL and average PnL improve, total net profit remains at least 98% of run_001, completed trades remain within 10%, total PnL/exposure hour stays flat or better, and worst MAE remains no worse than roughly -250 for the profile."
+      }
+    ]
+  },
+  "run": "run_018",
+  "signature": "[[\"profile.squeeze_long.dynamic-take-profit.max\",\"7.5\"],[\"profile.squeeze_long.es-vwap.slope-min\",\"0.05\"],[\"profile.squeeze_long.take-profit.distance\",\"4.25\"]]"
+}

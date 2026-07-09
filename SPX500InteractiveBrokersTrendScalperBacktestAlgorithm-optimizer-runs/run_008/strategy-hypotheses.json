@@ -1,0 +1,10 @@
+[
+  {
+    "evidence": "call_wall_acceptance_long has only 1 observed VALID_0DTE trade, but it produced $91 with -11.7 MAE and 455 PnL/exposure hour. Broader 1DTE/fallback tightening reduced score and net profit, so the next non-repeated test should expand a clean option-confirmed profile rather than tighten existing high-throughput profiles.",
+    "implementation_scope": "config-only",
+    "name": "Call Wall Acceptance Entry Sample Builder",
+    "risk": "Single-trade evidence can overfit; looser DEX and call-volume thresholds may admit noisy continuation entries or steal fills from stronger pullback/squeeze profiles.",
+    "trigger": "VALID_0DTE state with positive net DEX, positive forward DEX, accepted call-wall/strike context, and modest call-volume expansion.",
+    "validation_metric": "At least 5 call_wall_acceptance_long trades, positive profile PnL, average MAE better than -60, worst MAE better than -100, total net profit at least 98% of run_001, and pnl_per_exposure_hour flat or better."
+  }
+]

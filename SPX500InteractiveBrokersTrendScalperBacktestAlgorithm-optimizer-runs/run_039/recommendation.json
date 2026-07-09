@@ -1,0 +1,126 @@
+{
+  "changes": [
+    {
+      "key": "ema-period",
+      "reason": "deterministic fallback",
+      "value": "12"
+    }
+  ],
+  "duplicate_escape": {
+    "attempt": 1,
+    "reason": "advisor repeated already-tested experiments for 3 attempt(s)",
+    "signature": "[[\"ema-period\",\"12\"]]",
+    "source": "threshold"
+  },
+  "expected_effect": "Small config move for continued exploration.",
+  "label": "fallback-emaperiod-12",
+  "rationale": "Fallback deterministic recommendation because AI advisor was unavailable. Duplicate escape reason: advisor repeated already-tested experiments for 3 attempt(s).",
+  "strategy_hypotheses": [],
+  "strategy_plan_reference": {
+    "market_regime_read": "Short, high-win-rate, take-profit-only sample over about 12.3 calendar days. Realized losses and slow >=12h trades are absent, but hidden MAE is still the binding risk: average ...",
+    "new_strategy_ideas": [
+      {
+        "implementation_scope": "new-profile-config",
+        "name": "1DTE Pullback Companion Split",
+        "validation_metric": "Combined 1DTE PnL >= $1310, 1DTE average MAE improves versus -123.9, total net profit >=98% of leader, and breakout_long_1dte retained PnL is explicitly measured."
+      },
+      {
+        "implementation_scope": "requires-code",
+        "name": "Charm Pin Early-Progress Tail Classifier",
+        "validation_metric": "Reduce charm_pin_pullback_long worst MAE toward <= -403 while retaining >=90% charm-pin PnL, >=95% protected fast extended-VWAP winners, total net profit >=98% of leader, and sl..."
+      },
+      {
+        "implementation_scope": "config-only",
+        "name": "Charm Wall Pin-Avoid Dormant Activation Probe",
+        "validation_metric": "Activated profile has positive standalone PnL or reduces combined charm/pin worst MAE while total net profit remains >=98% of leader and protected fast-winner retention stays >=..."
+      },
+      {
+        "implementation_scope": "config-only",
+        "name": "Call Wall Acceptance Isolated Sample Builder",
+        "validation_metric": "At least 3 total call_wall_acceptance_long trades, positive standalone PnL, PnL/exposure >=250, worst MAE <= -150, and total net profit >=98% of leader."
+      }
+    ],
+    "next_experiments": [
+      {
+        "config_bias": "Keep current pullback_long admission mostly stable. Test only small realization-efficiency or path-state segmentation ideas that preserve at least 90-95% of pullback PnL; avoid ...",
+        "experiment_type": "profit-expansion",
+        "name": "Pullback Core Efficiency Holdout",
+        "primary_metric": "Total risk-adjusted score and pullback_long PnL/exposure, with pullback PnL retention >=95% and worst MAE no worse than -403.2.",
+        "target_profiles": [
+          "pullback_long"
+        ]
+      },
+      {
+        "config_bias": "Prefer restoring or preserving squeeze convexity rather than compressing targets. Keep option-map and order-book confirmation strong; only explore small admission expansion wher...",
+        "experiment_type": "profit-expansion",
+        "name": "Squeeze Convexity Preservation Probe",
+        "primary_metric": "squeeze_long PnL, squeeze PnL/exposure, total score, and squeeze worst MAE <= -225.",
+        "target_profiles": [
+          "squeeze_long"
+        ]
+      },
+      {
+        "config_bias": "Do not repeat latest charm-wall VWAP cap. Test only one small supported-admission or sample-builder variant at a time, preserving require-breakout and the wide convex payoff style.",
+        "experiment_type": "profile-specific",
+        "name": "Charm Wall Convexity Recovery",
+        "primary_metric": "charm_wall_breakaway_long PnL, profile PnL/exposure >=225, trade count, total score, and worst MAE no worse than -513.4.",
+        "target_profiles": [
+          "charm_wall_breakaway_long"
+        ]
+      },
+      {
+        "config_bias": "Leave breakout_long_1dte baseline thresholds stable. If legal, add pullback_long_1dte through the one-dte router as an attribution experiment and measure cannibalization explici...",
+        "experiment_type": "new-strategy",
+        "name": "1DTE Companion Router Split",
+        "primary_metric": "Combined 1DTE PnL, 1DTE average/worst MAE, total score, and breakout_long_1dte retained PnL.",
+        "target_profiles": [
+          "breakout_long_1dte"
+        ]
+      },
+      {
+        "config_bias": "Use a full valid-0DTE router replacement only if activating one dormant pin-avoid profile. Keep tuning minimal and treat the result as attribution, not promotion.",
+        "experiment_type": "new-strategy",
+        "name": "Dormant Pin-Avoid Attribution Probe",
+        "primary_metric": "Activated profile standalone PnL, combined charm-pin/charm-wall worst MAE, total net profit retention >=98%, and protected fast-winner retention >=95%.",
+        "target_profiles": [
+          "charm_pin_pullback_long",
+          "charm_wall_breakaway_long"
+        ]
+      },
+      {
+        "config_bias": "Nudge only the already-enabled extended-VWAP rejection near-miss family or equivalent profile-aware boundaries. Avoid global setup floors, broad structure floors, and hard VWAP ...",
+        "experiment_type": "risk-reducer",
+        "name": "Extended-VWAP Near-Miss Boundary Study",
+        "primary_metric": "Worst MAE, retained total net profit >=98%, retained protected extended-VWAP winners >=95%, and PnL/exposure flat or better.",
+        "target_profiles": [
+          "charm_pin_pullback_long",
+          "pullback_long"
+        ]
+      }
+    ],
+    "plan_label": "profit_expansion_protect_core_edges_add_convex_splits",
+    "profiles_to_expand": [
+      "pullback_long",
+      "squeeze_long",
+      "breakout_long_1dte",
+      "call_wall_acceptance_long",
+      "charm_wall_breakaway_long"
+    ],
+    "profiles_to_freeze": [
+      "breakout_long",
+      "wall_reclaim_long",
+      "wall_breakout_retest_long",
+      "late_day_pin_fade",
+      "negative_gamma_momentum_long",
+      "trend_day_pullback_long",
+      "breakout_long_no_0dte",
+      "pullback_long_no_0dte",
+      "squeeze_long_no_0dte"
+    ],
+    "run": "run_039",
+    "strategy_track": "profit-expansion"
+  },
+  "validated_changes": {
+    "ema-period": "12"
+  }
+}

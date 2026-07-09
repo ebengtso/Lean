@@ -1,0 +1,379 @@
+{
+  "enabled": true,
+  "recent_window": 50,
+  "recent_count": 42,
+  "family_max_share": 0.55,
+  "family_hard_max_share": 0.7,
+  "profile_max_share": 0.65,
+  "reject_repeated_keysets": true,
+  "family_summary": [
+    {
+      "family": "take-profit",
+      "count": 16,
+      "share": 0.38095238095238093
+    },
+    {
+      "family": "strategy-profile",
+      "count": 11,
+      "share": 0.2619047619047619
+    },
+    {
+      "family": "runtime-risk",
+      "count": 5,
+      "share": 0.11904761904761904
+    },
+    {
+      "family": "surgical-veto",
+      "count": 3,
+      "share": 0.07142857142857142
+    },
+    {
+      "family": "upstream-entry",
+      "count": 3,
+      "share": 0.07142857142857142
+    },
+    {
+      "family": "option-strike-map",
+      "count": 2,
+      "share": 0.047619047619047616
+    },
+    {
+      "family": "general",
+      "count": 2,
+      "share": 0.047619047619047616
+    }
+  ],
+  "profile_summary": [
+    {
+      "profile": "charm_wall_breakaway_long",
+      "count": 8,
+      "share": 0.25
+    },
+    {
+      "profile": "breakout_long_no_0dte",
+      "count": 5,
+      "share": 0.15625
+    },
+    {
+      "profile": "squeeze_long",
+      "count": 5,
+      "share": 0.15625
+    },
+    {
+      "profile": "call_wall_acceptance_long",
+      "count": 3,
+      "share": 0.09375
+    },
+    {
+      "profile": "charm_pin_pullback_long",
+      "count": 3,
+      "share": 0.09375
+    },
+    {
+      "profile": "pullback_long_no_0dte",
+      "count": 2,
+      "share": 0.0625
+    },
+    {
+      "profile": "breakout_long_1dte",
+      "count": 2,
+      "share": 0.0625
+    },
+    {
+      "profile": "pullback_long",
+      "count": 2,
+      "share": 0.0625
+    },
+    {
+      "profile": "squeeze_long_no_0dte",
+      "count": 1,
+      "share": 0.03125
+    },
+    {
+      "profile": "charm_wall_pin_avoid_long",
+      "count": 1,
+      "share": 0.03125
+    }
+  ],
+  "top_family": {
+    "family": "take-profit",
+    "count": 16,
+    "share": 0.38095238095238093
+  },
+  "top_profile": {
+    "profile": "charm_wall_breakaway_long",
+    "count": 8,
+    "share": 0.25
+  },
+  "saturated_families": [],
+  "hard_saturated_families": [],
+  "saturated_profiles": [],
+  "underexplored_profiles": [
+    "breakout_long",
+    "late_day_pin_fade",
+    "negative_gamma_momentum_long",
+    "trend_day_pullback_long",
+    "wall_breakout_retest_long",
+    "wall_reclaim_long"
+  ],
+  "target_families": [
+    "surgical-veto",
+    "runtime-risk",
+    "option-strike-map",
+    "strategy-profile",
+    "upstream-entry",
+    "general"
+  ],
+  "recent_keyset_signatures": {
+    "[\"profile.breakout_long_no_0dte.es-structure.min-score\",\"profile.breakout_long_no_0dte.es-vwap.slope-min\",\"profile.breakout_long_no_0dte.take-profit.distance\",\"profile.pullback_long_no_0dte.es-structure.min-score\"]": 1,
+    "[\"entry-veto-charm-pin-tail-risk-max-adx\",\"entry-veto-charm-pin-tail-risk-max-rolling-high-distance\",\"entry-veto-charm-pin-tail-risk-min-setup-quality-score\",\"use-entry-veto-charm-pin-tail-risk-signature\"]": 1,
+    "[\"profile.breakout_long_no_0dte.enabled\",\"profile.pullback_long_no_0dte.es-vwap.max-distance\",\"profile.pullback_long_no_0dte.take-profit.distance\",\"profile.squeeze_long_no_0dte.enabled\"]": 1,
+    "[\"profile.breakout_long_1dte.es-structure.min-score\",\"profile.breakout_long_1dte.es-vwap.slope-min\",\"profile.breakout_long_1dte.long-regime-filter-1dte.min-forward-dex-ratio-30m\",\"profile.breakout_long_1dte.take-profit.max-distance\"]": 1,
+    "[\"profile.breakout_long_1dte.es-structure.min-score\",\"profile.breakout_long_1dte.es-vwap.slope-min\",\"profile.breakout_long_1dte.take-profit.max-distance\"]": 1,
+    "[\"option-call-volume.min-increase-pct\",\"profile.call_wall_acceptance_long.dynamic-take-profit.max\",\"profile.call_wall_acceptance_long.long-regime-filter.min-forward-dex-ratio-30m\",\"profile.call_wall_acceptance_long.long-regime-filter.min-net-dex-volume\"]": 1,
+    "[\"option-call-volume.min-increase-pct\",\"option-strike-acceptance-seconds\",\"profile.call_wall_acceptance_long.long-regime-filter.min-forward-dex-ratio-30m\",\"profile.call_wall_acceptance_long.long-regime-filter.min-net-dex-volume\"]": 1,
+    "[\"option-call-volume.min-increase-pct\",\"option-strike-acceptance-seconds\",\"profile.call_wall_acceptance_long.long-regime-filter.min-net-dex-volume\"]": 1,
+    "[\"trade-risk-max-adverse-points\",\"use-stale-trade-exit\",\"use-trade-health-exit\"]": 1,
+    "[\"__router.one-dte-profiles\"]": 1,
+    "[\"entry-veto-charm-pin-tail-risk-max-pullback-from-high\",\"entry-veto-charm-pin-tail-risk-max-rolling-high-distance\",\"entry-veto-charm-pin-tail-risk-min-setup-quality-score\"]": 1,
+    "[\"profile.pullback_long.es-structure.min-score\",\"profile.pullback_long.es-vwap.max-distance\"]": 1,
+    "[\"profile.charm_wall_breakaway_long.es-structure.min-higher-high-distance\",\"profile.charm_wall_breakaway_long.es-structure.min-higher-low-distance\",\"profile.charm_wall_breakaway_long.long-regime-filter.max-distance-above-charm-wall\"]": 3,
+    "[\"entry-veto-charm-pin-tail-risk-max-rolling-high-distance\",\"entry-veto-charm-pin-tail-risk-min-setup-quality-score\",\"entry-veto-charm-pin-tail-risk-min-vwap-distance\"]": 1,
+    "[\"profile.pullback_long.dynamic-take-profit.max\",\"profile.pullback_long.es-vwap.max-distance\",\"profile.pullback_long.take-profit.distance\"]": 1,
+    "[\"profile.squeeze_long.dynamic-take-profit.max\",\"profile.squeeze_long.es-vwap.slope-min\",\"profile.squeeze_long.take-profit.distance\"]": 4,
+    "[\"profile.squeeze_long.dynamic-take-profit.max\",\"profile.squeeze_long.take-profit.distance\"]": 1,
+    "[\"profile.charm_wall_breakaway_long.es-vwap.max-distance\",\"profile.charm_wall_breakaway_long.take-profit.max-distance\",\"profile.charm_wall_breakaway_long.take-profit.multiplier\"]": 2,
+    "[\"profile.breakout_long_no_0dte.es-structure.min-score\",\"profile.breakout_long_no_0dte.es-vwap.slope-min\",\"profile.breakout_long_no_0dte.take-profit.distance\"]": 2,
+    "[\"__router.valid-0dte-profiles\",\"profile.charm_wall_pin_avoid_long.enabled\"]": 1,
+    "[\"profile.charm_pin_pullback_long.long-regime-filter.dynamic-vwap-expected-move-fraction\",\"profile.charm_pin_pullback_long.long-regime-filter.dynamic-vwap-max-distance\",\"profile.charm_pin_pullback_long.long-regime-filter.recent-high-rejection-min-pullback\"]": 1,
+    "[\"profile.charm_wall_breakaway_long.es-structure.min-higher-high-distance\",\"profile.charm_wall_breakaway_long.long-regime-filter.max-distance-above-charm-wall\"]": 1,
+    "[\"profile.charm_pin_pullback_long.long-regime-filter.dynamic-vwap-volatility-multiplier\",\"profile.charm_pin_pullback_long.long-regime-filter.recent-high-rejection-min-pullback\"]": 1,
+    "[\"entry-veto-extended-vwap-rejection-max-vwap-distance\"]": 2,
+    "[\"profile.charm_wall_breakaway_long.long-regime-filter.max-distance-above-charm-wall\"]": 1,
+    "[\"order-book-min-microprice-slope-points-per-second\"]": 1,
+    "[\"entry-veto-extended-vwap-rejection-max-rsi-slope\"]": 1,
+    "[\"profile.breakout_long_no_0dte.dynamic-take-profit.max\",\"profile.breakout_long_no_0dte.es-vwap.slope-min\",\"profile.breakout_long_no_0dte.take-profit.distance\"]": 1,
+    "[\"scalp-es-vwap-distance-min\"]": 1,
+    "[\"entry-veto-charm-pin-tail-risk-max-pullback-from-high\",\"entry-veto-charm-pin-tail-risk-max-rolling-high-distance\",\"entry-veto-charm-pin-tail-risk-max-vwap-acceleration\",\"entry-veto-charm-pin-tail-risk-min-setup-quality-score\"]": 1,
+    "[\"profile.charm_wall_breakaway_long.es-structure.min-higher-low-distance\",\"profile.charm_wall_breakaway_long.es-vwap.max-distance\",\"profile.charm_wall_breakaway_long.long-regime-filter.max-distance-above-charm-wall\"]": 1,
+    "[\"profile.charm_pin_pullback_long.long-regime-filter.dynamic-vwap-max-distance\",\"profile.charm_pin_pullback_long.long-regime-filter.dynamic-vwap-volatility-multiplier\",\"profile.charm_pin_pullback_long.long-regime-filter.recent-high-rejection-min-pullback\"]": 1,
+    "[\"ema-period\"]": 1,
+    "[\"indicator-register-resolution\"]": 1
+  },
+  "top_change_keys": [
+    {
+      "key": "profile.charm_wall_breakaway_long.long-regime-filter.max-distance-above-charm-wall",
+      "count": 6
+    },
+    {
+      "key": "profile.squeeze_long.dynamic-take-profit.max",
+      "count": 5
+    },
+    {
+      "key": "profile.squeeze_long.take-profit.distance",
+      "count": 5
+    },
+    {
+      "key": "profile.breakout_long_no_0dte.es-vwap.slope-min",
+      "count": 4
+    },
+    {
+      "key": "profile.breakout_long_no_0dte.take-profit.distance",
+      "count": 4
+    },
+    {
+      "key": "entry-veto-charm-pin-tail-risk-max-rolling-high-distance",
+      "count": 4
+    },
+    {
+      "key": "entry-veto-charm-pin-tail-risk-min-setup-quality-score",
+      "count": 4
+    },
+    {
+      "key": "profile.charm_wall_breakaway_long.es-structure.min-higher-high-distance",
+      "count": 4
+    },
+    {
+      "key": "profile.charm_wall_breakaway_long.es-structure.min-higher-low-distance",
+      "count": 4
+    },
+    {
+      "key": "profile.squeeze_long.es-vwap.slope-min",
+      "count": 4
+    },
+    {
+      "key": "profile.breakout_long_no_0dte.es-structure.min-score",
+      "count": 3
+    },
+    {
+      "key": "option-call-volume.min-increase-pct",
+      "count": 3
+    }
+  ],
+  "recent_rows": [
+    {
+      "from_run": "run_031",
+      "to_run": "run_034",
+      "family": "take-profit",
+      "profiles": [
+        "breakout_long_no_0dte"
+      ],
+      "change_keys": [
+        "profile.breakout_long_no_0dte.es-structure.min-score",
+        "profile.breakout_long_no_0dte.es-vwap.slope-min",
+        "profile.breakout_long_no_0dte.take-profit.distance"
+      ],
+      "delta_score": -209.98805042677304,
+      "delta_net_profit": -217.60000000000036
+    },
+    {
+      "from_run": "run_032",
+      "to_run": "run_035",
+      "family": "take-profit",
+      "profiles": [
+        "breakout_long_no_0dte"
+      ],
+      "change_keys": [
+        "profile.breakout_long_no_0dte.dynamic-take-profit.max",
+        "profile.breakout_long_no_0dte.es-vwap.slope-min",
+        "profile.breakout_long_no_0dte.take-profit.distance"
+      ],
+      "delta_score": -11.853442811643617,
+      "delta_net_profit": -12.5
+    },
+    {
+      "from_run": "run_033",
+      "to_run": "run_036",
+      "family": "strategy-profile",
+      "profiles": [
+        "charm_wall_breakaway_long"
+      ],
+      "change_keys": [
+        "profile.charm_wall_breakaway_long.es-structure.min-higher-high-distance",
+        "profile.charm_wall_breakaway_long.es-structure.min-higher-low-distance",
+        "profile.charm_wall_breakaway_long.long-regime-filter.max-distance-above-charm-wall"
+      ],
+      "delta_score": 110.56238675213535,
+      "delta_net_profit": 72.5
+    },
+    {
+      "from_run": "run_034",
+      "to_run": "run_037",
+      "family": "general",
+      "profiles": [],
+      "change_keys": [
+        "scalp-es-vwap-distance-min"
+      ],
+      "delta_score": 238.58949015423786,
+      "delta_net_profit": 241.40000000000055
+    },
+    {
+      "from_run": "run_035",
+      "to_run": "run_038",
+      "family": "runtime-risk",
+      "profiles": [],
+      "change_keys": [
+        "entry-veto-charm-pin-tail-risk-max-pullback-from-high",
+        "entry-veto-charm-pin-tail-risk-max-rolling-high-distance",
+        "entry-veto-charm-pin-tail-risk-max-vwap-acceleration",
+        "entry-veto-charm-pin-tail-risk-min-setup-quality-score"
+      ],
+      "delta_score": 89.78924648846987,
+      "delta_net_profit": 92.60000000000036
+    },
+    {
+      "from_run": "run_036",
+      "to_run": "run_039",
+      "family": "strategy-profile",
+      "profiles": [
+        "charm_wall_breakaway_long"
+      ],
+      "change_keys": [
+        "profile.charm_wall_breakaway_long.es-structure.min-higher-low-distance",
+        "profile.charm_wall_breakaway_long.es-vwap.max-distance",
+        "profile.charm_wall_breakaway_long.long-regime-filter.max-distance-above-charm-wall"
+      ],
+      "delta_score": -203.3606590964573,
+      "delta_net_profit": -204.39999999999964
+    },
+    {
+      "from_run": "run_037",
+      "to_run": "run_040",
+      "family": "strategy-profile",
+      "profiles": [
+        "charm_pin_pullback_long"
+      ],
+      "change_keys": [
+        "profile.charm_pin_pullback_long.long-regime-filter.dynamic-vwap-max-distance",
+        "profile.charm_pin_pullback_long.long-regime-filter.dynamic-vwap-volatility-multiplier",
+        "profile.charm_pin_pullback_long.long-regime-filter.recent-high-rejection-min-pullback"
+      ],
+      "delta_score": 0.0,
+      "delta_net_profit": 0.0
+    },
+    {
+      "from_run": "run_038",
+      "to_run": "run_041",
+      "family": "take-profit",
+      "profiles": [
+        "charm_wall_breakaway_long"
+      ],
+      "change_keys": [
+        "profile.charm_wall_breakaway_long.es-vwap.max-distance",
+        "profile.charm_wall_breakaway_long.take-profit.max-distance",
+        "profile.charm_wall_breakaway_long.take-profit.multiplier"
+      ],
+      "delta_score": -143.70145021917415,
+      "delta_net_profit": -146.70000000000073
+    },
+    {
+      "from_run": "run_039",
+      "to_run": "run_042",
+      "family": "upstream-entry",
+      "profiles": [],
+      "change_keys": [
+        "ema-period"
+      ],
+      "delta_score": -14219.200218408292,
+      "delta_net_profit": -2607.1000000000004
+    },
+    {
+      "from_run": "run_040",
+      "to_run": "run_043",
+      "family": "upstream-entry",
+      "profiles": [],
+      "change_keys": [
+        "indicator-register-resolution"
+      ],
+      "delta_score": -15618.400284360587,
+      "delta_net_profit": -3270.8
+    },
+    {
+      "from_run": "run_041",
+      "to_run": "run_044",
+      "family": "surgical-veto",
+      "profiles": [],
+      "change_keys": [
+        "entry-veto-extended-vwap-rejection-max-vwap-distance"
+      ],
+      "delta_score": 460.89448830956644,
+      "delta_net_profit": 529.9000000000005
+    },
+    {
+      "from_run": "run_043",
+      "to_run": "run_046",
+      "family": "strategy-profile",
+      "profiles": [
+        "charm_wall_breakaway_long"
+      ],
+      "change_keys": [
+        "profile.charm_wall_breakaway_long.es-structure.min-higher-high-distance",
+        "profile.charm_wall_breakaway_long.es-structure.min-higher-low-distance",
+        "profile.charm_wall_breakaway_long.long-regime-filter.max-distance-above-charm-wall"
+      ],
+      "delta_score": 15551.115300128204,
+      "delta_net_profit": 3206.0999999999995
+    }
+  ],
+  "rule": "When a family is saturated, avoid repeated keysets in that family. When a family is hard-saturated, pause that family and explore target_families instead."
+}

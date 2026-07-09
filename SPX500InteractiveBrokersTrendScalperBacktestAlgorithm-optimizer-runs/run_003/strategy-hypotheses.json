@@ -1,0 +1,10 @@
+[
+  {
+    "evidence": "STALE_0DTE produced only 4 trades and $145.8. Pullback fallback had 2 trades, $73.8, -26.1 worst MAE, and 156.93 PnL/exposure hour, while breakout/squeeze stale fallbacks had worse MAE and weaker efficiency.",
+    "implementation_scope": "config-only",
+    "name": "Pullback-Only Stale 0DTE Fallback",
+    "risk": "Small sample may overfit the stale-data slice and remove rare valid breakout/squeeze fallback winners.",
+    "trigger": "0DTE data is stale or unavailable and router uses no-0DTE fallback profiles.",
+    "validation_metric": "Fallback PnL remains non-negative, fallback average/worst MAE improves, VALID_0DTE PnL is unchanged, total net profit stays above 98% of run_001, and PnL/exposure hour is flat or better."
+  }
+]

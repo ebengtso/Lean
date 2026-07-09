@@ -1,0 +1,5 @@
+{
+  "entry-veto-charm-pin-tail-risk-max-pullback-from-high": "10",
+  "entry-veto-charm-pin-tail-risk-max-rolling-high-distance": "15",
+  "entry-veto-charm-pin-tail-risk-min-setup-quality-score": "60"
+}

@@ -1,0 +1,155 @@
+{
+  "changes": [
+    {
+      "key": "__router.one-dte-profiles",
+      "reason": "Concept activation exception: route VALID_1DTE_ONLY through a companion pullback profile in addition to the existing breakout_long_1dte, without changing VALID_0DTE or no-0DTE routing. The current 1DTE slice is meaningful but tail-heavy enough to justify attribution rather than direct tightening.",
+      "value": "breakout_long_1dte,pullback_long_1dte"
+    },
+    {
+      "key": "profile.pullback_long_1dte.enabled",
+      "reason": "Enable the dormant 1DTE pullback companion as an attribution probe. Current profile config already has enabled=true but it is absent from the one-DTE router, so this run tests reachability and cannibalization versus breakout_long_1dte.",
+      "value": "true"
+    },
+    {
+      "key": "profile.breakout_long_1dte.take-profit.max-distance",
+      "reason": "Keep the existing breakout 1DTE branch from stretching too far while the companion is introduced. Grid value 6 is a middle setting that preserves upside better than 4 but avoids letting breakout consume all convex 1DTE continuation by target priority.",
+      "value": "6"
+    }
+  ],
+  "expected_effect": "Should expose whether VALID_1DTE_ONLY contains a separable pullback/reclaim regime while preserving the existing breakout_long_1dte edge. Desired outcome is flat-or-better combined 1DTE PnL, improved 1DTE average/worst MAE or exposure efficiency, and no damage to VALID_0DTE performance. Main tradeoff is router cannibalization: if pullback_long_1dte simply relabels profitable breakout trades or reduces 1DTE PnL below the current $1315.3 slice, reject.",
+  "label": "one-dte-pullback-companion-attribution",
+  "rationale": "Use a new-profile-config router split rather than another global veto or repeated call-wall/charm-wall keyset. run_058 has clean data-state attribution: VALID_1DTE_ONLY contributes 20 trades, $1315.3 PnL, no slow trades, but worst MAE is still -386.75 and median hold is longer than the best 0DTE pullback/charm edges. Direct 1DTE tightening has been risky, so the better experiment is attribution: add the dormant pullback_long_1dte companion to the one-DTE router and measure whether it separates reclaim behavior from breakout continuation. This is one logical family and does not allow option-confirmed 0DTE profiles to trade on missing/stale/thin 0DTE data.",
+  "strategy_hypotheses": [
+    {
+      "evidence": "VALID_1DTE_ONLY currently contributes 20 trades and $1315.3 with no slow >=12h trades, but worst MAE is -386.75 and PnL/exposure is 170.09, below the strongest VALID_0DTE pullback/charm profiles. A companion route may separate pullback/reclaim from breakout continuation without weakening the current breakout profile directly.",
+      "implementation_scope": "new-profile-config",
+      "name": "1DTE Pullback Companion Profile",
+      "risk": "Router overlap may cannibalize breakout_long_1dte winners, or pullback_long_1dte may be unreachable despite activation because only limited tunables are exposed.",
+      "trigger": "0DTE unavailable, 1DTE map valid, and ES state resembles pullback/reclaim rather than clean breakout continuation.",
+      "validation_metric": "Combined 1DTE PnL >= $1315.3, breakout_long_1dte retained PnL/trades explicitly measured, 1DTE average/worst MAE flat or better, total net profit >=98% of run_044, and slow_12h remains 0."
+    },
+    {
+      "evidence": "call_wall_acceptance_long still owns the -655.2 worst MAE while contributing $640.5 on only two trades; static filters repeatedly risk profit suppression because the worst tail is also the largest winner.",
+      "implementation_scope": "requires-code",
+      "name": "Call-Wall Convex Recovery Monitor",
+      "risk": "Can overfit a two-trade profile and cut rare convex recoveries unless protected fast-winner retention and out-of-sample days are validated.",
+      "trigger": "call_wall_acceptance_long entry with wide target or extended ES-VWAP that fails to convert early favorable movement into sustained continuation.",
+      "validation_metric": "Reduce call-wall worst MAE below -655.2 while retaining at least 70% call-wall PnL, total net profit >=98% of leader, PnL per exposure hour flat or better, and no slow trades."
+    }
+  ],
+  "strategy_plan_reference": {
+    "market_regime_read": "Short, high-win-rate, take-profit-only SPX500 long scalper regime over about 12.3 days. Realized losses and slow >=12h trades are absent, so the real optimization target is hidd...",
+    "new_strategy_ideas": [
+      {
+        "implementation_scope": "new-profile-config",
+        "name": "1DTE Pullback Companion Profile",
+        "validation_metric": "Combined 1DTE PnL >= $1315, 1DTE average/worst MAE flat or better, breakout_long_1dte retained PnL explicitly measured, total risk-adjusted score flat or better."
+      },
+      {
+        "implementation_scope": "config-only",
+        "name": "Charm Wall Pin-Avoid Dormant Attribution Probe",
+        "validation_metric": "Activated profile has positive standalone PnL or lowers combined charm/pin worst MAE, total net profit >=98% of leader, protected fast-winner retention >=95%, no slow trades."
+      },
+      {
+        "implementation_scope": "requires-code",
+        "name": "Early Progress Heat Classifier",
+        "validation_metric": "Worst MAE improves below -655.2 toward <= -513.4 while retaining >=90% affected-profile PnL, >=95% protected fast winners, and total score flat or better."
+      },
+      {
+        "implementation_scope": "requires-code",
+        "name": "Call-Wall Convex Recovery Monitor",
+        "validation_metric": "Call-wall worst MAE materially improves, >=70% call-wall PnL retained, total net profit >=98% of leader, PnL/hour flat or better, no slow trades."
+      },
+      {
+        "implementation_scope": "config-only",
+        "name": "Delta Charm Breakout Dormant Attribution Probe",
+        "validation_metric": "Positive standalone PnL, no more than 10% degradation in squeeze/charm-wall combined PnL, total net profit >=98% of leader, worst MAE no worse than -513.4."
+      }
+    ],
+    "next_experiments": [
+      {
+        "config_bias": "Use the concept activation exception only as a full valid-0DTE router attribution test for exactly one dormant profile, with minimal same-profile tuning. Measure cannibalization...",
+        "experiment_type": "new-strategy",
+        "name": "Dormant Pin-Avoid Attribution Split",
+        "primary_metric": "Standalone dormant PnL, combined charm/pin/wall PnL retention, worst MAE, protected fast-winner retention, total risk-adjusted score.",
+        "target_profiles": [
+          "charm_pin_pullback_long",
+          "charm_wall_breakaway_long"
+        ]
+      },
+      {
+        "config_bias": "Keep breakout_long_1dte stable. If legal, test a one-dte pullback companion route; otherwise run diagnostics only and avoid tightening the current 1DTE winner directly.",
+        "experiment_type": "new-strategy",
+        "name": "1DTE Companion Split Attribution",
+        "primary_metric": "Combined 1DTE PnL, 1DTE average/worst MAE, breakout_long_1dte retained PnL/trades, total score.",
+        "target_profiles": [
+          "breakout_long_1dte"
+        ]
+      },
+      {
+        "config_bias": "Research only profile-aware realization/persistence boxes inside call_wall_acceptance_long. Avoid broad DEX/call-volume tightening that previously hurt score and PnL.",
+        "experiment_type": "profile-specific",
+        "name": "Call-Wall Convex Containment Split",
+        "primary_metric": "call_wall_acceptance_long PnL retention >=70%, worst MAE improvement, total net profit >=98% of leader, completed trade drop <=10%.",
+        "target_profiles": [
+          "call_wall_acceptance_long"
+        ]
+      },
+      {
+        "config_bias": "Use only narrow boundaries around the already-enabled extended-VWAP rejection family. Validate protected extended-VWAP winners explicitly; avoid ES-VWAP caps and setup floors.",
+        "experiment_type": "risk-reducer",
+        "name": "Extended-VWAP Near-Miss Micro Retest",
+        "primary_metric": "Worst MAE, retained total PnL >=98%, protected fast-winner retention >=95%, extended-VWAP winner retention >=95%, score flat or better.",
+        "target_profiles": [
+          "call_wall_acceptance_long",
+          "pullback_long",
+          "charm_pin_pullback_long",
+          "charm_wall_breakaway_long"
+        ]
+      },
+      {
+        "config_bias": "Continue admission/sample-builder research around confirmed wall structure and wall distance. Preserve require-breakout and convex target behavior; avoid exit compression as the...",
+        "experiment_type": "profile-specific",
+        "name": "Charm-Wall Structure-Confirmed Expansion",
+        "primary_metric": "charm_wall_breakaway_long PnL and PnL/hour, total net profit >=98% of leader, worst MAE no worse than -655.2 and preferably <= -513.4.",
+        "target_profiles": [
+          "charm_wall_breakaway_long"
+        ]
+      },
+      {
+        "config_bias": "Treat STALE_0DTE and EXPIRED_0DTE separately if expressible. Preserve VALID_0DTE routing and avoid removing the single EXPIRED_0DTE winner.",
+        "experiment_type": "router",
+        "name": "No-0DTE Data-State Holdout",
+        "primary_metric": "Fallback PnL/hour, fallback worst MAE, unchanged VALID_0DTE PnL/trade count, total net profit >=98%, slow_12h = 0.",
+        "target_profiles": [
+          "breakout_long_no_0dte",
+          "pullback_long_no_0dte",
+          "squeeze_long_no_0dte"
+        ]
+      }
+    ],
+    "plan_label": "new_regime_router_split_data_state_and_tail_attribution",
+    "profiles_to_expand": [
+      "pullback_long",
+      "charm_pin_pullback_long",
+      "charm_wall_breakaway_long",
+      "breakout_long_1dte",
+      "call_wall_acceptance_long",
+      "squeeze_long"
+    ],
+    "profiles_to_freeze": [
+      "breakout_long",
+      "wall_reclaim_long",
+      "wall_breakout_retest_long",
+      "late_day_pin_fade",
+      "negative_gamma_momentum_long",
+      "trend_day_pullback_long"
+    ],
+    "run": "run_058",
+    "strategy_track": "new-regime"
+  },
+  "validated_changes": {
+    "__router.one-dte-profiles": "breakout_long_1dte,pullback_long_1dte",
+    "profile.breakout_long_1dte.take-profit.max-distance": "6"
+  }
+}

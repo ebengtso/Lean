@@ -1,0 +1,49 @@
+{
+  "acceptance_criteria": {
+    "max_trade_drop_pct": 10.0,
+    "min_mae_delta_for_mae_family": 0.0,
+    "min_net_profit_delta": -25.0,
+    "min_score_delta": 0.0
+  },
+  "base_context": {
+    "base_config": "/Users/erikbengtson/Lean2026/LeanCustom/LauncherBacktest/SPX500InteractiveBrokersTrendScalperBacktestAlgorithm-optimizer-runs/run_044/config.before.json",
+    "base_net_profit": 7532.8,
+    "base_run": "run_044",
+    "base_score": 9940.283058006535,
+    "candidate_base": "best-by-score",
+    "candidate_base_config": "before",
+    "description": "The next run will be this leader/base config plus ONLY the JSON changes returned by the advisor.",
+    "mode": "candidate-base"
+  },
+  "changes": {
+    "option-call-volume.min-increase-pct": "0.05",
+    "profile.call_wall_acceptance_long.long-regime-filter.min-forward-dex-ratio-30m": "0.03",
+    "profile.call_wall_acceptance_long.long-regime-filter.min-net-dex-volume": "5e+08"
+  },
+  "expected_direction": "improve selected objective by changing entry quality/profile selection without starving trades",
+  "expected_effect": "Should either create a small standalone call_wall_acceptance_long sample or prove the trigger is structurally unreachable. Desired result is at least 3 positive-expectancy call-wall trades with total net profit retained above 98% of run_044 and no deterioration in VALID_0DTE core profiles. Tradeoff is possible cannibalization of stronger charm/pullback entries if call-wall priority captures marginal acceptance states.",
+  "family": "strategy-profile",
+  "label": "call-wall-sustained-sample-builder",
+  "objective_mode": "risk-adjusted",
+  "primary_metric": "score",
+  "rationale": "Use exactly one legal family: batch_a_call_wall_acceptance_long. The current leader base is strong, but call_wall_acceptance_long remains enabled with zero trades, so its value cannot be estimated. This is a profile-specific sample-builder, not a global veto or missing-0DTE change. It differs from the recently rejected duplicate by using 60-second sustained acceptance and the lowest DEX grid, while preserving positive forward DEX and call-volume expansion confirmation.",
+  "strategy_plan_label": "profit_expansion_protect_core_expand_isolated_convex_splits",
+  "strategy_plan_next_experiments": [
+    "Charm Wall Convex Admission Follow-Through",
+    "Protected-Winner Tail Boundary Study",
+    "1DTE Companion Router Split",
+    "Dormant Pin-Avoid Attribution Probe",
+    "Stale No-0DTE Fallback Efficiency Holdout",
+    "Call Wall Acceptance Sample Builder"
+  ],
+  "strategy_plan_track": "profit-expansion",
+  "watch_metrics": [
+    "score",
+    "net_profit",
+    "trade_count",
+    "worst_mae",
+    "average_mae",
+    "drawdown",
+    "slow_trades"
+  ]
+}

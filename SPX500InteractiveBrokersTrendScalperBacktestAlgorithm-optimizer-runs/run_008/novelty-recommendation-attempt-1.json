@@ -1,0 +1,74 @@
+{
+  "change_keys": [
+    "option-call-volume.min-increase-pct",
+    "option-strike-acceptance-seconds",
+    "profile.call_wall_acceptance_long.dynamic-take-profit.max",
+    "profile.call_wall_acceptance_long.long-regime-filter.min-net-dex-volume"
+  ],
+  "changes": {
+    "option-call-volume.min-increase-pct": "0.05",
+    "option-strike-acceptance-seconds": "30",
+    "profile.call_wall_acceptance_long.dynamic-take-profit.max": "7",
+    "profile.call_wall_acceptance_long.long-regime-filter.min-net-dex-volume": "7.5e+08"
+  },
+  "error": "novelty guardrail: hard-saturated family",
+  "family": "take-profit",
+  "iteration": 3,
+  "novelty_guardrail": {
+    "target_families": [
+      "surgical-veto",
+      "runtime-risk",
+      "option-strike-map",
+      "strategy-profile",
+      "upstream-entry",
+      "general"
+    ],
+    "top_family": {
+      "count": 4,
+      "family": "take-profit",
+      "share": 0.8
+    }
+  },
+  "profiles": [
+    "call_wall_acceptance_long"
+  ],
+  "reason": "Recent experiments are over-concentrated in family 'take-profit'; try a different mechanism/family before more local tuning.",
+  "recommendation": {
+    "changes": [
+      {
+        "key": "profile.call_wall_acceptance_long.long-regime-filter.min-net-dex-volume",
+        "reason": "Call-wall acceptance has only one observed trade but it is exceptionally clean; relaxing net DEX from the current 1B to the grid's 750M expands the sample without removing the positive DEX concept.",
+        "value": "750000000"
+      },
+      {
+        "key": "option-call-volume.min-increase-pct",
+        "reason": "Current 0.10 call-volume expansion may be too sparse for this profile; 0.05 is the mildest grid relaxation and should test whether cleaner call-wall entries are being missed.",
+        "value": "0.05"
+      },
+      {
+        "key": "option-strike-acceptance-seconds",
+        "reason": "Use the 30 second grid value to require slightly more stable strike acceptance while the flow threshold is relaxed, reducing the chance of noisy wall-chase entries.",
+        "value": "30"
+      },
+      {
+        "key": "profile.call_wall_acceptance_long.dynamic-take-profit.max",
+        "reason": "Raise the profile's adaptive cap from 6 to 7 so newly admitted call-wall continuation trades are not prematurely capped when option target distance is wide.",
+        "value": "7"
+      }
+    ],
+    "expected_effect": "Should increase call_wall_acceptance_long from a one-trade sample toward a measurable profile while preserving valid-0DTE option confirmation. Main tradeoff is possible added wall-chase exposure; reject if profile MAE rises above roughly -100 or total net profit falls below 98% of run_001.",
+    "label": "promote",
+    "rationale": "Use batch_a_call_wall_acceptance_long as a controlled sample-builder. The latest run shows call_wall_acceptance_long is underexplored but clean: 1 VALID_0DTE trade, $91 PnL, 455 PnL/exposure hour, -11.7 MAE. Prior saturated take-profit and 1DTE/fallback tightening hurt score, so the next non-repeated mechanism should expand a high-quality option-confirmed profile rather than tighten broad gates.",
+    "strategy_hypotheses": [
+      {
+        "evidence": "call_wall_acceptance_long has only 1 trade, but it produced $91 with -11.7 MAE and 455 PnL/exposure hour while broader 1DTE/fallback tightening reduced score and net profit.",
+        "implementation_scope": "config-only",
+        "name": "Call Wall Acceptance Sample Builder",
+        "risk": "Single-trade evidence can overfit; looser call-volume and DEX thresholds may admit noisy continuation entries or displace stronger pullback/squeeze fills.",
+        "trigger": "VALID_0DTE state with positive net DEX, positive forward DEX, accepted strike/wall context, and modest call-volume expansion.",
+        "validation_metric": "At least 5 call_wall_acceptance_long trades, positive profile PnL, average MAE better than -60, worst MAE better than -100, total net profit at least 98% of run_001, and pnl_per_exposure_hour flat or better."
+      }
+    ]
+  },
+  "run": "run_008"
+}

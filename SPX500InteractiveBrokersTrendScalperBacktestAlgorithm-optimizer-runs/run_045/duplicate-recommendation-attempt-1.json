@@ -1,0 +1,37 @@
+{
+  "changes": {
+    "__router.one-dte-profiles": "breakout_long_1dte,pullback_long_1dte"
+  },
+  "duplicate_of": "run_010",
+  "error": "duplicate experiment",
+  "iteration": 15,
+  "recommendation": {
+    "changes": [
+      {
+        "key": "__router.one-dte-profiles",
+        "reason": "Activate the dormant 1DTE pullback companion path as a router split while leaving the profitable breakout_long_1dte thresholds unchanged. Prior direct 1DTE tightening hurt score and net profit, so the cleaner test is attribution/cannibalization rather than more quality gating.",
+        "value": "breakout_long_1dte,pullback_long_1dte"
+      },
+      {
+        "key": "profile.pullback_long_1dte.enabled",
+        "reason": "Keep the companion profile explicitly enabled so the one-dte router activation can produce a measurable split if the existing playbook trigger is reachable.",
+        "value": "true"
+      }
+    ],
+    "expected_effect": "Should test whether VALID_1DTE_ONLY pullback/reclaim conditions can add or re-route 1DTE trades without damaging the existing breakout_long_1dte edge. Main risk is cannibalizing the current 20-trade, $1227.3 breakout fallback sleeve or producing no trades; reject unless combined 1DTE PnL is flat or better, total net profit retains at least 98% of run_044, and PnL/exposure stays flat or improves.",
+    "label": "promote",
+    "rationale": "Use a config-only companion-profile router split rather than direct 1DTE tightening. breakout_long_1dte is profitable but middling efficiency, and the experiment memory shows local 1DTE quality gates lost $558.5 and worsened score. Adding pullback_long_1dte to the one-dte router is a distinct mechanism: it measures whether the existing dormant pullback trigger separates reclaim-style 1DTE trades while preserving the breakout profile unchanged.",
+    "strategy_hypotheses": [
+      {
+        "evidence": "VALID_1DTE_ONLY breakout_long_1dte contributed 20 trades, $1227.3 PnL, no slow >=12h trades, but only $157.9 PnL/exposure hour and -375.7 worst MAE. Prior direct tightening damaged score and net profit, which argues for a companion split rather than stricter breakout thresholds.",
+        "implementation_scope": "new-profile-config",
+        "name": "1DTE Pullback Companion Split",
+        "risk": "The companion may be unreachable, or it may cannibalize profitable breakout_long_1dte trades without improving combined 1DTE PnL, MAE, or exposure efficiency.",
+        "trigger": "0DTE unavailable, 1DTE map valid, and ES state resembles pullback/reclaim rather than breakout continuation.",
+        "validation_metric": "Combined 1DTE PnL >= current $1227.3, breakout_long_1dte retained PnL/trades explicitly measured, combined 1DTE worst/average MAE improves or stays flat, total net profit >=98% of run_044, and total score flat or better."
+      }
+    ]
+  },
+  "run": "run_045",
+  "signature": "[[\"__router.one-dte-profiles\",\"breakout_long_1dte,pullback_long_1dte\"]]"
+}

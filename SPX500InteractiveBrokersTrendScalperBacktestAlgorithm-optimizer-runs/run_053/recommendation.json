@@ -1,0 +1,149 @@
+{
+  "changes": [
+    {
+      "key": "entry-veto-extended-vwap-rejection-max-rsi-slope",
+      "reason": "Three of the six worst MAE near-misses failed only because RSI slope exceeded the current 3.6 cap. Moving to 4.4 captures the -638.75 and -392.0 tails while avoiding the extreme 8.94 row that is more likely to overlap protected momentum winners.",
+      "value": "4.4"
+    },
+    {
+      "key": "entry-veto-extended-vwap-rejection-min-pullback-from-high",
+      "reason": "Two deep-MAE rows failed only because pullback-from-high was 0.0 to 0.25 versus the current 0.5 floor. Lowering this boundary to 0.0 lets the existing extended-VWAP rejection signature cover fresh-high rejection failures without adding a new broad entry filter.",
+      "value": "0"
+    },
+    {
+      "key": "entry-veto-extended-vwap-rejection-max-higher-high-distance",
+      "reason": "One deep-MAE near-miss had higher-high distance 7.5 versus the current 7.25 cap. This small boundary expansion completes the observed near-miss box without changing profile routing or option-data policy.",
+      "value": "7.5"
+    }
+  ],
+  "expected_effect": "Should reduce worst hidden MAE by letting the already-enabled extended-VWAP rejection veto catch several concrete near-miss tail trades, especially pullback_long and charm_pin_pullback_long heat. Tradeoff is possible loss of some profitable extended-above-VWAP recoveries, so reject if total PnL retention falls below 98%, protected fast/extended-VWAP winners are materially reduced, or kept worst MAE does not improve.",
+  "label": "extended-vwap-near-miss-tail-repair",
+  "rationale": "The current best path is a surgical tail repair, not another call-wall tightening or broad entry-quality floor. In run_053 all 24 bad-MAE rows are covered by the extended-VWAP rejection near-miss family, and the six worst entries each missed the enabled veto by one boundary. Broad setup, structure, or VWAP filters retain too little PnL and would damage protected winners; this experiment only widens the existing veto envelope at the exact failed thresholds.",
+  "strategy_hypotheses": [
+    {
+      "evidence": "pullback_long is the top PnL source with $2413.2 over 31 trades but owns the -638.75 worst MAE. Static broad filters either retain only 70-87% PnL or leave worst MAE unresolved, while the enabled extended-VWAP rejection signature has exact near-miss diagnostics.",
+      "implementation_scope": "config-only",
+      "name": "Extended-VWAP Near-Miss Tail Repair",
+      "risk": "Over-widening the veto can block clean extended-above-VWAP winners; validate protected fast-winner and extended-VWAP-winner retention explicitly.",
+      "trigger": "VALID_0DTE pullback/charm-pin entries with extended-VWAP rejection geometry that miss the existing surgical veto by only RSI-slope, pullback-from-high, or higher-high boundary.",
+      "validation_metric": "Worst MAE improves toward <= -513.4, total PnL remains >=98% of run_044, completed trades drop <=10%, pnl_per_exposure_hour stays flat or better, and slow_12h remains 0."
+    },
+    {
+      "evidence": "The worst heat rows often failed to make meaningful early progress before adverse expansion, while protected fast winners typically resolved quickly. This distinction is visible in intratrade path columns but not fully expressible with current static config.",
+      "implementation_scope": "requires-code",
+      "name": "Early Progress Heat Classifier",
+      "risk": "Can overfit a small tail sample and block delayed-but-profitable recoveries unless validated against protected UTCs and out-of-sample slices.",
+      "trigger": "pullback_long or charm_pin_pullback_long entries that fail to print early positive progress or half-TP progress before adverse expansion.",
+      "validation_metric": "Reduce worst MAE below current tail levels while retaining >=90% affected-profile PnL and >=95% protected fast-winner entries."
+    }
+  ],
+  "strategy_plan_reference": {
+    "market_regime_read": "Short 12.3-day, high-win-rate, take-profit-only long scalper regime. Realized losses and slow >=12h trades are absent, so the dominant risk is hidden MAE, recovery duration, and...",
+    "new_strategy_ideas": [
+      {
+        "implementation_scope": "new-profile-config",
+        "name": "1DTE Pullback Companion Profile",
+        "validation_metric": "Combined 1DTE PnL >= $1298.7, 1DTE average/worst MAE flat or better than -123.1/-375.7, retained breakout_long_1dte PnL explicitly measured, total risk-adjusted score flat or be..."
+      },
+      {
+        "implementation_scope": "requires-code",
+        "name": "Early Progress Heat Classifier",
+        "validation_metric": "Worst MAE improves toward <= -513.4 and preferably <= -403 while retaining >=90% affected-profile PnL, >=95% protected fast-winner entries, total PnL >=98% of leader, slow_12h r..."
+      },
+      {
+        "implementation_scope": "config-only",
+        "name": "Charm Wall Pin-Avoid Dormant Router Probe",
+        "validation_metric": "Activated dormant profile has positive standalone PnL or lowers combined charm/pin worst MAE, total PnL >=98% of leader, protected fast-winner retention >=95%, no slow trades."
+      },
+      {
+        "implementation_scope": "config-only",
+        "name": "Call Wall Acceptance Re-Attribution Probe",
+        "validation_metric": "At least 2-3 trades, positive standalone PnL, worst MAE <= -250 initially, no reduction of total PnL below 98% of leader-family base, and no degradation in pullback/charm-wall PnL."
+      }
+    ],
+    "next_experiments": [
+      {
+        "config_bias": "Only nudge the already-enabled extended-VWAP rejection near-miss family and use profile-aware boundaries. Prefer tests that catch the six concrete missed tail rows while explici...",
+        "experiment_type": "risk-reducer",
+        "name": "Extended-VWAP Near-Miss Tail Repair",
+        "primary_metric": "Worst MAE and retained total PnL; require >=95% protected fast-winner retention and >=90% affected-profile PnL retention.",
+        "target_profiles": [
+          "pullback_long",
+          "charm_pin_pullback_long"
+        ]
+      },
+      {
+        "config_bias": "Study weak-structure heat only inside pullback_long. Avoid global setup-quality floors, global ES-structure min-score jumps, or broad VWAP caps because the report shows those re...",
+        "experiment_type": "profile-specific",
+        "name": "Pullback Weak-Structure Heat Box",
+        "primary_metric": "pullback_long worst MAE, pullback PnL retention >=90%, total PnL retention >=98%, total score flat or better.",
+        "target_profiles": [
+          "pullback_long"
+        ]
+      },
+      {
+        "config_bias": "Keep breakout_long_1dte baseline thresholds stable. If optimizer can express a companion one-dte profile, test split attribution rather than tightening the existing winner.",
+        "experiment_type": "new-strategy",
+        "name": "1DTE Companion Split Holdout",
+        "primary_metric": "Combined 1DTE PnL, 1DTE average/worst MAE, retained breakout_long_1dte PnL/trades, total score.",
+        "target_profiles": [
+          "breakout_long_1dte"
+        ]
+      },
+      {
+        "config_bias": "Treat STALE_0DTE separately from EXPIRED_0DTE if legal. Do not disturb VALID_0DTE routing and do not remove the single EXPIRED_0DTE winner unless state targeting is explicit.",
+        "experiment_type": "risk-reducer",
+        "name": "No-0DTE Stale Fallback Efficiency Holdout",
+        "primary_metric": "Fallback PnL/hour, fallback worst MAE, unchanged VALID_0DTE PnL/trade count, total PnL retention >=98%.",
+        "target_profiles": [
+          "breakout_long_no_0dte",
+          "pullback_long_no_0dte",
+          "squeeze_long_no_0dte"
+        ]
+      },
+      {
+        "config_bias": "If testing dormant activation, use exactly one full valid-0DTE router-list replacement plus minimal same-profile tuning. Treat as attribution only, not promotion.",
+        "experiment_type": "new-strategy",
+        "name": "Dormant Pin-Avoid Attribution Probe",
+        "primary_metric": "Activated standalone PnL, combined affected-profile worst MAE, protected fast-winner retention, total score.",
+        "target_profiles": [
+          "charm_pin_pullback_long",
+          "charm_wall_breakaway_long"
+        ]
+      },
+      {
+        "config_bias": "Rebuild call-wall sample only inside call_wall_acceptance_long. Avoid repeating broad call-volume/DEX tightening that caused the run_050 to run_053 score and PnL drop.",
+        "experiment_type": "profile-specific",
+        "name": "Call-Wall Acceptance Re-Attribution",
+        "primary_metric": "Standalone call-wall trade count/PnL, cannibalization versus pullback/charm-wall, total PnL retention, worst MAE.",
+        "target_profiles": [
+          "call_wall_acceptance_long"
+        ]
+      }
+    ],
+    "plan_label": "risk_reducer_surgical_tail_repair_preserve_core_router_edges",
+    "profiles_to_expand": [
+      "pullback_long",
+      "charm_pin_pullback_long",
+      "breakout_long_1dte",
+      "charm_wall_breakaway_long"
+    ],
+    "profiles_to_freeze": [
+      "breakout_long",
+      "wall_reclaim_long",
+      "wall_breakout_retest_long",
+      "late_day_pin_fade",
+      "negative_gamma_momentum_long",
+      "trend_day_pullback_long",
+      "squeeze_long",
+      "call_wall_acceptance_long"
+    ],
+    "run": "run_053",
+    "strategy_track": "risk-reducer"
+  },
+  "validated_changes": {
+    "entry-veto-extended-vwap-rejection-max-higher-high-distance": "7.5",
+    "entry-veto-extended-vwap-rejection-max-rsi-slope": "4.4",
+    "entry-veto-extended-vwap-rejection-min-pullback-from-high": "0"
+  }
+}

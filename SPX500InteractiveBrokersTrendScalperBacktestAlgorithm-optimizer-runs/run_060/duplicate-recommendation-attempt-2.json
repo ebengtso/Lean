@@ -1,0 +1,32 @@
+{
+  "changes": {
+    "__router.one-dte-profiles": "breakout_long_1dte,pullback_long_1dte"
+  },
+  "duplicate_of": "run_010",
+  "error": "duplicate experiment",
+  "iteration": 20,
+  "recommendation": {
+    "changes": [
+      {
+        "key": "__router.one-dte-profiles",
+        "reason": "Single-family dormant companion attribution probe. VALID_1DTE_ONLY is a real edge with 20 trades, $1315.3 PnL, and no slow trades, but breakout_long_1dte has mediocre efficiency at $170/hour and worst MAE -386.75. Add pullback_long_1dte to the 1DTE router to test whether the existing pullback companion can capture reclaim-like 1DTE states without touching the proven breakout profile thresholds.",
+        "value": "breakout_long_1dte,pullback_long_1dte"
+      }
+    ],
+    "expected_effect": "Should expose whether 1DTE pullback/reclaim routing is reachable and additive. The desired outcome is positive standalone pullback_long_1dte attribution or improved combined 1DTE PnL/hour/MAE while preserving breakout_long_1dte PnL. Main tradeoff is cannibalization: reject if combined 1DTE PnL falls, total net profit drops below 98% of the leader, completed trades fall more than 10%, or VALID_0DTE attribution changes unexpectedly.",
+    "label": "one-dte-pullback-companion-probe",
+    "rationale": "Use the concept activation exception as exactly one logical family: a router-only 1DTE companion split. The leader is plateaued at $7532.8 with no slow trades, and recent direct call-wall, squeeze, no-0DTE, and surgical-veto keysets are either duplicate, flat, or profit-suppressive. The underexplored 1DTE sleeve is large enough to matter and should be split by routing before tightening a known profitable breakout_long_1dte profile. Because pullback_long_1dte is already enabled but absent from the one-dte router, this is the smallest legal attribution test.",
+    "strategy_hypotheses": [
+      {
+        "evidence": "VALID_1DTE_ONLY contributes 20 trades, $1315.3 PnL, $170.1 PnL/hour, 100% win rate, no slow trades, and worst MAE -386.75. Hidden signatures show blocking breakout_long_1dte would retain only 82.5% PnL and does not solve portfolio worst MAE, so the correct test is a companion split rather than direct tightening.",
+        "implementation_scope": "new-profile-config",
+        "name": "1DTE Pullback Companion Profile",
+        "risk": "The companion may be unreachable or may cannibalize profitable breakout_long_1dte trades without adding net PnL or improving MAE.",
+        "trigger": "0DTE unavailable, 1DTE map valid, and ES state resembles pullback/reclaim rather than clean breakout continuation.",
+        "validation_metric": "Combined 1DTE PnL stays at or above $1315.3, combined 1DTE PnL/hour improves above $170/hour, 1DTE worst MAE is flat or better than -386.75, breakout_long_1dte retained PnL is explicitly measured, total net profit remains >=98% of leader, and slow_12h remains 0."
+      }
+    ]
+  },
+  "run": "run_060",
+  "signature": "[[\"__router.one-dte-profiles\",\"breakout_long_1dte,pullback_long_1dte\"]]"
+}

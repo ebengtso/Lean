@@ -1,0 +1,18 @@
+[
+  {
+    "evidence": "VALID_1DTE_ONLY currently contributes 20 trades and $1315.3 with no slow >=12h trades, but worst MAE is -386.75 and PnL/exposure is 170.09, below the strongest VALID_0DTE pullback/charm profiles. A companion route may separate pullback/reclaim from breakout continuation without weakening the current breakout profile directly.",
+    "implementation_scope": "new-profile-config",
+    "name": "1DTE Pullback Companion Profile",
+    "risk": "Router overlap may cannibalize breakout_long_1dte winners, or pullback_long_1dte may be unreachable despite activation because only limited tunables are exposed.",
+    "trigger": "0DTE unavailable, 1DTE map valid, and ES state resembles pullback/reclaim rather than clean breakout continuation.",
+    "validation_metric": "Combined 1DTE PnL >= $1315.3, breakout_long_1dte retained PnL/trades explicitly measured, 1DTE average/worst MAE flat or better, total net profit >=98% of run_044, and slow_12h remains 0."
+  },
+  {
+    "evidence": "call_wall_acceptance_long still owns the -655.2 worst MAE while contributing $640.5 on only two trades; static filters repeatedly risk profit suppression because the worst tail is also the largest winner.",
+    "implementation_scope": "requires-code",
+    "name": "Call-Wall Convex Recovery Monitor",
+    "risk": "Can overfit a two-trade profile and cut rare convex recoveries unless protected fast-winner retention and out-of-sample days are validated.",
+    "trigger": "call_wall_acceptance_long entry with wide target or extended ES-VWAP that fails to convert early favorable movement into sustained continuation.",
+    "validation_metric": "Reduce call-wall worst MAE below -655.2 while retaining at least 70% call-wall PnL, total net profit >=98% of leader, PnL per exposure hour flat or better, and no slow trades."
+  }
+]

@@ -1,0 +1,188 @@
+{
+  "best_edges": [
+    {
+      "action": "protect",
+      "edge": "VALID_0DTE pullback engine",
+      "evidence": "pullback_long is the main realized edge: 30 trades, $2419 PnL, 349.6 PnL/exposure hour, 100% win rate, no slow >=12h trades. Worst MAE is material at -379.8 but not the global tail.",
+      "profile": "pullback_long"
+    },
+    {
+      "action": "protect",
+      "edge": "Charm wall breakaway convex winners",
+      "evidence": "charm_wall_breakaway_long has only 5 trades but $986.6 PnL, 197.3 average PnL, 234.6 PnL/exposure hour, median MFE 146.2, no slow trades, and worst MAE -346.8.",
+      "profile": "charm_wall_breakaway_long"
+    },
+    {
+      "action": "protect",
+      "edge": "1DTE fallback breakout flow",
+      "evidence": "breakout_long_1dte contributes $1311.2 over 20 VALID_1DTE_ONLY trades. Prior direct quality tightening hurt score and net profit, so preserve the baseline rather than tightening the same breakout gates again.",
+      "profile": "breakout_long_1dte"
+    },
+    {
+      "action": "protect selectively",
+      "edge": "Fast extended-above-VWAP winners",
+      "evidence": "Extended-VWAP winners include 17 trades, $654.5 PnL, median MAE -14.45, median hold 1.18 minutes. Broad VWAP-extension pruning would likely destroy fast convex flow.",
+      "profile": "charm_pin_pullback_long"
+    },
+    {
+      "action": "monitor",
+      "edge": "Squeeze continuation",
+      "evidence": "squeeze_long produced $721 over 10 trades with worst MAE -208.25 and no slow trades, but PnL/exposure is only 187.2 and median TP distance is very large, so it is useful but not the primary risk-reducer target.",
+      "profile": "squeeze_long"
+    }
+  ],
+  "broken_edges": [
+    {
+      "action": "do not expand; isolate tail",
+      "evidence": "34 trades and $1261.5 PnL, but global worst MAE -513.4, 80-minute hold, delayed TP touch, and poor early progress. Static broad filters overlap protected extended-VWAP winners.",
+      "problem": "Tail-heavy profitable profile; needs surgical risk discrimination rather than throughput pruning.",
+      "profile": "charm_pin_pullback_long"
+    },
+    {
+      "action": "do not tighten directly",
+      "evidence": "Prior 1DTE quality-gate runs reduced score by -355 to -594 and net profit by -317 to -558 while worsening worst MAE to -603.75.",
+      "problem": "Direct breakout_long_1dte quality tightening is a known bad path.",
+      "profile": "breakout_long_1dte"
+    },
+    {
+      "action": "trim only if isolated",
+      "evidence": "STALE_0DTE fallback has 5 trades and only $162.8 PnL. breakout_long_no_0dte stale subset has 2 trades, 40.5 PnL/exposure hour, median hold 52.6 minutes, and -250.25 worst MAE.",
+      "problem": "No-0DTE stale fallback is low-efficiency exposure; useful to reduce tail/exposure only if VALID_0DTE and EXPIRED_0DTE behavior remain untouched.",
+      "profile": "breakout_long_no_0dte"
+    },
+    {
+      "action": "freeze",
+      "evidence": "No trades despite being active/enabled or router-listed in this sample; no evidence of reachable edge in the current regime.",
+      "problem": "Dead or unreachable profiles should not consume optimizer budget in a risk-reducer pass.",
+      "profile": "call_wall_acceptance_long, breakout_long, wall_reclaim_long, wall_breakout_retest_long, late_day_pin_fade, negative_gamma_momentum_long, trend_day_pullback_long, squeeze_long_no_0dte"
+    }
+  ],
+  "market_regime_read": "Short, high-win-rate, take-profit-only sample with 105 trades, 100% realized win rate, no slow >=12h trades, and low portfolio drawdown. The risk is hidden intratrade heat rather than realized loss. The current leader remains run_029; run_032 improved average MAE and exposure efficiency but lost $80 and 2 trades after the RSI-slope boundary probe, so the next risk-reducer should revert to surgical tail capture around known threshold misses, not broad filters or direct 1DTE tightening.",
+  "new_strategy_ideas": [
+    {
+      "edge": "Separates delayed charm-pin recoveries from fast extension winners.",
+      "failure_mode": "Overfits a few delayed recoveries or blocks protected high-extension winners that resolve quickly.",
+      "implementation_scope": "requires-code",
+      "name": "Charm Pin Early-Progress Tail Classifier",
+      "required_data": "Intratrade path stats: first positive move, first +1.5/+2 points, MFE before MAE, first 15m MFE/MAE, TP touch timing, profile and VWAP-extension context.",
+      "trigger": "charm_pin_pullback_long entries with high extension or recent-high-rejection that fail to make early positive progress after entry.",
+      "validation_metric": "Reduce charm_pin_pullback_long worst MAE toward <= -403 while retaining >=90% charm-pin PnL, >=95% protected fast extended-VWAP winners, total net profit >=98% of leader, and no slow trades."
+    },
+    {
+      "edge": "Splits 1DTE pullback/reclaim behavior from breakout_long_1dte without damaging the proven fallback.",
+      "failure_mode": "Router overlap cannibalizes profitable breakout_long_1dte trades or the companion profile is unreachable.",
+      "implementation_scope": "new-profile-config",
+      "name": "1DTE Pullback Companion Profile",
+      "required_data": "VALID_1DTE_ONLY profile routing, ES pullback/reclaim state, 1DTE option-map quality, profile-level MAE and PnL attribution.",
+      "trigger": "0DTE unavailable, 1DTE map valid, and ES state resembles pullback/reclaim rather than breakout continuation.",
+      "validation_metric": "Combined 1DTE PnL >= current $1311, 1DTE average MAE improves versus -124.1, total net profit >=98% of leader, and total score flat or better."
+    },
+    {
+      "edge": "May route pin-risk tail states away from charm_pin_pullback_long and charm_wall_breakaway_long using an existing dormant concept.",
+      "failure_mode": "Dormant route is unreachable or cannibalizes clean charm-pin/charm-wall winners instead of isolating tail states.",
+      "implementation_scope": "config-only",
+      "name": "Charm Wall Pin Avoid Dormant Activation Probe",
+      "required_data": "Router attribution, charm/pin state, profile standalone PnL, protected fast-winner overlap.",
+      "trigger": "VALID_0DTE high charm-wall or pin-risk state currently routed into charm_pin_pullback_long or charm_wall_breakaway_long.",
+      "validation_metric": "Activated inactive profile has positive standalone PnL or reduces combined charm/pin worst MAE while total net profit remains >=98% of leader and protected fast-winner count is not materially reduced."
+    },
+    {
+      "edge": "Captures recoverable pullback heat separately from deep traps.",
+      "failure_mode": "Config-only proxy removes profitable weak-structure pullbacks; may need path-aware features to avoid suppressing the core PnL engine.",
+      "implementation_scope": "requires-code",
+      "name": "Pullback Deep-Heat Companion Classifier",
+      "required_data": "pullback_long entry state, early path behavior, weak structure distances, VWAP acceleration, delayed recovery markers.",
+      "trigger": "VALID_0DTE pullback_long entries with weak structure, low/negative VWAP acceleration, poor early MFE, and delayed recovery.",
+      "validation_metric": "Retain >=90% pullback_long PnL while improving pullback worst MAE from -379.8 toward <= -300 and keeping total PnL/exposure flat or better."
+    }
+  ],
+  "next_experiments": [
+    {
+      "config_bias": "Use narrow boundary nudges around the already-enabled extended-VWAP rejection family, prioritizing the single failed boundary that caught the -513.4 tail before considering multi-boundary expansion. Avoid the prior RSI-slope widening path because run_032 lost score and net profit.",
+      "experiment_type": "risk-reducer",
+      "goal": "Reduce global worst MAE without sacrificing the protected fast extended-VWAP winners.",
+      "hypothesis": "The -513.4 charm-pin tail was a near miss on the extended-VWAP rejection veto by a small VWAP-distance boundary, while protected extended-VWAP winners are fast and low-MAE. A small non-RSI boundary expansion can remove the worst tail with less PnL loss than broad structure or setup filters.",
+      "name": "Extended-VWAP Tail Boundary Re-Test",
+      "primary_metric": "Worst MAE improvement with total net profit >=98.5% of run_029 and protected extended-VWAP winner retention >=95%.",
+      "risk": "Boundary expansion can still catch clean extended winners, especially because extended-VWAP winners are a real fast edge.",
+      "target_profiles": [
+        "charm_pin_pullback_long"
+      ]
+    },
+    {
+      "config_bias": "Tighten only the charm-pin tail-risk box around high pullback-from-high, high rolling-high distance, weak/negative VWAP acceleration, low ADX/RSI, and profile match. Do not add a broad setup-quality floor or global ES-structure threshold.",
+      "experiment_type": "risk-reducer",
+      "goal": "Catch the worst charm-pin delayed recovery while preserving charm-pin throughput.",
+      "hypothesis": "The worst trade had pullback-from-high 9.25, rolling-high distance 14.25, VWAP acceleration -0.0179, ADX 17.95, RSI 42.42, and delayed TP touch at 80 minutes. This is more specific than the profitable extended-VWAP population.",
+      "name": "Charm Pin Tail Box Specificity Probe",
+      "primary_metric": "charm_pin_pullback_long worst MAE, charm-pin PnL retention >=90%, total score flat or better.",
+      "risk": "Too much overlap with valid pullback/charm-pin winners because static pre-entry fields do not see delayed post-entry behavior.",
+      "target_profiles": [
+        "charm_pin_pullback_long"
+      ]
+    },
+    {
+      "config_bias": "Isolate stale no-0DTE behavior only. Favor mild quality or exposure-efficiency trimming of breakout_long_no_0dte stale fallback; avoid touching VALID_0DTE routes or the single profitable EXPIRED_0DTE winner.",
+      "experiment_type": "risk-reducer",
+      "goal": "Reduce inefficient stale fallback exposure and tail without damaging core valid-option flow.",
+      "hypothesis": "STALE_0DTE fallback contributes little PnL and breakout_long_no_0dte stale trades have poor efficiency and elevated MAE, so isolated trimming may improve risk-adjusted exposure quality.",
+      "name": "Stale No-0DTE Fallback Efficiency Trim",
+      "primary_metric": "Fallback PnL/exposure improvement, fallback worst MAE not worse, total net profit >=98.5% of leader, VALID_0DTE PnL unchanged.",
+      "risk": "Very small sample; removing even low-efficiency winners can reduce score without visible drawdown benefit.",
+      "target_profiles": [
+        "breakout_long_no_0dte",
+        "pullback_long_no_0dte"
+      ]
+    },
+    {
+      "config_bias": "Freeze breakout_long_1dte thresholds. If legal, test adding pullback_long_1dte as a companion one-dte router split with minimal local tuning and attribution-first evaluation.",
+      "experiment_type": "new-strategy",
+      "goal": "Improve 1DTE MAE composition without repeating failed direct 1DTE tightening.",
+      "hypothesis": "VALID_1DTE_ONLY flow is profitable but average MAE is heavy. Prior direct tightening damaged score, so a companion split is more plausible than stricter breakout filters.",
+      "name": "1DTE Companion Split Attribution Probe",
+      "primary_metric": "Combined 1DTE PnL >= current $1311, 1DTE average MAE improves, total score flat or better.",
+      "risk": "Router ordering may cannibalize the proven breakout_long_1dte edge or produce no reachable trades.",
+      "target_profiles": [
+        "breakout_long_1dte"
+      ]
+    },
+    {
+      "config_bias": "Keep charm_wall_breakaway_long exits and take-profit behavior stable. Only test small admission attribution/holdout if it does not broaden weak wall-chase entries.",
+      "experiment_type": "profile-specific",
+      "goal": "Preserve the charm-wall convex edge while checking whether admission geometry remains robust.",
+      "hypothesis": "Charm-wall breakaway is high-value but only 5 trades. Prior geometry admission improved objective, but follow-through was flat; this is a holdout/stability test, not an expansion priority.",
+      "name": "Charm Wall Geometry Stability Holdout",
+      "primary_metric": "Profile PnL/exposure >=225, total worst MAE no worse than -513.4, total net profit >=98.5% of leader.",
+      "risk": "Small sample makes false positives likely; loosening geometry can dilute a strong but sparse edge.",
+      "target_profiles": [
+        "charm_wall_breakaway_long"
+      ]
+    }
+  ],
+  "plan_label": "risk_reducer_surgical_tail_capture_after_rsi_boundary_reject",
+  "profiles_to_expand": [
+    "charm_pin_pullback_long",
+    "pullback_long",
+    "charm_wall_breakaway_long"
+  ],
+  "profiles_to_freeze": [
+    "breakout_long",
+    "wall_reclaim_long",
+    "wall_breakout_retest_long",
+    "late_day_pin_fade",
+    "negative_gamma_momentum_long",
+    "trend_day_pullback_long",
+    "call_wall_acceptance_long",
+    "squeeze_long_no_0dte"
+  ],
+  "research_notes": "Run_032 is a useful warning: loosening the extended-VWAP RSI-slope boundary improved exposure efficiency but reduced score and net profit, with no worst-MAE gain. The strongest remaining risk-reducer path is not broad pruning. Single-threshold candidates either retain only 79-84% PnL or still leave the -513.4 tail. The optimizer should prefer profile-aware surgical veto tuning and stale fallback isolation. Do not repeat direct 1DTE quality tightening, broad setup-quality floors, broad ES-VWAP max-distance caps, or pullback TP/VWAP expansion, all of which have prior negative evidence or obvious protected-winner overlap.",
+  "risk_controls": [
+    "Require total net profit retention >=98.5% of run_029 for any risk-reducer promotion unless worst MAE improves materially below -403.",
+    "Require protected fast-winner retention checks, especially extended-VWAP winners, before promoting any entry veto or extension cap.",
+    "Reject experiments that reduce completed trades by more than 10% unless worst MAE improvement is large and profile PnL attribution supports it.",
+    "Keep slow >=12h trades at 0; any reintroduced slow hold is an automatic fail for this track.",
+    "Do not promote changes that only improve PnL/exposure by removing profitable trades while leaving worst MAE unchanged.",
+    "Validate profile-level MAE and PnL, not only aggregate score, because the aggregate 100% win-rate sample hides tail heat."
+  ],
+  "strategy_track": "risk-reducer"
+}

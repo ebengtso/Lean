@@ -1,0 +1,52 @@
+[
+  {
+    "attempt": 1,
+    "changes": {
+      "higher-timeframe-resolution": "30min"
+    },
+    "duplicate_of": "run_056",
+    "error": "duplicate fallback experiment",
+    "iteration": 19,
+    "recommendation": {
+      "changes": [
+        {
+          "key": "higher-timeframe-resolution",
+          "reason": "deterministic fallback",
+          "value": "30min"
+        }
+      ],
+      "expected_effect": "Small config move for continued exploration.",
+      "label": "fallback-highertimeframeresolution-30min",
+      "rationale": "Fallback deterministic recommendation because AI advisor was unavailable.",
+      "strategy_hypotheses": []
+    },
+    "run": "run_057",
+    "signature": "[[\"higher-timeframe-resolution\",\"30min\"]]",
+    "source": "threshold"
+  },
+  {
+    "attempt": 2,
+    "changes": {
+      "scalp-es-vwap-distance-min": "20"
+    },
+    "duplicate_of": "run_034",
+    "error": "duplicate fallback experiment",
+    "iteration": 19,
+    "recommendation": {
+      "changes": [
+        {
+          "key": "scalp-es-vwap-distance-min",
+          "reason": "deterministic fallback",
+          "value": "20"
+        }
+      ],
+      "expected_effect": "Small config move for continued exploration.",
+      "label": "fallback-scalpesvwapdistancemin-20",
+      "rationale": "Fallback deterministic recommendation because the AI advisor was unavailable or repeated tested experiments.",
+      "strategy_hypotheses": []
+    },
+    "run": "run_057",
+    "signature": "[[\"scalp-es-vwap-distance-min\",\"20\"]]",
+    "source": "single"
+  }
+]

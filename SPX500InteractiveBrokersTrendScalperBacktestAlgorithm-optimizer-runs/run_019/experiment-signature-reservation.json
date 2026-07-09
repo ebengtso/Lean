@@ -1,0 +1,8 @@
+{
+  "changes": {
+    "profile.squeeze_long.dynamic-take-profit.max": "8",
+    "profile.squeeze_long.es-vwap.slope-min": "0.05",
+    "profile.squeeze_long.take-profit.distance": "4.25"
+  },
+  "signature": "[[\"profile.squeeze_long.dynamic-take-profit.max\",\"8\"],[\"profile.squeeze_long.es-vwap.slope-min\",\"0.05\"],[\"profile.squeeze_long.take-profit.distance\",\"4.25\"]]"
+}

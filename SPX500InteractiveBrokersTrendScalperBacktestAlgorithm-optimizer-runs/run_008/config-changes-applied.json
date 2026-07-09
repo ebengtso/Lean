@@ -1,0 +1,5 @@
+{
+  "option-call-volume.min-increase-pct": "0.05",
+  "option-strike-acceptance-seconds": "30",
+  "profile.call_wall_acceptance_long.long-regime-filter.min-net-dex-volume": "7.5e+08"
+}

@@ -1,0 +1,82 @@
+{
+  "change_keys": [
+    "profile.charm_wall_breakaway_long.es-structure.min-higher-high-distance",
+    "profile.charm_wall_breakaway_long.es-vwap.max-distance",
+    "profile.charm_wall_breakaway_long.long-regime-filter.max-distance-above-charm-wall",
+    "profile.charm_wall_breakaway_long.take-profit.multiplier"
+  ],
+  "changes": {
+    "profile.charm_wall_breakaway_long.es-structure.min-higher-high-distance": "0.5",
+    "profile.charm_wall_breakaway_long.es-vwap.max-distance": "22",
+    "profile.charm_wall_breakaway_long.long-regime-filter.max-distance-above-charm-wall": "15",
+    "profile.charm_wall_breakaway_long.take-profit.multiplier": "1.15"
+  },
+  "error": "novelty guardrail: hard-saturated family",
+  "family": "take-profit",
+  "iteration": 3,
+  "novelty_guardrail": {
+    "target_families": [
+      "surgical-veto",
+      "runtime-risk",
+      "option-strike-map",
+      "strategy-profile",
+      "upstream-entry",
+      "general"
+    ],
+    "top_family": {
+      "count": 5,
+      "family": "take-profit",
+      "share": 0.7142857142857143
+    }
+  },
+  "profiles": [
+    "charm_wall_breakaway_long"
+  ],
+  "reason": "Recent experiments are over-concentrated in family 'take-profit'; try a different mechanism/family before more local tuning.",
+  "recommendation": {
+    "changes": [
+      {
+        "key": "profile.charm_wall_breakaway_long.es-structure.min-higher-high-distance",
+        "reason": "Batch D isolated charm-wall breakaway test. Current profile is high efficiency but small sample; reducing HH confirmation from 1.0 to 0.5 is a controlled expansion within the grid that should admit nearby breakaway continuation states without touching pullback, 1DTE, no-0DTE, or global veto logic.",
+        "value": "0.5"
+      },
+      {
+        "key": "profile.charm_wall_breakaway_long.es-vwap.max-distance",
+        "reason": "Current max distance is already the loosest grid point at 25 and the profile has high average MAE. Bringing it to 22 keeps expansion from admitting the most overextended wall-chase entries while still allowing the clean extended winners observed around median ES-VWAP distance 15.66.",
+        "value": "22"
+      },
+      {
+        "key": "profile.charm_wall_breakaway_long.take-profit.multiplier",
+        "reason": "Current multiplier 1.25 with max-distance 12 captures the payoff edge, but the median MFE is only 114.75 against 12 point TP behavior. Moving to 1.15 tests whether slightly faster monetization improves exposure efficiency while preserving larger targets versus the 0.85/1.0 grids.",
+        "value": "1.15"
+      },
+      {
+        "key": "profile.charm_wall_breakaway_long.long-regime-filter.max-distance-above-charm-wall",
+        "reason": "Keep the wall breakout premise intact but tighten the distance-above-wall cap from 20 to 15 so the relaxed HH requirement does not become a broad late chase profile.",
+        "value": "15"
+      }
+    ],
+    "expected_effect": "Should increase or stabilize charm_wall_breakaway_long quality while testing a modest sample expansion. Success means at least 8 trades or improved profile efficiency, PnL/exposure above 200, profile worst MAE no worse than about -346.8, total net profit within 2% of run_001, and no damage to VALID_0DTE pullback/charm-pin engines. Main tradeoff is fewer far-above-wall breakaway entries if the 15 point cap is too strict.",
+    "label": "charm-wall-breakaway-controlled-expansion",
+    "rationale": "Choose Batch D as the next one-family experiment because take-profit is hard-saturated, call-wall loosening and 1DTE tightening have repeatedly hurt objective, and no-0DTE fallback edits are under-sampled. charm_wall_breakaway_long is underexplored and currently the cleanest high-payoff VALID_0DTE profile: 6 trades, $1015.10 PnL, 231.03 PnL/exposure hour, median TP 12, and worst MAE -346.8. This tests a profile-specific expansion with a paired overextension guard, not a global filter.",
+    "strategy_hypotheses": [
+      {
+        "evidence": "pullback_long produced $2413.20 across 31 VALID_0DTE trades but owns the global worst MAE at -638.75. Broad structure-score pruning would retain only 71.6% PnL and leave worst MAE unchanged, so a separate state/profile is more appropriate than tightening the parent.",
+        "implementation_scope": "new-profile-config",
+        "name": "Pullback Deep-Heat Split",
+        "risk": "Config-only parent tightening may remove profitable score-3 pullbacks; a true split may need additional profile routing support if current keys cannot express delayed early-MFE behavior at entry.",
+        "trigger": "VALID_0DTE pullback_long entries with weak structure distances, low VWAP acceleration, near-zero early MFE diagnostics, and delayed TP behavior.",
+        "validation_metric": "Retain at least 90% of pullback_long PnL while improving pullback worst MAE from -638.75 toward <= -527 and improving combined PnL/exposure hour."
+      },
+      {
+        "evidence": "All 24 bad-MAE rows are covered by the extended-VWAP-rejection near-miss family, but protected extended_vwap_winners exist and broad extension filters would cut profitable edge. Current instruction family does not allow these global veto keys this run.",
+        "implementation_scope": "config-only",
+        "name": "Extended VWAP Rejection State Split",
+        "risk": "Boundary expansion could block clean extended-VWAP winners and suppress fast PnL if used as a blunt global veto.",
+        "trigger": "Entries matching existing extended-vwap-rejection near misses, especially max-rsi-slope, max-vwap-distance, and min-pullback-from-high failures.",
+        "validation_metric": "Worst MAE improves toward <= -527 with retained total PnL >=97%, fast_under_15m trades down <=3, and protected extended_vwap_winners mostly retained."
+      }
+    ]
+  },
+  "run": "run_010"
+}

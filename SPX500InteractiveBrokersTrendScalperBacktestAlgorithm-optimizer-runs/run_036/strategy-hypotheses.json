@@ -1,0 +1,10 @@
+[
+  {
+    "evidence": "charm_wall_breakaway_long produced 5 VALID_0DTE trades, $985.6 PnL, $197.1 average PnL, 234.36 PnL/exposure hour, median MFE 146.2, no slow >=12h trades, and worst MAE -346.8. The previous geometry move improved score by 110.6 and net profit by $72.5 without reducing trade count.",
+    "implementation_scope": "config-only",
+    "name": "Charm Wall Supported Admission Follow-Through",
+    "risk": "Small sample risk is high; the wider charm-wall box can admit lower-quality continuation attempts, while the VWAP cap or higher-low requirement can remove existing convex winners.",
+    "trigger": "VALID_0DTE charm-wall breakaway context with price above the charm wall, require-breakout still true, and ES support confirmed by higher-low structure but not excessive VWAP extension.",
+    "validation_metric": "charm_wall_breakaway_long PnL/exposure remains >=225, total net profit remains >=98% of run_029, completed trades decline by no more than 10%, slow_12h remains 0, and total worst MAE is no worse than -513.4."
+  }
+]

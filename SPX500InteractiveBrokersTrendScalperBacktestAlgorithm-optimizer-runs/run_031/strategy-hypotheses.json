@@ -1,0 +1,18 @@
+[
+  {
+    "evidence": "VALID_1DTE_ONLY breakout fallback contributes $1305 over 20 trades, but prior direct 1DTE tightening hurt score and net profit. That suggests a companion split, not stricter breakout_long_1dte thresholds.",
+    "implementation_scope": "new-profile-config",
+    "name": "1DTE Pullback Companion Profile",
+    "risk": "Router overlap may cannibalize profitable breakout_long_1dte trades or the companion profile may be unreachable.",
+    "trigger": "0DTE unavailable, 1DTE map valid, and ES state resembles pullback/reclaim rather than breakout continuation.",
+    "validation_metric": "Combined 1DTE PnL remains >= current $1305, 1DTE average MAE improves versus -123.9, total net profit remains >=98% of leader, and score is flat or better."
+  },
+  {
+    "evidence": "charm_pin_pullback_long contributes $1237.7 over 34 trades with fast median hold, but owns the -527 worst MAE. Protected extended-VWAP winners have median MAE around -14.9 and resolve quickly, so static config filters are too blunt.",
+    "implementation_scope": "requires-code",
+    "name": "Charm Pin Early-Progress Tail Classifier",
+    "risk": "Can overfit a small number of delayed recoveries or block clean high-extension winners unless protected fast-winner retention is explicitly validated.",
+    "trigger": "charm_pin_pullback_long high-extension or recent-high-rejection entries that fail to show early positive progress after entry.",
+    "validation_metric": "Reduce charm_pin_pullback_long worst MAE toward <= -403 while retaining >=90% charm-pin PnL, >=95% protected fast extended-VWAP winners, total net profit >=98% of leader, and no new slow >=12h exposure."
+  }
+]

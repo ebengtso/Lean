@@ -1,0 +1,10 @@
+{
+  "applied_after_base_run": "run_001",
+  "changes": {
+    "profile.charm_wall_breakaway_long.es-vwap.max-distance": "22",
+    "profile.charm_wall_breakaway_long.take-profit.max-distance": "10",
+    "profile.charm_wall_breakaway_long.take-profit.multiplier": "1.15"
+  },
+  "source_changes": "/Users/erikbengtson/Lean2026/LeanCustom/LauncherBacktest/SPX500InteractiveBrokersTrendScalperBacktestAlgorithm-optimizer-runs/run_020/config-changes-applied.json",
+  "source_run": "run_020"
+}

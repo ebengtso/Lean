@@ -1,0 +1,138 @@
+[
+  {
+    "first_run": "run_001",
+    "signature": "[[\"profile.breakout_long_no_0dte.es-structure.min-score\",\"5\"],[\"profile.breakout_long_no_0dte.es-vwap.slope-min\",\"0.1\"],[\"profile.breakout_long_no_0dte.take-profit.distance\",\"4\"],[\"profile.pullback_long_no_0dte.es-structure.min-score\",\"5\"]]"
+  },
+  {
+    "first_run": "run_002",
+    "signature": "[[\"entry-veto-charm-pin-tail-risk-max-adx\",\"20\"],[\"entry-veto-charm-pin-tail-risk-max-rolling-high-distance\",\"15\"],[\"entry-veto-charm-pin-tail-risk-min-setup-quality-score\",\"60\"],[\"use-entry-veto-charm-pin-tail-risk-signature\",\"true\"]]"
+  },
+  {
+    "first_run": "run_003",
+    "signature": "[[\"profile.breakout_long_no_0dte.enabled\",\"false\"],[\"profile.pullback_long_no_0dte.es-vwap.max-distance\",\"8\"],[\"profile.pullback_long_no_0dte.take-profit.distance\",\"3\"],[\"profile.squeeze_long_no_0dte.enabled\",\"false\"]]"
+  },
+  {
+    "first_run": "run_003",
+    "signature": "[[\"profile.breakout_long_no_0dte.dynamic-take-profit.max\",\"4\"],[\"profile.breakout_long_no_0dte.es-structure.min-score\",\"5\"],[\"profile.breakout_long_no_0dte.es-vwap.slope-min\",\"0.1\"],[\"profile.pullback_long_no_0dte.es-structure.min-score\",\"5\"]]"
+  },
+  {
+    "first_run": "run_004",
+    "signature": "[[\"profile.breakout_long_1dte.es-structure.min-score\",\"4\"],[\"profile.breakout_long_1dte.es-vwap.slope-min\",\"0.04\"],[\"profile.breakout_long_1dte.long-regime-filter-1dte.min-forward-dex-ratio-30m\",\"0.08\"],[\"profile.breakout_long_1dte.take-profit.max-distance\",\"6\"]]"
+  },
+  {
+    "first_run": "run_004",
+    "signature": "[[\"profile.breakout_long_no_0dte.es-structure.min-score\",\"5\"],[\"profile.breakout_long_no_0dte.es-vwap.slope-min\",\"0.1\"],[\"profile.breakout_long_no_0dte.take-profit.distance\",\"4\"],[\"profile.pullback_long_no_0dte.es-vwap.max-distance\",\"8\"]]"
+  },
+  {
+    "first_run": "run_005",
+    "signature": "[[\"profile.breakout_long_1dte.es-structure.min-score\",\"4\"],[\"profile.breakout_long_1dte.es-vwap.slope-min\",\"0.04\"],[\"profile.breakout_long_1dte.take-profit.max-distance\",\"6\"]]"
+  },
+  {
+    "first_run": "run_006",
+    "signature": "[[\"option-call-volume.min-increase-pct\",\"0.05\"],[\"profile.call_wall_acceptance_long.dynamic-take-profit.max\",\"7\"],[\"profile.call_wall_acceptance_long.long-regime-filter.min-forward-dex-ratio-30m\",\"0.03\"],[\"profile.call_wall_acceptance_long.long-regime-filter.min-net-dex-volume\",\"7.5e+08\"]]"
+  },
+  {
+    "first_run": "run_007",
+    "signature": "[[\"option-call-volume.min-increase-pct\",\"0.05\"],[\"option-strike-acceptance-seconds\",\"30\"],[\"profile.call_wall_acceptance_long.long-regime-filter.min-forward-dex-ratio-30m\",\"0.03\"],[\"profile.call_wall_acceptance_long.long-regime-filter.min-net-dex-volume\",\"7.5e+08\"]]"
+  },
+  {
+    "first_run": "run_008",
+    "signature": "[[\"option-call-volume.min-increase-pct\",\"0.05\"],[\"option-strike-acceptance-seconds\",\"30\"],[\"profile.call_wall_acceptance_long.long-regime-filter.min-net-dex-volume\",\"7.5e+08\"]]"
+  },
+  {
+    "first_run": "run_009",
+    "signature": "[[\"trade-risk-max-adverse-points\",\"12\"],[\"use-stale-trade-exit\",\"true\"],[\"use-trade-health-exit\",\"true\"]]"
+  },
+  {
+    "first_run": "run_010",
+    "signature": "[[\"__router.one-dte-profiles\",\"breakout_long_1dte,pullback_long_1dte\"]]"
+  },
+  {
+    "first_run": "run_011",
+    "signature": "[[\"entry-veto-charm-pin-tail-risk-max-pullback-from-high\",\"10\"],[\"entry-veto-charm-pin-tail-risk-max-rolling-high-distance\",\"15\"],[\"entry-veto-charm-pin-tail-risk-min-setup-quality-score\",\"60\"]]"
+  },
+  {
+    "first_run": "run_012",
+    "signature": "[[\"profile.pullback_long.es-structure.min-score\",\"4\"],[\"profile.pullback_long.es-vwap.max-distance\",\"8.5\"]]"
+  },
+  {
+    "first_run": "run_013",
+    "signature": "[[\"profile.charm_wall_breakaway_long.es-structure.min-higher-high-distance\",\"1.5\"],[\"profile.charm_wall_breakaway_long.es-structure.min-higher-low-distance\",\"1\"],[\"profile.charm_wall_breakaway_long.long-regime-filter.max-distance-above-charm-wall\",\"15\"]]"
+  },
+  {
+    "first_run": "run_014",
+    "signature": "[[\"entry-veto-charm-pin-tail-risk-max-rolling-high-distance\",\"14.75\"],[\"entry-veto-charm-pin-tail-risk-min-setup-quality-score\",\"60\"],[\"entry-veto-charm-pin-tail-risk-min-vwap-distance\",\"20\"]]"
+  },
+  {
+    "first_run": "run_015",
+    "signature": "[[\"profile.pullback_long.dynamic-take-profit.max\",\"5\"],[\"profile.pullback_long.es-vwap.max-distance\",\"12\"],[\"profile.pullback_long.take-profit.distance\",\"2.5\"]]"
+  },
+  {
+    "first_run": "run_016",
+    "signature": "[[\"profile.squeeze_long.dynamic-take-profit.max\",\"7.5\"],[\"profile.squeeze_long.es-vwap.slope-min\",\"0.05\"],[\"profile.squeeze_long.take-profit.distance\",\"4.25\"]]"
+  },
+  {
+    "first_run": "run_017",
+    "signature": "[[\"profile.squeeze_long.dynamic-take-profit.max\",\"7.5\"],[\"profile.squeeze_long.take-profit.distance\",\"4.25\"]]"
+  },
+  {
+    "first_run": "run_018",
+    "signature": "[[\"profile.squeeze_long.dynamic-take-profit.max\",\"8\"],[\"profile.squeeze_long.es-vwap.slope-min\",\"0.06\"],[\"profile.squeeze_long.take-profit.distance\",\"4.5\"]]"
+  },
+  {
+    "first_run": "run_019",
+    "signature": "[[\"profile.squeeze_long.dynamic-take-profit.max\",\"8\"],[\"profile.squeeze_long.es-vwap.slope-min\",\"0.05\"],[\"profile.squeeze_long.take-profit.distance\",\"4.25\"]]"
+  },
+  {
+    "first_run": "run_020",
+    "signature": "[[\"profile.charm_wall_breakaway_long.es-vwap.max-distance\",\"22\"],[\"profile.charm_wall_breakaway_long.take-profit.max-distance\",\"10\"],[\"profile.charm_wall_breakaway_long.take-profit.multiplier\",\"1.15\"]]"
+  },
+  {
+    "first_run": "run_021",
+    "signature": "[[\"profile.breakout_long_no_0dte.es-structure.min-score\",\"5\"],[\"profile.breakout_long_no_0dte.es-vwap.slope-min\",\"0.1\"],[\"profile.breakout_long_no_0dte.take-profit.distance\",\"4\"]]"
+  },
+  {
+    "first_run": "run_022",
+    "signature": "[[\"__router.valid-0dte-profiles\",\"breakout_long,pullback_long,squeeze_long,wall_reclaim_long,wall_breakout_retest_long,late_day_pin_fade,negative_gamma_momentum_long,trend_day_pullback_long,charm_pin_pullback_long,charm_wall_breakaway_long,call_wall_acceptance_long,charm_wall_pin_avoid_long\"],[\"profile.charm_wall_pin_avoid_long.enabled\",\"true\"]]"
+  },
+  {
+    "first_run": "run_023",
+    "signature": "[[\"profile.charm_pin_pullback_long.long-regime-filter.dynamic-vwap-expected-move-fraction\",\"0.2\"],[\"profile.charm_pin_pullback_long.long-regime-filter.dynamic-vwap-max-distance\",\"25\"],[\"profile.charm_pin_pullback_long.long-regime-filter.recent-high-rejection-min-pullback\",\"8\"]]"
+  },
+  {
+    "first_run": "run_024",
+    "signature": "[[\"profile.charm_wall_breakaway_long.es-structure.min-higher-high-distance\",\"0.5\"],[\"profile.charm_wall_breakaway_long.long-regime-filter.max-distance-above-charm-wall\",\"25\"]]"
+  },
+  {
+    "first_run": "run_025",
+    "signature": "[[\"profile.charm_pin_pullback_long.long-regime-filter.dynamic-vwap-volatility-multiplier\",\"0.25\"],[\"profile.charm_pin_pullback_long.long-regime-filter.recent-high-rejection-min-pullback\",\"8\"]]"
+  },
+  {
+    "first_run": "run_026",
+    "signature": "[[\"entry-veto-extended-vwap-rejection-max-vwap-distance\",\"26.25\"]]"
+  },
+  {
+    "first_run": "run_027",
+    "signature": "[[\"profile.charm_wall_breakaway_long.long-regime-filter.max-distance-above-charm-wall\",\"25\"]]"
+  },
+  {
+    "first_run": "run_028",
+    "signature": "[[\"order-book-min-microprice-slope-points-per-second\",\"-0.003\"]]"
+  },
+  {
+    "first_run": "run_029",
+    "signature": "[[\"entry-veto-extended-vwap-rejection-max-rsi-slope\",\"4.1\"]]"
+  },
+  {
+    "first_run": "run_030",
+    "signature": "[[\"profile.squeeze_long.dynamic-take-profit.max\",\"5.5\"],[\"profile.squeeze_long.es-vwap.slope-min\",\"0.05\"],[\"profile.squeeze_long.take-profit.distance\",\"3.25\"]]"
+  },
+  {
+    "first_run": "run_031",
+    "signature": "[[\"profile.breakout_long_no_0dte.es-structure.min-score\",\"5\"],[\"profile.breakout_long_no_0dte.es-vwap.slope-min\",\"0.1\"],[\"profile.breakout_long_no_0dte.take-profit.distance\",\"2.5\"]]"
+  },
+  {
+    "first_run": "run_032",
+    "signature": "[[\"profile.breakout_long_no_0dte.dynamic-take-profit.max\",\"4\"],[\"profile.breakout_long_no_0dte.es-vwap.slope-min\",\"0.1\"],[\"profile.breakout_long_no_0dte.take-profit.distance\",\"2.5\"]]"
+  }
+]

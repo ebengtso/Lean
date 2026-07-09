@@ -1,0 +1,38 @@
+{
+  "changes": {
+    "__router.valid-0dte-profiles": "breakout_long,pullback_long,squeeze_long,wall_reclaim_long,wall_breakout_retest_long,late_day_pin_fade,negative_gamma_momentum_long,trend_day_pullback_long,charm_pin_pullback_long,charm_wall_breakaway_long,call_wall_acceptance_long,charm_wall_pin_avoid_long",
+    "profile.charm_wall_pin_avoid_long.enabled": "true"
+  },
+  "duplicate_of": "run_022",
+  "error": "duplicate experiment",
+  "iteration": 19,
+  "recommendation": {
+    "changes": [
+      {
+        "key": "__router.valid-0dte-profiles",
+        "reason": "Activate one dormant valid-0DTE pin-avoid concept as an attribution probe while preserving every existing valid-0DTE routed profile. This is a full router-list replacement as required for dormant profile tests.",
+        "value": "breakout_long,pullback_long,squeeze_long,wall_reclaim_long,wall_breakout_retest_long,late_day_pin_fade,negative_gamma_momentum_long,trend_day_pullback_long,charm_pin_pullback_long,charm_wall_breakaway_long,call_wall_acceptance_long,charm_wall_pin_avoid_long"
+      },
+      {
+        "key": "profile.charm_wall_pin_avoid_long.enabled",
+        "reason": "Enable the dormant charm-wall pin-avoid profile to test whether existing C# playbook logic can isolate tail-prone charm/pin states without tightening global vetoes or disturbing no-0DTE routing.",
+        "value": "true"
+      }
+    ],
+    "expected_effect": "This should produce attribution on whether dormant pin-avoid logic captures or diverts high-extension charm-wall/charm-pin risk. Best case: combined charm/pin worst MAE improves and protected pullback/squeeze throughput is unchanged. Main tradeoff is router cannibalization: it may steal profitable charm_pin_pullback_long or charm_wall_breakaway_long trades without reducing the call-wall -655.2 tail.",
+    "label": "dormant-pin-avoid-attribution-probe",
+    "rationale": "The last rejected recommendation was a duplicate charm-wall structure box, and the latest surgical extended-VWAP repair hurt score without improving worst MAE. The next non-duplicate, config-only experiment should change mechanism: use the dormant valid-0DTE charm_wall_pin_avoid_long concept to test whether existing playbook routing can separate pin-risk states that are currently mixed into profitable but tail-heavy charm profiles. This keeps one logical family, avoids global veto tightening, leaves option-confirmed profiles constrained to VALID_0DTE routing, and does not touch no-stop-loss behavior.",
+    "strategy_hypotheses": [
+      {
+        "evidence": "run_056 shows charm_pin_pullback_long has 28 trades, $1088.2 PnL, efficient median behavior, but a -335.75 worst MAE; charm_wall_breakaway_long has 5 trades, $574 PnL, $503.6/hour, but -357 MAE. Dormant pin-avoid logic may provide attribution for the high-extension pin-risk subset without broad pruning.",
+        "implementation_scope": "config-only",
+        "name": "Dormant Pin-Avoid Attribution Probe",
+        "risk": "Router overlap may cannibalize profitable charm-pin or charm-wall winners, and the dormant profile may not reduce the portfolio worst MAE if the dominant tail remains call_wall_acceptance_long.",
+        "trigger": "VALID_0DTE charm/pin/wall context where active charm profiles are profitable but carry hidden MAE around pin-risk or high-extension states.",
+        "validation_metric": "Dormant profile has positive standalone PnL or improves combined charm/pin/wall worst MAE; total net profit remains >=98% of run_044, completed trades drop <=10%, protected fast-winner retention remains >=95%, and slow_12h stays 0."
+      }
+    ]
+  },
+  "run": "run_056",
+  "signature": "[[\"__router.valid-0dte-profiles\",\"breakout_long,pullback_long,squeeze_long,wall_reclaim_long,wall_breakout_retest_long,late_day_pin_fade,negative_gamma_momentum_long,trend_day_pullback_long,charm_pin_pullback_long,charm_wall_breakaway_long,call_wall_acceptance_long,charm_wall_pin_avoid_long\"],[\"profile.charm_wall_pin_avoid_long.enabled\",\"true\"]]"
+}

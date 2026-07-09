@@ -1,0 +1,148 @@
+{
+  "changes": [
+    {
+      "key": "profile.call_wall_acceptance_long.long-regime-filter.min-net-dex-volume",
+      "reason": "Expand the under-sampled call-wall acceptance profile one notch while preserving a large positive DEX requirement; current single trade was very clean but too sparse for inference.",
+      "value": "750000000"
+    },
+    {
+      "key": "profile.call_wall_acceptance_long.long-regime-filter.min-forward-dex-ratio-30m",
+      "reason": "Loosen forward DEX confirmation from 0.05 to 0.03 to admit more accepted-wall continuation attempts without removing the forward-flow concept.",
+      "value": "0.03"
+    },
+    {
+      "key": "option-call-volume.min-increase-pct",
+      "reason": "Reduce call-volume expansion requirement from 0.10 to 0.05 so valid wall acceptance with modest but positive flow expansion is sampled.",
+      "value": "0.05"
+    },
+    {
+      "key": "option-strike-acceptance-seconds",
+      "reason": "Require 30 seconds of strike acceptance rather than the fastest 20-second acceptance; this offsets the looser DEX/volume gates with a time-confirmation check.",
+      "value": "30"
+    }
+  ],
+  "expected_effect": "Should increase call_wall_acceptance_long sample size from the current 1 trade while keeping it option-confirmed and VALID_0DTE dependent. Success is at least several new trades with average MAE still far cleaner than pullback/charm tails, no worse total worst MAE, and net profit/growth quality retained versus run_001. Main tradeoff is admitting duplicate or weaker wall-continuation entries if DEX expansion is too permissive.",
+  "label": "call-wall-sample-expansion",
+  "rationale": "The latest 1DTE tightening branch hurt score, profit, drawdown, and worst MAE, so the next experiment should not repeat 1DTE quality tightening or fallback pruning. call_wall_acceptance_long is underexplored, produced the cleanest profile-level MAE (-11.7) and highest valid-0DTE efficiency on its one trade, and can be expanded with one coherent option-flow/wall-acceptance family rather than global veto tightening.",
+  "strategy_hypotheses": [
+    {
+      "evidence": "call_wall_acceptance_long had 1 VALID_0DTE trade, $91 PnL, 455 PnL/exposure hour, 12 minute hold, and -11.7 worst MAE. It is too small to promote but materially cleaner than the current tail-heavy 1DTE and charm-pin profiles.",
+      "implementation_scope": "config-only",
+      "name": "Call Wall Acceptance Sample Expansion",
+      "risk": "Single-trade evidence may be luck; loosening flow gates could add noisy continuation entries or displace better pullback/squeeze trades.",
+      "trigger": "VALID_0DTE state with accepted call-wall/strike context, positive forward DEX, and call-volume expansion that is present but below the prior stricter threshold.",
+      "validation_metric": "At least 5 call_wall_acceptance_long trades, positive profile PnL, average MAE below -60, no worsening of total worst MAE, total net profit >= 98% of run_001, and pnl_per_exposure_hour flat or better."
+    }
+  ],
+  "strategy_plan_reference": {
+    "market_regime_read": "The observed regime is a favorable long-only grind/upside acceptance environment with 100% realized win rate, no slow >=12h trades, high PSR, and strong fast-winner contribution...",
+    "new_strategy_ideas": [
+      {
+        "implementation_scope": "new-profile-config",
+        "name": "1DTE Breakout Companion Split",
+        "validation_metric": "1DTE combined PnL/exposure hour improves above 125 while worst 1DTE MAE improves toward <= -375 and total net profit remains >= 98% of run_001."
+      },
+      {
+        "implementation_scope": "new-profile-config",
+        "name": "Charm Pin Fast-Resolution Split",
+        "validation_metric": "Retain >= 90% of charm_pin_pullback_long PnL, reduce profile worst MAE below -400, and keep fast_under_15m trades within -3 of base."
+      },
+      {
+        "implementation_scope": "new-profile-config",
+        "name": "Dormant Mean-Reversion Long Probe",
+        "validation_metric": "Positive out-of-sample PnL with average MAE below active-profile median, no increase in worst MAE, and no reduction in baseline active-profile trades."
+      },
+      {
+        "implementation_scope": "new-profile-config",
+        "name": "Dormant Pin-Avoid Long Probe",
+        "validation_metric": "At least 5 trades across expanded sample, positive PnL, average MAE better than -75, and no overlap-driven degradation in pullback/charm-pin profiles."
+      },
+      {
+        "implementation_scope": "requires-code",
+        "name": "Slow-To-Profit Tail State Classifier",
+        "validation_metric": "Reduce worst MAE and exposure hours while keeping realized PnL within 95% of base; especially reduce 60-180 minute tail holds."
+      }
+    ],
+    "next_experiments": [
+      {
+        "config_bias": "Undo the spirit of broad 1DTE tightening and test a split or lighter acceptance branch. Bias toward preserving 1DTE winners while isolating only the overbought weak-higher-low l...",
+        "experiment_type": "new-strategy",
+        "name": "1DTE Acceptance Split Recovery",
+        "primary_metric": "Total score versus run_001, 1DTE worst MAE, 1DTE PnL/exposure hour, total net profit retained >= 98%.",
+        "target_profiles": [
+          "breakout_long_1dte"
+        ]
+      },
+      {
+        "config_bias": "Prefer profile-scoped threshold nudges around the existing extended-VWAP-rejection signature over global gates. Use the failed-threshold evidence, but avoid changing every bound...",
+        "experiment_type": "risk-reducer",
+        "name": "Surgical Extended-VWAP Rejection Boundary Study",
+        "primary_metric": "Worst MAE improvement with retained PnL >= 95%, protected fast-winner count loss <= 3, and no drop in PnL/exposure hour below 190 on base comparison.",
+        "target_profiles": [
+          "breakout_long_1dte",
+          "charm_pin_pullback_long",
+          "pullback_long"
+        ]
+      },
+      {
+        "config_bias": "Run an activation-style dormant concept probe with minimal routing addition and conservative profile defaults. Treat as discovery, not score maximization.",
+        "experiment_type": "new-strategy",
+        "name": "Dormant VALID_0DTE Concept Probe",
+        "primary_metric": "New-profile trade count, standalone PnL, average MAE, overlap impact on pullback_long/charm_pin_pullback_long, and total score drawdown.",
+        "target_profiles": [
+          "mean_reversion_long",
+          "late_day_pin_avoid_long",
+          "charm_wall_pin_avoid_long"
+        ]
+      },
+      {
+        "config_bias": "Expand only one under-sampled high-efficiency profile at a time. Favor slightly broader acceptance around wall confirmation rather than lowering all quality controls.",
+        "experiment_type": "profile-specific",
+        "name": "Call Wall Acceptance Sample Expansion",
+        "primary_metric": "At least 5 trades, positive PnL, average MAE below -60, no increase in total worst MAE, and no material pullback/charm trade displacement.",
+        "target_profiles": [
+          "call_wall_acceptance_long"
+        ]
+      },
+      {
+        "config_bias": "Hold fallback profiles close to base and study only reporting/routing splits, not tighter thresholds. No more fallback pruning until stale/missing sample grows.",
+        "experiment_type": "router",
+        "name": "Fallback Freeze With Data-State Monitoring",
+        "primary_metric": "Total score, stale/expired trade count, fallback PnL, fallback average MAE, and whether any new stale tail emerges.",
+        "target_profiles": [
+          "breakout_long_no_0dte",
+          "pullback_long_no_0dte",
+          "squeeze_long_no_0dte"
+        ]
+      }
+    ],
+    "plan_label": "new-regime-profile-split-discovery-v1",
+    "profiles_to_expand": [
+      "breakout_long_1dte",
+      "call_wall_acceptance_long",
+      "charm_wall_breakaway_long",
+      "mean_reversion_long",
+      "late_day_pin_avoid_long",
+      "charm_wall_pin_avoid_long"
+    ],
+    "profiles_to_freeze": [
+      "breakout_long",
+      "wall_reclaim_long",
+      "wall_breakout_retest_long",
+      "late_day_pin_fade",
+      "negative_gamma_momentum_long",
+      "trend_day_pullback_long",
+      "breakout_long_no_0dte",
+      "pullback_long_no_0dte",
+      "squeeze_long_no_0dte"
+    ],
+    "run": "run_007",
+    "strategy_track": "new-regime"
+  },
+  "validated_changes": {
+    "option-call-volume.min-increase-pct": "0.05",
+    "option-strike-acceptance-seconds": "30",
+    "profile.call_wall_acceptance_long.long-regime-filter.min-forward-dex-ratio-30m": "0.03",
+    "profile.call_wall_acceptance_long.long-regime-filter.min-net-dex-volume": "7.5e+08"
+  }
+}

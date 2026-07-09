@@ -1,0 +1,49 @@
+{
+  "acceptance_criteria": {
+    "max_trade_drop_pct": 10.0,
+    "min_mae_delta_for_mae_family": 0.0,
+    "min_net_profit_delta": -25.0,
+    "min_score_delta": 0.0
+  },
+  "base_context": {
+    "base_config": "/Users/erikbengtson/Lean2026/LeanCustom/LauncherBacktest/SPX500InteractiveBrokersTrendScalperBacktestAlgorithm-optimizer-runs/run_044/config.before.json",
+    "base_net_profit": 7532.8,
+    "base_run": "run_044",
+    "base_score": 9940.283058006535,
+    "candidate_base": "best-by-score",
+    "candidate_base_config": "before",
+    "description": "The next run will be this leader/base config plus ONLY the JSON changes returned by the advisor.",
+    "mode": "candidate-base"
+  },
+  "changes": {
+    "option-call-volume.min-increase-pct": "0.15",
+    "profile.call_wall_acceptance_long.long-regime-filter.min-forward-dex-ratio-30m": "0.08",
+    "profile.call_wall_acceptance_long.long-regime-filter.min-net-dex-volume": "1.5e+09"
+  },
+  "expected_direction": "improve selected objective by changing entry quality/profile selection without starving trades",
+  "expected_effect": "Should reduce or eliminate weak call-wall acceptance attempts, targeting lower worst MAE and shorter hidden recovery exposure while preserving the core pullback, squeeze, charm-pin, charm-wall, and 1DTE edges. Main tradeoff is that the call-wall sample is only two trades, so the stricter flow box may remove the $546 convex winner; reject if total net profit falls below 98% of run_044/run_050 or if score improvement is only MAE-through-deletion.",
+  "family": "strategy-profile",
+  "label": "promote",
+  "objective_mode": "risk-adjusted",
+  "primary_metric": "score",
+  "rationale": "Run one batch_a_call_wall_acceptance_long experiment focused on option-flow persistence, not TP compression. The score leader has excellent net profit but the global worst MAE is concentrated in call_wall_acceptance_long: 2 trades, $640.5 PnL, $290/hour, but -655.2 worst MAE and a 120-minute recovery path. Prior call-wall TP containment was basically flat and did not improve MAE, so the next distinct mechanism is stricter pre-entry acceptance quality using legal call-wall/option-flow keys only.",
+  "strategy_plan_label": "risk_reducer_surgical_tail_containment_preserve_convex_edges",
+  "strategy_plan_next_experiments": [
+    "Extended-VWAP Near-Miss Tail Repair",
+    "Call-Wall Acceptance Tail Containment",
+    "Pullback Weak-Structure Heat Split",
+    "1DTE Companion Split Validation",
+    "Dormant Pin-Avoid Attribution Probe",
+    "No-0DTE Fallback Efficiency Holdout"
+  ],
+  "strategy_plan_track": "risk-reducer",
+  "watch_metrics": [
+    "score",
+    "net_profit",
+    "trade_count",
+    "worst_mae",
+    "average_mae",
+    "drawdown",
+    "slow_trades"
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "acceptance_criteria": {
+    "max_trade_drop_pct": 10.0,
+    "min_mae_delta_for_mae_family": 0.0,
+    "min_net_profit_delta": -25.0,
+    "min_score_delta": 0.0
+  },
+  "base_context": {
+    "base_config": "/Users/erikbengtson/Lean2026/LeanCustom/LauncherBacktest/SPX500InteractiveBrokersTrendScalperBacktestAlgorithm-optimizer-runs/run_029/config.before.json",
+    "base_net_profit": 7149.6,
+    "base_run": "run_029",
+    "base_score": 9623.090019916142,
+    "candidate_base": "best-by-score",
+    "candidate_base_config": "before",
+    "description": "The next run will be this leader/base config plus ONLY the JSON changes returned by the advisor.",
+    "mode": "candidate-base"
+  },
+  "changes": {
+    "profile.charm_pin_pullback_long.long-regime-filter.dynamic-vwap-max-distance": "25",
+    "profile.charm_pin_pullback_long.long-regime-filter.dynamic-vwap-volatility-multiplier": "0.4",
+    "profile.charm_pin_pullback_long.long-regime-filter.recent-high-rejection-min-pullback": "8"
+  },
+  "expected_direction": "improve selected objective by changing entry quality/profile selection without starving trades",
+  "expected_effect": "Expected to reduce charm_pin_pullback_long worst/average MAE and exposure from delayed high-extension pin recoveries while retaining most of the 34-trade, $1261.5 profile edge. Reject if total net profit falls below 98% of run_029, protected extended-VWAP winners are materially cannibalized, completed trades fall more than 10%, or pullback_long/squeeze_long throughput is affected.",
+  "family": "strategy-profile",
+  "label": "charm-pin-local-extension-box",
+  "objective_mode": "risk-adjusted",
+  "primary_metric": "score",
+  "rationale": "This uses a single profile-specific strategy-profile family, not global veto tightening or take-profit compression. run_029/run_037 are the best anchors with 107 trades, $7149.6 net profit, and no slow >=12h trades, but the current risk-adjusted bottleneck is hidden MAE from charm_pin_pullback_long. Global hidden signatures retain only about 79-84% PnL or leave worst MAE unchanged, and prior RSI-boundary surgical veto lost score without improving worst MAE. A local charm-pin dynamic-extension box is the least invasive config-only test aligned with the strategist plan: preserve pullback, squeeze, charm-wall, and 1DTE edges while probing the high-extension charm-pin tail.",
+  "strategy_plan_label": "new_regime_split_router_and_path_state_discovery",
+  "strategy_plan_next_experiments": [
+    "Dormant Charm Wall Pin-Avoid Router Split",
+    "1DTE Pullback Companion Split",
+    "Extended-VWAP Rejection Near-Miss Study",
+    "Pullback Deep-Heat Split Research",
+    "Call Wall Acceptance Isolated Sample Builder",
+    "No-0DTE Data-State Holdout"
+  ],
+  "strategy_plan_track": "new-regime",
+  "watch_metrics": [
+    "score",
+    "net_profit",
+    "trade_count",
+    "worst_mae",
+    "average_mae",
+    "drawdown",
+    "slow_trades"
+  ]
+}

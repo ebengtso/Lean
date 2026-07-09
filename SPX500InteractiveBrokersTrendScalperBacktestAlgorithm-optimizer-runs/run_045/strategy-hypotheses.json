@@ -1,0 +1,10 @@
+[
+  {
+    "evidence": "call_wall_acceptance_long is active in the VALID_0DTE router and enabled, but latest profile attribution shows 0 trades and 0 PnL while other option-aware profiles remain profitable. Prior call-wall loosening repaired a damaged run but did not produce call-wall attribution, implying the branch may still be over-filtered or cannibalized before execution.",
+    "implementation_scope": "config-only",
+    "name": "Call Wall Acceptance Isolated Sample Builder",
+    "risk": "Looser DEX gates may admit call-wall chop or steal trades from higher-expectancy charm_wall_breakaway_long and pullback_long without adding net PnL.",
+    "trigger": "VALID_0DTE call-wall acceptance context with positive forward DEX, call-volume expansion, and sustained strike acceptance for 60 seconds.",
+    "validation_metric": "At least 3 call_wall_acceptance_long trades, positive standalone PnL, profile PnL/exposure hour >=150, total net profit >=98% of run_044, completed trades within 10% of baseline, slow_12h remains 0, and VALID_0DTE core profile PnL is not materially cannibalized."
+  }
+]

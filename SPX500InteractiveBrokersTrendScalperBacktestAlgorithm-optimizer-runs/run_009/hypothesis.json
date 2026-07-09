@@ -1,0 +1,49 @@
+{
+  "acceptance_criteria": {
+    "max_trade_drop_pct": 10.0,
+    "min_mae_delta_for_mae_family": 0.0,
+    "min_net_profit_delta": -25.0,
+    "min_score_delta": 0.0
+  },
+  "base_context": {
+    "base_config": "/Users/erikbengtson/Lean2026/LeanCustom/LauncherBacktest/SPX500InteractiveBrokersTrendScalperBacktestAlgorithm-optimizer-runs/run_001/config.before.json",
+    "base_net_profit": 7125.8,
+    "base_run": "run_001",
+    "base_score": 9594.488580188678,
+    "candidate_base": "best-by-score",
+    "candidate_base_config": "before",
+    "description": "The next run will be this leader/base config plus ONLY the JSON changes returned by the advisor.",
+    "mode": "candidate-base"
+  },
+  "changes": {
+    "trade-risk-max-adverse-points": "12",
+    "use-stale-trade-exit": "true",
+    "use-trade-health-exit": "true"
+  },
+  "expected_direction": "reduce tail MAE without materially reducing net profit or trade count",
+  "expected_effect": "Should reveal whether runtime risk modules improve drawdown, exposure hours, and worst/average MAE without starving trades. Reject if realized losses appear, net profit falls below 98% of run_001, trade count falls more than 10%, pnl_per_exposure_hour falls, or the module merely exits recoverable winners earlier.",
+  "family": "runtime-risk",
+  "label": "runtime-risk-validation",
+  "objective_mode": "risk-adjusted",
+  "primary_metric": "worst_mae",
+  "rationale": "Use batch_f_risk_module_validation because take-profit experiments are hard-saturated and recent call-wall/1DTE/fallback tightening hurt score and net profit. The latest run has no realized losses and no >=12h trades, but worst MAE deteriorated to -638.75 and several winners required long underwater recovery. This is the cleanest non-entry, non-TP experiment to test whether existing runtime health/stale logic can reduce hidden no-stop tail cost while preserving the profitable entry population.",
+  "strategy_plan_label": "profit-expansion-proven-edge-recovery-v1",
+  "strategy_plan_next_experiments": [
+    "Revert Failed Call-Wall Promotion Bias",
+    "MFE-Harvest TP Expansion On Proven Profiles",
+    "1DTE Target-Side Expansion",
+    "Charm Wall Breakaway Sample Expansion",
+    "Pullback Slow-To-Profit Tail Guard",
+    "Pullback 1DTE Dormant Activation Probe"
+  ],
+  "strategy_plan_track": "profit-expansion",
+  "watch_metrics": [
+    "score",
+    "net_profit",
+    "trade_count",
+    "worst_mae",
+    "average_mae",
+    "drawdown",
+    "slow_trades"
+  ]
+}

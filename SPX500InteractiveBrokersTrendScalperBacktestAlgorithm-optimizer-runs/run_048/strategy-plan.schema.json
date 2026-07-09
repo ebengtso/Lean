@@ -1,0 +1,215 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "best_edges": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "edge": {
+            "type": "string"
+          },
+          "evidence": {
+            "type": "string"
+          },
+          "profile": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "profile",
+          "edge",
+          "evidence",
+          "action"
+        ],
+        "type": "object"
+      },
+      "maxItems": 8,
+      "type": "array"
+    },
+    "broken_edges": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "evidence": {
+            "type": "string"
+          },
+          "problem": {
+            "type": "string"
+          },
+          "profile": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "profile",
+          "problem",
+          "evidence",
+          "action"
+        ],
+        "type": "object"
+      },
+      "maxItems": 8,
+      "type": "array"
+    },
+    "market_regime_read": {
+      "type": "string"
+    },
+    "new_strategy_ideas": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "edge": {
+            "type": "string"
+          },
+          "failure_mode": {
+            "type": "string"
+          },
+          "implementation_scope": {
+            "enum": [
+              "config-only",
+              "new-profile-config",
+              "requires-code"
+            ],
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "required_data": {
+            "type": "string"
+          },
+          "trigger": {
+            "type": "string"
+          },
+          "validation_metric": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "trigger",
+          "edge",
+          "implementation_scope",
+          "required_data",
+          "validation_metric",
+          "failure_mode"
+        ],
+        "type": "object"
+      },
+      "maxItems": 6,
+      "type": "array"
+    },
+    "next_experiments": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "config_bias": {
+            "type": "string"
+          },
+          "experiment_type": {
+            "enum": [
+              "risk-reducer",
+              "profit-expansion",
+              "profile-specific",
+              "router",
+              "new-strategy"
+            ],
+            "type": "string"
+          },
+          "goal": {
+            "type": "string"
+          },
+          "hypothesis": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "primary_metric": {
+            "type": "string"
+          },
+          "risk": {
+            "type": "string"
+          },
+          "target_profiles": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 8,
+            "type": "array"
+          }
+        },
+        "required": [
+          "name",
+          "experiment_type",
+          "goal",
+          "target_profiles",
+          "hypothesis",
+          "config_bias",
+          "primary_metric",
+          "risk"
+        ],
+        "type": "object"
+      },
+      "maxItems": 6,
+      "minItems": 1,
+      "type": "array"
+    },
+    "plan_label": {
+      "type": "string"
+    },
+    "profiles_to_expand": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 10,
+      "type": "array"
+    },
+    "profiles_to_freeze": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 10,
+      "type": "array"
+    },
+    "research_notes": {
+      "type": "string"
+    },
+    "risk_controls": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 8,
+      "type": "array"
+    },
+    "strategy_track": {
+      "enum": [
+        "risk-reducer",
+        "profit-expansion",
+        "new-regime",
+        "balanced"
+      ],
+      "type": "string"
+    }
+  },
+  "required": [
+    "plan_label",
+    "strategy_track",
+    "market_regime_read",
+    "best_edges",
+    "broken_edges",
+    "profiles_to_expand",
+    "profiles_to_freeze",
+    "new_strategy_ideas",
+    "next_experiments",
+    "risk_controls",
+    "research_notes"
+  ],
+  "type": "object"
+}

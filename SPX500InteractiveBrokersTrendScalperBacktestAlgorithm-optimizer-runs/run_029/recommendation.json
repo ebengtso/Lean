@@ -1,0 +1,117 @@
+{
+  "changes": [
+    {
+      "key": "entry-veto-extended-vwap-rejection-max-rsi-slope",
+      "reason": "The enabled extended-VWAP rejection signature missed two deep-MAE rows only because RSI slope exceeded the current 3.6 cap: one at 4.0863 MAE -403.2 and one at 8.942 MAE -379.8. Expanding to 4.1 is the smallest useful boundary nudge and avoids the very broad 8.942 expansion that would likely catch too many momentum winners.",
+      "value": "4.1"
+    }
+  ],
+  "expected_effect": "Should test whether the prior successful surgical-veto boundary family can remove or reclassify one additional deep-heat row while preserving the pullback, 1DTE, squeeze, and charm-wall engines. Main tradeoff is possible loss of a small number of high-RSI-slope recoveries; reject if protected fast extended-VWAP winners are materially reduced or net profit falls below 98% of run_029.",
+  "label": "extended-vwap-rsi-boundary-probe",
+  "rationale": "Use exactly one surgical-veto family change because run_029 became the leader from a narrow extended-VWAP rejection boundary nudge, while broad hidden signatures retain only 73-84% of PnL and still leave material MAE. The remaining worst tail set is fully covered by the extended-VWAP near-miss family; this experiment extends only the next-nearest missed boundary, not a global entry filter or profile TP change.",
+  "strategy_hypotheses": [
+    {
+      "evidence": "charm_pin_pullback_long owns the current global worst MAE at -513.4 while still contributing $1261.5 over 34 trades. Static broad filters overlap protected extended-VWAP winners, so this is better expressed as a path-aware classifier if more static boundary nudges fail.",
+      "implementation_scope": "requires-code",
+      "name": "Charm Pin Early-Progress Tail Classifier",
+      "risk": "Can overfit a small number of delayed recoveries or block clean high-extension winners unless protected fast-winner retention is explicitly validated.",
+      "trigger": "charm_pin_pullback_long high-extension or recent-high-rejection entries that fail to make early positive progress after entry.",
+      "validation_metric": "Reduce charm_pin_pullback_long worst MAE toward <= -403 while retaining >=90% charm-pin PnL, >=95% protected fast extended-VWAP winners, total net profit >=98% of leader, and slow_12h_trades at 0."
+    }
+  ],
+  "strategy_plan_reference": {
+    "market_regime_read": "This is a short, high-win-rate, take-profit-only sample with no realized losses and no slow >=12h trades. Risk is hidden mainly in intratrade heat and delayed recovery, not real...",
+    "new_strategy_ideas": [
+      {
+        "implementation_scope": "requires-code",
+        "name": "Charm Pin Early-Progress Tail Classifier",
+        "validation_metric": "Reduce charm_pin_pullback_long worst MAE from -513.4 toward <= -403 while retaining >=90% charm-pin PnL and >=95% protected fast extended-VWAP winners."
+      },
+      {
+        "implementation_scope": "new-profile-config",
+        "name": "1DTE Pullback Companion Profile",
+        "validation_metric": "Combined 1DTE PnL >= current $1305, 1DTE average MAE improves versus -123.9, and total net profit remains >=98% of leader."
+      },
+      {
+        "implementation_scope": "config-only",
+        "name": "Charm Wall Pin Avoid Dormant Activation Probe",
+        "validation_metric": "Activated profile has positive standalone PnL or reduces combined charm/pin worst MAE while total net profit remains >=98% of leader."
+      },
+      {
+        "implementation_scope": "requires-code",
+        "name": "Pullback Deep-Heat Companion Classifier",
+        "validation_metric": "Retain >=90% pullback_long PnL while improving pullback worst MAE from -403.2 and keeping total PnL/exposure hour flat or better."
+      }
+    ],
+    "next_experiments": [
+      {
+        "config_bias": "Continue from the successful boundary-nudge direction. Test one small extension of the enabled extended-VWAP rejection miss box at a time, prioritizing thresholds that caught th...",
+        "experiment_type": "risk-reducer",
+        "name": "Extended-VWAP Tail Boundary Follow-Through",
+        "primary_metric": "Worst MAE, retained total PnL >=98%, protected extended-VWAP winner retention >=90%, and score.",
+        "target_profiles": [
+          "charm_pin_pullback_long"
+        ]
+      },
+      {
+        "config_bias": "Use profile-specific charm-pin tail-risk research around high pullback-from-high, high rolling-high distance, weak or negative VWAP acceleration, and low ADX/RSI. Avoid global s...",
+        "experiment_type": "risk-reducer",
+        "name": "Charm Pin High-Extension Tail Box Refinement",
+        "primary_metric": "charm_pin_pullback_long worst MAE, charm-pin PnL retention >=90%, fast_under_15m retention, and total score.",
+        "target_profiles": [
+          "charm_pin_pullback_long"
+        ]
+      },
+      {
+        "config_bias": "Probe stale no-0DTE fallback exposure only as a holdout-style efficiency trim. Keep VALID_0DTE behavior untouched and avoid removing the single EXPIRED_0DTE winner unless the op...",
+        "experiment_type": "risk-reducer",
+        "name": "Stale No-0DTE Fallback Efficiency Holdout",
+        "primary_metric": "Fallback PnL/exposure hour, fallback worst MAE, unchanged VALID_0DTE PnL, and total PnL retention >=98%.",
+        "target_profiles": [
+          "breakout_long_no_0dte",
+          "pullback_long_no_0dte",
+          "squeeze_long_no_0dte"
+        ]
+      },
+      {
+        "config_bias": "Freeze direct breakout_long_1dte thresholds. If legal, evaluate a companion pullback_long_1dte router split; otherwise leave 1DTE baseline unchanged for this risk-reducer cycle.",
+        "experiment_type": "new-strategy",
+        "name": "1DTE Companion Split Validation",
+        "primary_metric": "Combined 1DTE PnL >= $1305, 1DTE average MAE improvement, total score, and no more than 10% trade loss.",
+        "target_profiles": [
+          "breakout_long_1dte"
+        ]
+      },
+      {
+        "config_bias": "Keep charm_wall_breakaway_long exits frozen. Test only very small admission geometry holdouts or retests of the prior successful relaxation; do not compress take-profit distance.",
+        "experiment_type": "profile-specific",
+        "name": "Charm Wall Admission Geometry Holdout",
+        "primary_metric": "Profile PnL/exposure >=225, total worst MAE no worse than -513.4, slow_12h remains 0, and total net profit >=98% of leader.",
+        "target_profiles": [
+          "charm_wall_breakaway_long"
+        ]
+      }
+    ],
+    "plan_label": "risk_reducer_surgical_tail_boundaries_protect_core_edges",
+    "profiles_to_expand": [
+      "charm_pin_pullback_long",
+      "pullback_long",
+      "charm_wall_breakaway_long",
+      "squeeze_long"
+    ],
+    "profiles_to_freeze": [
+      "breakout_long",
+      "wall_reclaim_long",
+      "wall_breakout_retest_long",
+      "late_day_pin_fade",
+      "negative_gamma_momentum_long",
+      "trend_day_pullback_long",
+      "breakout_long_1dte"
+    ],
+    "run": "run_029",
+    "strategy_track": "risk-reducer"
+  },
+  "validated_changes": {
+    "entry-veto-extended-vwap-rejection-max-rsi-slope": "4.1"
+  }
+}

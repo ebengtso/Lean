@@ -1,0 +1,5 @@
+{
+  "profile.charm_pin_pullback_long.long-regime-filter.dynamic-vwap-expected-move-fraction": "0.2",
+  "profile.charm_pin_pullback_long.long-regime-filter.dynamic-vwap-max-distance": "25",
+  "profile.charm_pin_pullback_long.long-regime-filter.recent-high-rejection-min-pullback": "8"
+}

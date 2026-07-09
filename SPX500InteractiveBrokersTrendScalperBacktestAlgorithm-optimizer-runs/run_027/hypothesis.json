@@ -1,0 +1,47 @@
+{
+  "acceptance_criteria": {
+    "max_trade_drop_pct": 10.0,
+    "min_mae_delta_for_mae_family": 0.0,
+    "min_net_profit_delta": -25.0,
+    "min_score_delta": 0.0
+  },
+  "base_context": {
+    "base_config": "/Users/erikbengtson/Lean2026/LeanCustom/LauncherBacktest/SPX500InteractiveBrokersTrendScalperBacktestAlgorithm-optimizer-runs/run_001/config.before.json",
+    "base_net_profit": 7125.8,
+    "base_run": "run_001",
+    "base_score": 9594.488580188678,
+    "candidate_base": "best-by-score",
+    "candidate_base_config": "before",
+    "description": "The next run will be this leader/base config plus ONLY the JSON changes returned by the advisor.",
+    "mode": "candidate-base"
+  },
+  "changes": {
+    "profile.charm_wall_breakaway_long.long-regime-filter.max-distance-above-charm-wall": "25"
+  },
+  "expected_direction": "improve selected objective by changing entry quality/profile selection without starving trades",
+  "expected_effect": "Should test whether charm_wall_breakaway_long can add one or two high-payoff VALID_0DTE continuation trades while preserving profile PnL/exposure above roughly 225 and total net profit within 98% of run_001. Main risk is admitting weak wall-chase entries; reject if worst MAE worsens, profile efficiency falls materially, or total PnL/exposure declines.",
+  "family": "strategy-profile",
+  "label": "charm-wall-geometry-followthrough",
+  "objective_mode": "risk-adjusted",
+  "primary_metric": "score",
+  "rationale": "Choose exactly one legal family: batch_d_charm_wall_breakaway_long. The strongest recent positive experiment was charm-wall admission geometry, while exit compression and direct 1DTE/pullback tightening have hurt. This keeps the mechanism to profile-specific admission breadth, avoids global veto tightening, avoids take-profit compression, and protects pullback/squeeze/charm-pin fast winners.",
+  "strategy_plan_label": "profit_expansion_protect_fast_winners_and_split_tail_states",
+  "strategy_plan_next_experiments": [
+    "Squeeze Clean Continuation Expansion",
+    "Charm Wall Admission Follow-Through",
+    "1DTE Pullback Companion Router Split",
+    "Dormant Charm Pin Avoid Split Probe",
+    "Extended-VWAP Rejection Boundary Micro-Nudge",
+    "Stale No-0DTE Fallback Efficiency Holdout"
+  ],
+  "strategy_plan_track": "profit-expansion",
+  "watch_metrics": [
+    "score",
+    "net_profit",
+    "trade_count",
+    "worst_mae",
+    "average_mae",
+    "drawdown",
+    "slow_trades"
+  ]
+}

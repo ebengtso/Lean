@@ -1,0 +1,46 @@
+{
+  "changes": {
+    "__router.valid-0dte-profiles": "breakout_long,pullback_long,squeeze_long,wall_reclaim_long,wall_breakout_retest_long,late_day_pin_fade,negative_gamma_momentum_long,trend_day_pullback_long,charm_pin_pullback_long,charm_wall_breakaway_long,call_wall_acceptance_long,charm_wall_pin_avoid_long",
+    "profile.charm_wall_pin_avoid_long.enabled": "true"
+  },
+  "duplicate_of": "run_022",
+  "error": "duplicate experiment",
+  "iteration": 12,
+  "recommendation": {
+    "changes": [
+      {
+        "key": "__router.valid-0dte-profiles",
+        "reason": "Activate a dormant pin-risk split as an attribution experiment while preserving every currently routed VALID_0DTE profile. This tests whether existing router logic can divert charm-wall/pin-risk states into a separate profile instead of pruning the profitable charm-pin and charm-wall parents.",
+        "value": "breakout_long,pullback_long,squeeze_long,wall_reclaim_long,wall_breakout_retest_long,late_day_pin_fade,negative_gamma_momentum_long,trend_day_pullback_long,charm_pin_pullback_long,charm_wall_breakaway_long,call_wall_acceptance_long,charm_wall_pin_avoid_long"
+      },
+      {
+        "key": "profile.charm_wall_pin_avoid_long.enabled",
+        "reason": "Enable only the dormant charm_wall_pin_avoid_long concept. The current leader's largest hidden risk is charm/pin tail MAE, but broad static filters overlap protected fast extended-VWAP winners, so a router split is cleaner than another global veto nudge.",
+        "value": "true"
+      }
+    ],
+    "expected_effect": "This should reveal whether an existing dormant pin-avoid profile is reachable and whether it isolates charm/pin tail states without damaging the profitable charm_pin_pullback_long and charm_wall_breakaway_long edges. Promote only if combined charm-pin/charm-wall/pin-avoid PnL is retained, total net profit stays within 2% of the run_029 leader, protected fast winners are not cannibalized, and worst MAE improves or stays flat. Main risk is router cannibalization or no reachable sample.",
+    "label": "dormant-charm-wall-pin-avoid-split",
+    "rationale": "The leader is already strong, and the latest evidence argues against another broad entry filter: hidden MAE signatures retain only 79-84% PnL or leave worst MAE unchanged, while protected extended-VWAP winners are a real edge. The next highest-value config-only experiment from the strategist plan is a dormant router split for charm/pin attribution. This uses the concept activation exception as one logical strategy-profile family and avoids repeating failed 1DTE tightening, no-0DTE pruning, squeeze target compression, and global extended-VWAP veto broadening.",
+    "strategy_hypotheses": [
+      {
+        "evidence": "charm_pin_pullback_long contributes $1261.5 across 34 VALID_0DTE trades but owns the global -513.4 MAE. charm_wall_breakaway_long contributes $985.6 from only 5 trades with high convexity. Static filters overlap 19 protected extended-VWAP winners worth $715.7, so a split is preferable to blunt pruning.",
+        "implementation_scope": "config-only",
+        "name": "Dormant Charm Wall Pin-Avoid Router Split",
+        "risk": "The dormant profile may be unreachable, or router precedence may divert clean charm-pin/charm-wall winners into a weaker profile and suppress net profit.",
+        "trigger": "VALID_0DTE charm-wall or pin-risk state currently routed into charm_pin_pullback_long or charm_wall_breakaway_long.",
+        "validation_metric": "Combined charm-pin/charm-wall/pin-avoid PnL remains >=98% of the leader contribution, total net profit remains >=98% of run_029, protected fast-winner retention >=95%, and worst MAE improves or remains no worse than -513.4."
+      },
+      {
+        "evidence": "The worst charm-pin tail required 80 minutes to recover, had ES-VWAP 26.69, negative VWAP acceleration, high pullback-from-high 9.25, and failed TP-before-MAE, while protected fast extended-VWAP winners resolve quickly with median hold 2.27 minutes and median MAE -15.3.",
+        "implementation_scope": "requires-code",
+        "name": "Charm Pin Early-Progress Tail Classifier",
+        "risk": "Path-aware logic can overfit a small number of delayed green trades unless validated against protected fast-winner timestamps and out-of-sample days.",
+        "trigger": "charm_pin_pullback_long high-extension entries that fail to make early positive progress after entry.",
+        "validation_metric": "Reduce charm_pin_pullback_long worst MAE toward <= -403 while retaining >=90% charm-pin PnL, >=95% protected fast extended-VWAP winners, total net profit >=98% of leader, and slow_12h remains 0."
+      }
+    ]
+  },
+  "run": "run_037",
+  "signature": "[[\"__router.valid-0dte-profiles\",\"breakout_long,pullback_long,squeeze_long,wall_reclaim_long,wall_breakout_retest_long,late_day_pin_fade,negative_gamma_momentum_long,trend_day_pullback_long,charm_pin_pullback_long,charm_wall_breakaway_long,call_wall_acceptance_long,charm_wall_pin_avoid_long\"],[\"profile.charm_wall_pin_avoid_long.enabled\",\"true\"]]"
+}

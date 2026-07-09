@@ -1,0 +1,49 @@
+{
+  "acceptance_criteria": {
+    "max_trade_drop_pct": 10.0,
+    "min_mae_delta_for_mae_family": 0.0,
+    "min_net_profit_delta": -25.0,
+    "min_score_delta": 0.0
+  },
+  "base_context": {
+    "base_config": "/Users/erikbengtson/Lean2026/LeanCustom/LauncherBacktest/SPX500InteractiveBrokersTrendScalperBacktestAlgorithm-optimizer-runs/run_044/config.before.json",
+    "base_net_profit": 7532.8,
+    "base_run": "run_044",
+    "base_score": 9940.283058006535,
+    "candidate_base": "best-by-score",
+    "candidate_base_config": "before",
+    "description": "The next run will be this leader/base config plus ONLY the JSON changes returned by the advisor.",
+    "mode": "candidate-base"
+  },
+  "changes": {
+    "entry-veto-extended-vwap-rejection-max-higher-high-distance": "7.5",
+    "entry-veto-extended-vwap-rejection-max-rsi-slope": "4.4",
+    "entry-veto-extended-vwap-rejection-min-pullback-from-high": "0"
+  },
+  "expected_direction": "reduce tail MAE without materially reducing net profit or trade count",
+  "expected_effect": "Should reduce worst hidden MAE by letting the already-enabled extended-VWAP rejection veto catch several concrete near-miss tail trades, especially pullback_long and charm_pin_pullback_long heat. Tradeoff is possible loss of some profitable extended-above-VWAP recoveries, so reject if total PnL retention falls below 98%, protected fast/extended-VWAP winners are materially reduced, or kept worst MAE does not improve.",
+  "family": "surgical-veto",
+  "label": "extended-vwap-near-miss-tail-repair",
+  "objective_mode": "risk-adjusted",
+  "primary_metric": "worst_mae",
+  "rationale": "The current best path is a surgical tail repair, not another call-wall tightening or broad entry-quality floor. In run_053 all 24 bad-MAE rows are covered by the extended-VWAP rejection near-miss family, and the six worst entries each missed the enabled veto by one boundary. Broad setup, structure, or VWAP filters retain too little PnL and would damage protected winners; this experiment only widens the existing veto envelope at the exact failed thresholds.",
+  "strategy_plan_label": "risk_reducer_surgical_tail_repair_preserve_core_router_edges",
+  "strategy_plan_next_experiments": [
+    "Extended-VWAP Near-Miss Tail Repair",
+    "Pullback Weak-Structure Heat Box",
+    "1DTE Companion Split Holdout",
+    "No-0DTE Stale Fallback Efficiency Holdout",
+    "Dormant Pin-Avoid Attribution Probe",
+    "Call-Wall Acceptance Re-Attribution"
+  ],
+  "strategy_plan_track": "risk-reducer",
+  "watch_metrics": [
+    "score",
+    "net_profit",
+    "trade_count",
+    "worst_mae",
+    "average_mae",
+    "drawdown",
+    "slow_trades"
+  ]
+}

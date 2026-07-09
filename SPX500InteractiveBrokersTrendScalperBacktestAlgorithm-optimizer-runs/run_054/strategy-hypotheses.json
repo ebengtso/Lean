@@ -1,0 +1,10 @@
+[
+  {
+    "evidence": "call_wall_acceptance_long has only 2 VALID_0DTE trades but contributes $640.5, $290.3 per exposure hour, and the -655.2 worst MAE. Prior dynamic TP max=5 plus forward DEX 0.08 improved objective slightly without trade starvation, while heavier DEX/call-volume tightening hurt net profit.",
+    "implementation_scope": "config-only",
+    "name": "Call-Wall Acceptance Persistence Box",
+    "risk": "Small sample risk is high; stricter persistence may remove the largest winner and improve MAE only by suppressing profit.",
+    "trigger": "VALID_0DTE call-wall acceptance with positive forward DEX, expanding call flow, and strike acceptance that persists long enough to avoid transient wall touches.",
+    "validation_metric": "Total risk-adjusted score improves versus run_044, total net profit remains >=98% of run_044, call-wall PnL retention >=70%, completed trades drop <=10%, PnL/exposure stays flat or better, and slow_12h remains 0."
+  }
+]

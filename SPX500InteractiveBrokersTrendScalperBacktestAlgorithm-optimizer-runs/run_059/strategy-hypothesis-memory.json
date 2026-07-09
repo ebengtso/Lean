@@ -1,0 +1,182 @@
+[
+  {
+    "evidence": "call_wall_acceptance_long produced only 2 VALID_0DTE trades but contributed $640.5, $290.3/hour, and the global worst MAE at -655.2. The worst trade had early favorable excursio...",
+    "implementation_scope": "config-only",
+    "name": "Call-Wall Early Realization Containment",
+    "risk": "The profile may require wide targets to pay for rare convex call-wall moves; capping TP can improve MAE and exposure while suppressing total net profit.",
+    "run": "run_044",
+    "trigger": "VALID_0DTE call-wall acceptance with positive forward DEX and strike acceptance, but wide selected target distance and extended ES-VWAP state.",
+    "validation_metric": "call_wall_acceptance_long worst MAE improves materially, total worst MAE moves toward <= -513.4, slow >=12h stays 0, total net profit remains >=98% of run_044, and portfolio PnL..."
+  },
+  {
+    "evidence": "The analyzer repeatedly shows static config cannot distinguish delayed convex recoveries from clean fast winners as well as intratrade path features: first profit timing, half-T...",
+    "implementation_scope": "requires-code",
+    "name": "Call-Wall Convex Recovery Monitor",
+    "risk": "Path-aware logic can overfit a two-trade profile unless validated against protected fast winners and out-of-sample days.",
+    "run": "run_044",
+    "trigger": "call_wall_acceptance_long enters with wide target and extended ES-VWAP but fails to make early half-target progress or prints adverse expansion before meaningful continuation.",
+    "validation_metric": "Reduce call_wall_acceptance_long worst MAE while retaining at least 70% of its PnL, keeping total score flat or better, and preserving protected fast-winner retention >=95%."
+  },
+  {
+    "evidence": "call_wall_acceptance_long is active in the VALID_0DTE router and enabled, but latest profile attribution shows 0 trades and 0 PnL while other option-aware profiles remain profit...",
+    "implementation_scope": "config-only",
+    "name": "Call Wall Acceptance Isolated Sample Builder",
+    "risk": "Looser DEX gates may admit call-wall chop or steal trades from higher-expectancy charm_wall_breakaway_long and pullback_long without adding net PnL.",
+    "run": "run_045",
+    "trigger": "VALID_0DTE call-wall acceptance context with positive forward DEX, call-volume expansion, and sustained strike acceptance for 60 seconds.",
+    "validation_metric": "At least 3 call_wall_acceptance_long trades, positive standalone PnL, profile PnL/exposure hour >=150, total net profit >=98% of run_044, completed trades within 10% of baseline..."
+  },
+  {
+    "evidence": "call_wall_acceptance_long produced $640.5 on only 2 VALID_0DTE trades with $290/hour, but also the global -655.2 MAE and a 120-minute recovery path. Static broad filters would r...",
+    "implementation_scope": "config-only",
+    "name": "Call-Wall Acceptance Persistence And Realization Box",
+    "risk": "The worst tail is also the largest winner, so stronger acceptance and smaller targets may suppress net profit more than they improve hidden MAE.",
+    "run": "run_047",
+    "trigger": "VALID_0DTE call-wall acceptance with positive forward DEX but wide selected target distance and extended ES-VWAP state.",
+    "validation_metric": "Global worst MAE improves toward <= -513.4 or average MAE/exposure improves, call-wall PnL retention >=70%, total net profit >=98% of run_044, completed trades drop <=10%, and s..."
+  },
+  {
+    "evidence": "The worst call-wall trade had early favorable movement but did not reach full TP until after deep adverse excursion; config cannot directly observe early path failure.",
+    "implementation_scope": "requires-code",
+    "name": "Call-Wall Convex Recovery Monitor",
+    "risk": "Path-aware logic can overfit a two-trade profile and cut rare convex winners unless protected winner retention is validated.",
+    "run": "run_047",
+    "trigger": "call_wall_acceptance_long enters with wide target or extended ES-VWAP and fails to make sustained early progress before adverse expansion.",
+    "validation_metric": "Reduce worst MAE below the current -655.2 while retaining >=70% call-wall PnL, total net profit >=98% of leader, protected fast-winner retention >=95%, and no new slow trades."
+  },
+  {
+    "evidence": "charm_wall_breakaway_long produced 7 VALID_0DTE trades, $1060.6 PnL, 224.54 PnL/exposure hour, no slow >=12h trades, and worst MAE -346.8, cleaner than pullback_long and charm_p...",
+    "implementation_scope": "config-only",
+    "name": "Charm Wall Structure-Confirmed Extension Box",
+    "risk": "Small-sample edge can be overfit; stricter structure plus a 22-point VWAP cap may remove rare convex winners or cannibalize nothing, yielding lower net profit without MAE improv...",
+    "run": "run_048",
+    "trigger": "VALID_0DTE charm-wall breakaway with price above charm wall, require-breakout true, confirmed ES higher-high/higher-low structure, and ES-VWAP extension below the overextension ...",
+    "validation_metric": "Total risk-adjusted score improves versus run_044, total net profit remains >=98% of run_044, charm_wall_breakaway_long PnL/exposure remains >=225, slow_12h stays 0, and global ..."
+  },
+  {
+    "evidence": "charm_wall_breakaway_long contributes only 4 VALID_0DTE trades but $939.1 PnL, $583/hour, median MFE 293.6, no slow trades, and worst MAE -346.8. The profile may support a more ...",
+    "implementation_scope": "config-only",
+    "name": "Charm Wall Structure-Confirmed Convex Branch",
+    "risk": "Small sample risk is high; stricter structure plus TP cap can remove or underpay the rare convex winners that make the profile valuable.",
+    "run": "run_049",
+    "trigger": "VALID_0DTE charm-wall breakaway with require-breakout true, price above charm wall, and ES higher-high/higher-low support confirmation.",
+    "validation_metric": "Profile PnL/exposure remains >=225, total net profit >=98% of run_044, slow_12h remains 0, completed trades drop <=10% unless objective improves materially, and global worst MAE..."
+  },
+  {
+    "evidence": "The worst current tail behavior is path-dependent in pullback_long and charm_pin_pullback_long. Static broad filters like RSI-slope floors and setup >=50 retain too little PnL, ...",
+    "implementation_scope": "requires-code",
+    "name": "Early-Progress Heat Classifier",
+    "risk": "Can overfit delayed green recoveries or block protected fast extended-VWAP winners unless validated against protected winner UTCs and out-of-sample slices.",
+    "run": "run_049",
+    "trigger": "pullback_long or charm_pin_pullback_long entry that fails to make meaningful early positive progress before adverse expansion.",
+    "validation_metric": "Remove slow >=12h trades, reduce worst MAE toward <= -513, retain >=90% combined pullback/charm-pin PnL, retain >=95% protected fast winners, and keep total score flat or better."
+  },
+  {
+    "evidence": "call_wall_acceptance_long contributes 8.5% of total PnL from only 2 trades, but owns the -655.2 portfolio worst MAE. The worst row had strong forward DEX but delayed realization...",
+    "implementation_scope": "config-only",
+    "name": "Call-Wall Flow Persistence Box",
+    "risk": "Small sample risk is high; tighter DEX and call-volume expansion can delete the largest single winner and suppress net profit without improving kept worst MAE.",
+    "run": "run_050",
+    "trigger": "VALID_0DTE call-wall acceptance with positive forward DEX, accepted strike context, and demonstrably expanding call volume.",
+    "validation_metric": "Global worst MAE improves toward <= -513.4, call_wall_acceptance_long retains at least 70% of PnL, total net profit remains >=98% of run_050, completed trades drop <=10%, and pn..."
+  },
+  {
+    "evidence": "The worst call-wall trade made early progress but reached full target only after deep adverse excursion; this path distinction is not directly available as a current config key.",
+    "implementation_scope": "requires-code",
+    "name": "Call-Wall Convex Recovery Monitor",
+    "risk": "Path-aware logic can overfit a two-trade profile and cut rare convex winners unless validated against protected fast winners and out-of-sample days.",
+    "run": "run_050",
+    "trigger": "call_wall_acceptance_long with wide target or high ES-VWAP extension that fails to convert early favorable movement into sustained continuation.",
+    "validation_metric": "Call-wall worst MAE improves materially while retaining >=70% call-wall PnL, total net profit >=98% of leader, protected fast-winner retention >=95%, and slow_12h remains 0."
+  },
+  {
+    "evidence": "STALE_0DTE fallback produced 5 trades and $162.8 total, but breakout_long_no_0dte contributed only $71 over 2 trades with 40.5 PnL/exposure hour, 52.6 minute median hold, and -2...",
+    "implementation_scope": "config-only",
+    "name": "No-0DTE Breakout Realization Box",
+    "risk": "Small sample risk is high; tighter slope and smaller targets can remove or underpay the single EXPIRED_0DTE winner, causing profit suppression without improving portfolio risk-a...",
+    "run": "run_051",
+    "trigger": "STALE_0DTE or EXPIRED_0DTE routed breakout_long_no_0dte entries where no valid 0DTE option map is available and the trade must rely on ES continuation quality.",
+    "validation_metric": "Fallback PnL/exposure improves versus 83.2 aggregate and 40.5 breakout stale slice, fallback expectancy remains positive, VALID_0DTE PnL/trade count remains unchanged, total net..."
+  },
+  {
+    "evidence": "call_wall_acceptance_long contributes $640.5 on only 2 trades and owns the -655.2 worst MAE; the worst trade still made $546 after early favorable movement and later deep heat, ...",
+    "implementation_scope": "requires-code",
+    "name": "Call-Wall Convex Recovery Monitor",
+    "risk": "Can overfit a two-trade profile and cut rare convex winners unless validated against protected fast-winner retention and out-of-sample days.",
+    "run": "run_052",
+    "trigger": "call_wall_acceptance_long entry with wide target or extended ES-VWAP that fails to make sustained early progress before adverse expansion.",
+    "validation_metric": "Reduce worst MAE below -655.2 toward <= -513.4 while retaining >=70% call-wall PnL, total net profit >=98% of leader, pnl_per_exposure_hour flat or better, and slow_12h remains 0."
+  },
+  {
+    "evidence": "VALID_1DTE_ONLY contributes 20 trades and $1315.3 with no slow trades, but direct 1DTE tightening has repeatedly been risky. A separate pullback companion may improve 1DTE MAE w...",
+    "implementation_scope": "new-profile-config",
+    "name": "1DTE Pullback Companion Profile",
+    "risk": "The companion may cannibalize profitable breakout_long_1dte trades or be unreachable under current trigger logic.",
+    "run": "run_052",
+    "trigger": "0DTE unavailable, 1DTE map valid, and ES state resembles pullback/reclaim rather than clean breakout continuation.",
+    "validation_metric": "Combined 1DTE PnL stays >= $1315, 1DTE average MAE improves versus -124.6, breakout_long_1dte retained PnL is measured, and total risk-adjusted score is flat or better."
+  },
+  {
+    "evidence": "pullback_long is the top PnL source with $2413.2 over 31 trades but owns the -638.75 worst MAE. Static broad filters either retain only 70-87% PnL or leave worst MAE unresolved,...",
+    "implementation_scope": "config-only",
+    "name": "Extended-VWAP Near-Miss Tail Repair",
+    "risk": "Over-widening the veto can block clean extended-above-VWAP winners; validate protected fast-winner and extended-VWAP-winner retention explicitly.",
+    "run": "run_053",
+    "trigger": "VALID_0DTE pullback/charm-pin entries with extended-VWAP rejection geometry that miss the existing surgical veto by only RSI-slope, pullback-from-high, or higher-high boundary.",
+    "validation_metric": "Worst MAE improves toward <= -513.4, total PnL remains >=98% of run_044, completed trades drop <=10%, pnl_per_exposure_hour stays flat or better, and slow_12h remains 0."
+  },
+  {
+    "evidence": "The worst heat rows often failed to make meaningful early progress before adverse expansion, while protected fast winners typically resolved quickly. This distinction is visible...",
+    "implementation_scope": "requires-code",
+    "name": "Early Progress Heat Classifier",
+    "risk": "Can overfit a small tail sample and block delayed-but-profitable recoveries unless validated against protected UTCs and out-of-sample slices.",
+    "run": "run_053",
+    "trigger": "pullback_long or charm_pin_pullback_long entries that fail to print early positive progress or half-TP progress before adverse expansion.",
+    "validation_metric": "Reduce worst MAE below current tail levels while retaining >=90% affected-profile PnL and >=95% protected fast-winner entries."
+  },
+  {
+    "evidence": "call_wall_acceptance_long has only 2 VALID_0DTE trades but contributes $640.5, $290.3 per exposure hour, and the -655.2 worst MAE. Prior dynamic TP max=5 plus forward DEX 0.08 i...",
+    "implementation_scope": "config-only",
+    "name": "Call-Wall Acceptance Persistence Box",
+    "risk": "Small sample risk is high; stricter persistence may remove the largest winner and improve MAE only by suppressing profit.",
+    "run": "run_054",
+    "trigger": "VALID_0DTE call-wall acceptance with positive forward DEX, expanding call flow, and strike acceptance that persists long enough to avoid transient wall touches.",
+    "validation_metric": "Total risk-adjusted score improves versus run_044, total net profit remains >=98% of run_044, call-wall PnL retention >=70%, completed trades drop <=10%, PnL/exposure stays flat..."
+  },
+  {
+    "evidence": "squeeze_long is clean but modest at 10 trades, $723 PnL, -214.2 worst MAE; charm_wall_breakaway_long is high expectancy with 5 trades, $987 PnL, -357 worst MAE. A dormant delta/...",
+    "implementation_scope": "config-only",
+    "name": "Delta Charm Breakout Dormant Attribution Probe",
+    "risk": "The route may be unreachable, or it may cannibalize high-quality squeeze_long/charm_wall_breakaway_long entries without adding incremental PnL.",
+    "run": "run_055",
+    "trigger": "VALID_0DTE strong option-flow/charm continuation state that is not cleanly captured by squeeze_long or charm_wall_breakaway_long.",
+    "validation_metric": "Positive standalone delta_charm_breakout_long PnL, total net profit >=98% of run_055, no more than 10% degradation in squeeze_long plus charm_wall_breakaway_long PnL, worst MAE ..."
+  },
+  {
+    "evidence": "call_wall_acceptance_long owns the -655.2 worst MAE but also contributes $640.5 from only two trades, including the largest winner. Static pruning has repeatedly risked suppress...",
+    "implementation_scope": "requires-code",
+    "name": "Call-Wall Convex Recovery Monitor",
+    "risk": "Can overfit a two-trade profile and cut the rare convex winner unless validated against protected fast-winner retention and out-of-sample days.",
+    "run": "run_055",
+    "trigger": "call_wall_acceptance_long entry with wide target or extended ES-VWAP that fails to convert early favorable movement into sustained continuation.",
+    "validation_metric": "Reduce worst MAE below -655.2 toward <= -513.4 while retaining >=70% call-wall PnL, total net profit >=98% of leader, and slow_12h remains 0."
+  },
+  {
+    "evidence": "VALID_1DTE_ONLY currently contributes 20 trades and $1315.3 with no slow >=12h trades, but worst MAE is -386.75 and PnL/exposure is 170.09, below the strongest VALID_0DTE pullba...",
+    "implementation_scope": "new-profile-config",
+    "name": "1DTE Pullback Companion Profile",
+    "risk": "Router overlap may cannibalize breakout_long_1dte winners, or pullback_long_1dte may be unreachable despite activation because only limited tunables are exposed.",
+    "run": "run_058",
+    "trigger": "0DTE unavailable, 1DTE map valid, and ES state resembles pullback/reclaim rather than clean breakout continuation.",
+    "validation_metric": "Combined 1DTE PnL >= $1315.3, breakout_long_1dte retained PnL/trades explicitly measured, 1DTE average/worst MAE flat or better, total net profit >=98% of run_044, and slow_12h ..."
+  },
+  {
+    "evidence": "call_wall_acceptance_long still owns the -655.2 worst MAE while contributing $640.5 on only two trades; static filters repeatedly risk profit suppression because the worst tail ...",
+    "implementation_scope": "requires-code",
+    "name": "Call-Wall Convex Recovery Monitor",
+    "risk": "Can overfit a two-trade profile and cut rare convex recoveries unless protected fast-winner retention and out-of-sample days are validated.",
+    "run": "run_058",
+    "trigger": "call_wall_acceptance_long entry with wide target or extended ES-VWAP that fails to convert early favorable movement into sustained continuation.",
+    "validation_metric": "Reduce call-wall worst MAE below -655.2 while retaining at least 70% call-wall PnL, total net profit >=98% of leader, PnL per exposure hour flat or better, and no slow trades."
+  }
+]

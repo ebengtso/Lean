@@ -1,0 +1,48 @@
+{
+  "acceptance_criteria": {
+    "max_trade_drop_pct": 10.0,
+    "min_mae_delta_for_mae_family": 0.0,
+    "min_net_profit_delta": -25.0,
+    "min_score_delta": 0.0
+  },
+  "base_context": {
+    "base_config": "/Users/erikbengtson/Lean2026/LeanCustom/LauncherBacktest/SPX500InteractiveBrokersTrendScalperBacktestAlgorithm-optimizer-runs/run_044/config.before.json",
+    "base_net_profit": 7532.8,
+    "base_run": "run_044",
+    "base_score": 9940.283058006535,
+    "candidate_base": "best-by-score",
+    "candidate_base_config": "before",
+    "description": "The next run will be this leader/base config plus ONLY the JSON changes returned by the advisor.",
+    "mode": "candidate-base"
+  },
+  "changes": {
+    "__router.one-dte-profiles": "breakout_long_1dte,pullback_long_1dte",
+    "profile.breakout_long_1dte.take-profit.max-distance": "6"
+  },
+  "expected_direction": "increase net profit or PnL per exposure hour without worsening MAE",
+  "expected_effect": "Should expose whether VALID_1DTE_ONLY contains a separable pullback/reclaim regime while preserving the existing breakout_long_1dte edge. Desired outcome is flat-or-better combined 1DTE PnL, improved 1DTE average/worst MAE or exposure efficiency, and no damage to VALID_0DTE performance. Main tradeoff is router cannibalization: if pullback_long_1dte simply relabels profitable breakout trades or reduces 1DTE PnL below the current $1315.3 slice, reject.",
+  "family": "take-profit",
+  "label": "one-dte-pullback-companion-attribution",
+  "objective_mode": "risk-adjusted",
+  "primary_metric": "net_profit",
+  "rationale": "Use a new-profile-config router split rather than another global veto or repeated call-wall/charm-wall keyset. run_058 has clean data-state attribution: VALID_1DTE_ONLY contributes 20 trades, $1315.3 PnL, no slow trades, but worst MAE is still -386.75 and median hold is longer than the best 0DTE pullback/charm edges. Direct 1DTE tightening has been risky, so the better experiment is attribution: add the dormant pullback_long_1dte companion to the one-DTE router and measure whether it separates reclaim behavior from breakout continuation. This is one logical family and does not allow option-confirmed 0DTE profiles to trade on missing/stale/thin 0DTE data.",
+  "strategy_plan_label": "new_regime_router_split_data_state_and_tail_attribution",
+  "strategy_plan_next_experiments": [
+    "Dormant Pin-Avoid Attribution Split",
+    "1DTE Companion Split Attribution",
+    "Call-Wall Convex Containment Split",
+    "Extended-VWAP Near-Miss Micro Retest",
+    "Charm-Wall Structure-Confirmed Expansion",
+    "No-0DTE Data-State Holdout"
+  ],
+  "strategy_plan_track": "new-regime",
+  "watch_metrics": [
+    "score",
+    "net_profit",
+    "trade_count",
+    "worst_mae",
+    "average_mae",
+    "drawdown",
+    "slow_trades"
+  ]
+}

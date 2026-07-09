@@ -1,0 +1,8 @@
+{
+  "applied_after_base_run": "run_001",
+  "changes": {
+    "entry-veto-extended-vwap-rejection-max-vwap-distance": "26.25"
+  },
+  "source_changes": "/Users/erikbengtson/Lean2026/LeanCustom/LauncherBacktest/SPX500InteractiveBrokersTrendScalperBacktestAlgorithm-optimizer-runs/run_026/config-changes-applied.json",
+  "source_run": "run_026"
+}

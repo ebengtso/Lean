@@ -1,0 +1,8 @@
+{
+  "applied_after_base_run": "run_029",
+  "changes": {
+    "indicator-register-resolution": "Second"
+  },
+  "source_changes": "/Users/erikbengtson/Lean2026/LeanCustom/LauncherBacktest/SPX500InteractiveBrokersTrendScalperBacktestAlgorithm-optimizer-runs/run_040/config-changes-applied.json",
+  "source_run": "run_040"
+}

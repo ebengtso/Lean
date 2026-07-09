@@ -1,0 +1,7 @@
+{
+  "changes": {
+    "profile.call_wall_acceptance_long.dynamic-take-profit.max": "5",
+    "profile.call_wall_acceptance_long.long-regime-filter.min-forward-dex-ratio-30m": "0.08"
+  },
+  "signature": "[[\"profile.call_wall_acceptance_long.dynamic-take-profit.max\",\"5\"],[\"profile.call_wall_acceptance_long.long-regime-filter.min-forward-dex-ratio-30m\",\"0.08\"]]"
+}

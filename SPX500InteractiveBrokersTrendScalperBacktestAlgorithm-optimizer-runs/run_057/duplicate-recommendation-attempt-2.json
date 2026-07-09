@@ -1,0 +1,44 @@
+{
+  "changes": {
+    "profile.breakout_long_no_0dte.dynamic-take-profit.max": "4",
+    "profile.breakout_long_no_0dte.es-vwap.slope-min": "0.1",
+    "profile.breakout_long_no_0dte.take-profit.distance": "4"
+  },
+  "duplicate_of": "run_051",
+  "error": "duplicate experiment",
+  "iteration": 19,
+  "recommendation": {
+    "changes": [
+      {
+        "key": "profile.breakout_long_no_0dte.es-vwap.slope-min",
+        "reason": "State-specific Batch G fallback test. STALE_0DTE breakout fallback is positive but inefficient: 2 trades, only $71 PnL, 40.5 PnL/hour, 52.6m median hold, and -250.25 worst MAE. Raising slope from 0.08 to 0.10 requires stronger ES continuation when 0DTE evidence is unavailable, without touching VALID_0DTE profiles.",
+        "value": "0.10"
+      },
+      {
+        "key": "profile.breakout_long_no_0dte.dynamic-take-profit.max",
+        "reason": "The stale breakout fallback currently carries a 6-point adaptive cap but realizes low PnL/hour with long holds. Capping at 4 tests faster realization for ES-only/no-0DTE breakout entries while preserving the separate pullback_no_0dte fallback and all valid-0DTE option-confirmed profiles.",
+        "value": "4"
+      },
+      {
+        "key": "profile.breakout_long_no_0dte.take-profit.distance",
+        "reason": "Move the fallback fixed TP to the prior profitable 4-point realization box: large enough not to underpay the single EXPIRED_0DTE winner, but more disciplined than letting stale-map breakout trades drift toward wide dynamic targets.",
+        "value": "4"
+      }
+    ],
+    "expected_effect": "Should improve no-0DTE fallback efficiency, especially stale breakout PnL per exposure hour and average hold, while leaving the core VALID_0DTE pullback/charm/squeeze edge unchanged. Main tradeoff is small-sample risk: it may underpay or remove the single EXPIRED_0DTE breakout winner, so reject if fallback PnL turns negative, total net profit falls below 98% of run_044, or VALID_0DTE trade attribution changes unexpectedly.",
+    "label": "no-0dte-breakout-efficiency-retest",
+    "rationale": "Use exactly one legal family: batch_g_missing_0dte_policy_adapted. The leader-family runs are already strong and broad entry/veto tuning has repeatedly risked profit suppression. The cleanest underexplored lever is state-specific fallback efficiency: VALID_0DTE produces $5864.3 and should be protected, while STALE_0DTE breakout_long_no_0dte is low-efficiency and tail-heavier than pullback_no_0dte. This tests a contained ES-only realization/continuation box and does not allow option-confirmed profiles to trade on missing or stale 0DTE data.",
+    "strategy_hypotheses": [
+      {
+        "evidence": "STALE_0DTE fallback contributes 5 trades and $162.8, but breakout_long_no_0dte is the weak slice: 2 trades, $71, 40.5 PnL/hour, 52.6m median hold, avg MAE -210.6. EXPIRED_0DTE has one strong breakout winner, so the test must preserve positive fallback expectancy rather than simply deleting fallback trades.",
+        "implementation_scope": "config-only",
+        "name": "No-0DTE Breakout Realization Box",
+        "risk": "Tiny sample; stricter slope plus smaller adaptive cap can either improve stale fallback efficiency or suppress the single expired-0DTE convex winner with little portfolio benefit.",
+        "trigger": "STALE_0DTE or EXPIRED_0DTE breakout_long_no_0dte entries where 0DTE option confirmation is unavailable and the strategy must rely on ES continuation quality.",
+        "validation_metric": "Fallback PnL remains positive, fallback PnL/hour improves above the current aggregate 83.2 and stale breakout 40.5, fallback worst MAE is flat or better, VALID_0DTE PnL/trade count is unchanged, total net profit remains >=98% of run_044, and total risk-adjusted score is flat or better."
+      }
+    ]
+  },
+  "run": "run_057",
+  "signature": "[[\"profile.breakout_long_no_0dte.dynamic-take-profit.max\",\"4\"],[\"profile.breakout_long_no_0dte.es-vwap.slope-min\",\"0.1\"],[\"profile.breakout_long_no_0dte.take-profit.distance\",\"4\"]]"
+}

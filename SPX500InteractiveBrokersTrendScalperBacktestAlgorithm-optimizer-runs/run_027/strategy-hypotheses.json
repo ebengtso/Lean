@@ -1,0 +1,10 @@
+[
+  {
+    "evidence": "charm_wall_breakaway_long has only 5 VALID_0DTE trades but contributes $985.6, 197.1 average PnL, 234.4 PnL/exposure hour, median MFE 146.2, and no slow >=12h trades. The run_024 to run_027 admission probe improved score by 217 and net profit by $221 without worsening worst MAE.",
+    "implementation_scope": "config-only",
+    "name": "Charm Wall Admission Follow-Through",
+    "risk": "Small sample risk is high; relaxing higher-low geometry may add lower-quality wall-chase entries or cannibalize existing charm-wall winners without improving total score.",
+    "trigger": "VALID_0DTE charm-wall breakaway context with require-breakout true, distance above charm wall within the expanded 25-point box, and only marginal ES higher-low confirmation.",
+    "validation_metric": "charm_wall_breakaway_long PnL/exposure remains >=225, total net profit remains >=98% of run_001, completed trades do not drop more than 10%, slow_12h remains 0, and total worst MAE stays no worse than -527."
+  }
+]

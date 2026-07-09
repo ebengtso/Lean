@@ -1,0 +1,10 @@
+[
+  {
+    "evidence": "VALID_1DTE_ONLY contributes 20 trades and $1315.3 with no slow trades, but lower PnL/hour than pullback_long and a -386.75 worst MAE. Prior notes argue against deleting or broadly tightening the edge; this tests a profile-local confirmation box instead.",
+    "implementation_scope": "config-only",
+    "name": "1DTE Forward DEX Continuation Box",
+    "risk": "The 1DTE sample may be too small, and stronger forward DEX plus VWAP slope can cannibalize profitable fallback insurance without materially reducing the kept worst MAE.",
+    "trigger": "0DTE unavailable, 1DTE map valid, breakout_long_1dte selected, and the trade depends on 1DTE forward DEX plus ES continuation rather than valid 0DTE confirmation.",
+    "validation_metric": "VALID_1DTE_ONLY PnL remains >=98% of $1315.3 unless worst/average MAE improves materially; 1DTE PnL/hour improves above $170/hour; total net profit remains >=98% of leader; completed trades drop <=10%; slow_12h remains 0."
+  }
+]

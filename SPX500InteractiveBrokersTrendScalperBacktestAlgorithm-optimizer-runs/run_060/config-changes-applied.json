@@ -1,0 +1,5 @@
+{
+  "profile.breakout_long_1dte.es-vwap.slope-min": "0.04",
+  "profile.breakout_long_1dte.long-regime-filter-1dte.min-forward-dex-ratio-30m": "0.08",
+  "profile.breakout_long_1dte.take-profit.max-distance": "6"
+}

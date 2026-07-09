@@ -1,0 +1,10 @@
+[
+  {
+    "evidence": "breakout_long_1dte produced 20 VALID_1DTE_ONLY trades and $1305 PnL, but average MAE was -123.86 and worst MAE was -375.7. It is too profitable to remove, but it is a valid local risk-adjusted optimization target.",
+    "implementation_scope": "config-only",
+    "name": "1DTE Breakout Quality Gate",
+    "risk": "Small sample with all winners; stricter slope/structure may remove profitable fallback insurance without enough MAE improvement.",
+    "trigger": "0DTE unavailable while 1DTE map is valid and breakout_long_1dte is routed.",
+    "validation_metric": "1DTE average MAE and worst MAE improve, 1DTE PnL remains at least 95% of current, total net profit remains at least 98% of run_001, and VALID_0DTE performance is unchanged."
+  }
+]

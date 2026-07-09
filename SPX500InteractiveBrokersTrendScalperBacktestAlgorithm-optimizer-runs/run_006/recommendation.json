@@ -1,0 +1,150 @@
+{
+  "changes": [
+    {
+      "key": "profile.call_wall_acceptance_long.long-regime-filter.min-net-dex-volume",
+      "reason": "Call-wall acceptance produced only one trade, but it was the cleanest profile by MAE and exposure efficiency. Relaxing the DEX volume floor from 1.0B to 750M should build sample without abandoning positive dealer-flow confirmation.",
+      "value": "750000000"
+    },
+    {
+      "key": "profile.call_wall_acceptance_long.long-regime-filter.min-forward-dex-ratio-30m",
+      "reason": "Move from 0.05 to 0.03 to admit moderate forward-DEX continuation states while still requiring positive forward dealer support.",
+      "value": "0.03"
+    },
+    {
+      "key": "option-call-volume.min-increase-pct",
+      "reason": "Reduce the call-volume expansion hurdle from 0.10 to 0.05 to test whether sparse sampling is under-routing otherwise valid call-wall acceptance impulses.",
+      "value": "0.05"
+    },
+    {
+      "key": "profile.call_wall_acceptance_long.dynamic-take-profit.max",
+      "reason": "The only observed call-wall trade had very low MAE and high MFE, so a modest target ceiling expansion should test upside capture without changing entry routing broadly.",
+      "value": "7"
+    }
+  ],
+  "expected_effect": "Should increase call_wall_acceptance_long sample count from the current one-trade footprint while preserving valid-0DTE option confirmation. Expected upside is higher net profit and PnL per exposure hour from clean call-wall impulses; risk is wall-chase entries with higher MAE if the relaxed DEX and call-volume thresholds admit weak acceptance.",
+  "label": "promote",
+  "rationale": "Use batch_a_call_wall_acceptance_long as the next isolated experiment. Prior fallback/take-profit work is saturated and recently hurt score, while call_wall_acceptance_long is underexplored and showed the best realized efficiency: 1 trade, $91 PnL, 455 PnL/exposure hour, and only -11.7 worst MAE. This is not a global filter and does not let option-confirmed profiles trade on missing or stale 0DTE data.",
+  "strategy_hypotheses": [
+    {
+      "evidence": "call_wall_acceptance_long has only one VALID_0DTE trade, but that trade had $91 PnL, 455 PnL/exposure hour, -11.7 MAE, high setup quality, and strong ADX. This suggests the concept may be under-routed rather than unprofitable.",
+      "implementation_scope": "config-only",
+      "name": "Call Wall Acceptance Sample Builder",
+      "risk": "One-trade evidence can overfit; relaxed acceptance may add low-quality wall-chase entries or steal signals from stronger pullback profiles.",
+      "trigger": "VALID_0DTE sessions with positive net DEX, positive forward DEX, and expanding call volume near an upside call wall.",
+      "validation_metric": "Increase call_wall_acceptance_long to at least 5 trades with positive PnL, PnL per exposure hour above 250, worst MAE better than -100, total net profit at least 98% of run_001, and no degradation in VALID_0DTE performance."
+    }
+  ],
+  "strategy_plan_reference": {
+    "market_regime_read": "The tested window is a strongly favorable long-only, no-stop-loss regime with 105 completed trades, 100% realized win rate, no slow >=12h trades, 0.4% drawdown, and high fast-tr...",
+    "new_strategy_ideas": [
+      {
+        "implementation_scope": "requires-code",
+        "name": "Charm Pin Fast-Recovery Classifier",
+        "validation_metric": "Reduce charm_pin_pullback_long worst MAE from -527 toward <= -375 while retaining >=90% of profile PnL and no loss of fast_under_15m count beyond 3."
+      },
+      {
+        "implementation_scope": "new-profile-config",
+        "name": "1DTE Pullback Companion",
+        "validation_metric": "Combined 1DTE PnL/exposure hour improves above 167.94 while total 1DTE PnL remains >= baseline $1298.7 and worst MAE does not worsen beyond -375.7."
+      },
+      {
+        "implementation_scope": "new-profile-config",
+        "name": "Dormant Pin-Avoid Mean-Reversion Discovery",
+        "validation_metric": "New dormant profile produces positive PnL, PnL/exposure hour >150, average MAE below active-profile median, and does not reduce active profile PnL in the same run."
+      },
+      {
+        "implementation_scope": "config-only",
+        "name": "Call Wall Acceptance Sample Builder",
+        "validation_metric": "Increase call_wall_acceptance_long to at least 5-8 trades with positive PnL, PnL/exposure hour >250, and worst MAE below -100."
+      }
+    ],
+    "next_experiments": [
+      {
+        "config_bias": "Keep current leader as base. Do not change broad entry switches. Bias toward slightly wider dynamic/profit target behavior only on pullback_long states that already show fast pr...",
+        "experiment_type": "profit-expansion",
+        "name": "Pullback Long Target Expansion Slice",
+        "primary_metric": "Total score and pullback_long PnL/exposure hour; guardrails: total net profit > run_001, worst MAE no worse than -527, avg MAE not worse by more than 5%, fast_under_15m trades w...",
+        "target_profiles": [
+          "pullback_long"
+        ]
+      },
+      {
+        "config_bias": "Run a profile-isolated target expansion/quality split for charm_wall_breakaway_long. Preserve the 12-point runner behavior; test whether slightly more permissive breakaway accep...",
+        "experiment_type": "profit-expansion",
+        "name": "Charm Wall Breakaway Runner Expansion",
+        "primary_metric": "Profile PnL, PnL/exposure hour, trade count, and worst/avg MAE; require total score non-negative versus run_001.",
+        "target_profiles": [
+          "charm_wall_breakaway_long"
+        ]
+      },
+      {
+        "config_bias": "Build sample for call_wall_acceptance_long using only profile-local acceptance loosen/tighten research. Do not combine with other changes, because the one observed trade is clea...",
+        "experiment_type": "profile-specific",
+        "name": "Call Wall Acceptance Sample Builder",
+        "primary_metric": "At least 5 trades, positive PnL, PnL/exposure hour >250, worst MAE below -100, and no negative impact to active profile routing.",
+        "target_profiles": [
+          "call_wall_acceptance_long"
+        ]
+      },
+      {
+        "config_bias": "Test a surgical extended-VWAP-rejection threshold nudge only as a guardrail overlay, not a broad filter. Focus on thresholds that missed the -527 and -403 rows by narrow margins...",
+        "experiment_type": "risk-reducer",
+        "name": "Surgical Extended-VWAP Near-Miss Repair",
+        "primary_metric": "Worst MAE improvement toward <= -403, retained net profit >=98% of run_001, fast winner PnL retention, and protected extended-VWAP winner count.",
+        "target_profiles": [
+          "charm_pin_pullback_long",
+          "pullback_long",
+          "charm_wall_breakaway_long"
+        ]
+      },
+      {
+        "config_bias": "Preserve breakout_long_1dte as active, but test efficiency improvements only within 1DTE routing. Avoid disabling it or replacing it with 0DTE logic.",
+        "experiment_type": "profit-expansion",
+        "name": "1DTE Breakout Efficiency Lift",
+        "primary_metric": "1DTE PnL/exposure hour, total 1DTE PnL >=95% baseline, total score, and worst MAE not worse than -375.7 for the profile.",
+        "target_profiles": [
+          "breakout_long_1dte"
+        ]
+      },
+      {
+        "config_bias": "One dormant profile at a time, full router replacement plus same-profile tuning only. Prefer pullback_long_1dte or a valid-0DTE pin/mean-reversion concept as an isolated discove...",
+        "experiment_type": "new-strategy",
+        "name": "Single Dormant Concept Activation Probe",
+        "primary_metric": "New profile PnL, PnL/exposure hour, trade count, average/worst MAE, and active-profile PnL preservation.",
+        "target_profiles": [
+          "pullback_long_1dte",
+          "mean_reversion_long",
+          "late_day_pin_avoid_long",
+          "charm_wall_pin_avoid_long",
+          "delta_charm_breakout_long"
+        ]
+      }
+    ],
+    "plan_label": "profit-expansion-edge-preservation-v1",
+    "profiles_to_expand": [
+      "pullback_long",
+      "charm_wall_breakaway_long",
+      "call_wall_acceptance_long",
+      "breakout_long_1dte"
+    ],
+    "profiles_to_freeze": [
+      "breakout_long",
+      "breakout_long_no_0dte",
+      "pullback_long_no_0dte",
+      "squeeze_long_no_0dte",
+      "wall_reclaim_long",
+      "wall_breakout_retest_long",
+      "late_day_pin_fade",
+      "negative_gamma_momentum_long",
+      "trend_day_pullback_long"
+    ],
+    "run": "run_006",
+    "strategy_track": "profit-expansion"
+  },
+  "validated_changes": {
+    "option-call-volume.min-increase-pct": "0.05",
+    "profile.call_wall_acceptance_long.dynamic-take-profit.max": "7",
+    "profile.call_wall_acceptance_long.long-regime-filter.min-forward-dex-ratio-30m": "0.03",
+    "profile.call_wall_acceptance_long.long-regime-filter.min-net-dex-volume": "7.5e+08"
+  }
+}

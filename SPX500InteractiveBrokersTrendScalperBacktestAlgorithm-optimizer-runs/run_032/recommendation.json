@@ -1,0 +1,128 @@
+{
+  "changes": [
+    {
+      "key": "profile.breakout_long_no_0dte.es-vwap.slope-min",
+      "reason": "STALE_0DTE breakout fallback is the weakest live slice: 2 trades, only $71 PnL, 40.5 PnL/exposure hour, 52.6 minute median hold, and -250.25 worst MAE. A one-step slope tighten tests whether stale fallback should require stronger ES-only continuation without touching VALID_0DTE profiles.",
+      "value": "0.10"
+    },
+    {
+      "key": "profile.breakout_long_no_0dte.take-profit.distance",
+      "reason": "The stale breakout fallback is low-efficiency exposure with small realized payoff; reducing the fixed TP from 3 to 2.5 should favor faster realization in missing/stale option states while leaving option-confirmed routes unchanged.",
+      "value": "2.5"
+    },
+    {
+      "key": "profile.breakout_long_no_0dte.dynamic-take-profit.max",
+      "reason": "Current breakout_no_0dte dynamic cap is 6 and stale trades show long holds with mediocre MFE-to-time quality. Compressing the adaptive cap to 4 limits stale fallback target inflation without using a stop loss or broad entry veto.",
+      "value": "4"
+    }
+  ],
+  "expected_effect": "Should improve no-0DTE fallback exposure efficiency and reduce stale fallback heat/hold time. Main risk is losing the single high-quality EXPIRED_0DTE breakout winner or cutting fallback convexity; reject if total net profit drops more than 2%, VALID_0DTE changes, or fallback PnL/exposure fails to improve.",
+  "label": "stale-no-0dte-breakout-compression",
+  "rationale": "Use Batch G only and keep the experiment isolated to the routed no-0DTE breakout fallback. The core VALID_0DTE engines remain strong and should be protected, while stale fallback contributes little PnL and carries inefficient exposure. This avoids repeating the failed 1DTE tightening path and avoids global extended-VWAP/veto tightening after the RSI-boundary probe hurt score and net profit.",
+  "strategy_hypotheses": [
+    {
+      "evidence": "breakout_long_no_0dte in STALE_0DTE produced only 2 trades, $71 PnL, 40.5 PnL/exposure hour, 52.6 minute median hold, and -250.25 worst MAE, while VALID_0DTE profiles produced $5388.1 and should not be touched.",
+      "implementation_scope": "config-only",
+      "name": "Stale No-0DTE Breakout Efficiency Trim",
+      "risk": "Very small stale/expired sample; stricter slope and lower targets may remove or underpay fallback insurance, especially the one EXPIRED_0DTE winner with strong efficiency.",
+      "trigger": "0DTE map stale/expired and router selects breakout_long_no_0dte as ES-only fallback.",
+      "validation_metric": "Fallback PnL/exposure improves, fallback worst MAE does not worsen, VALID_0DTE PnL/trade count are unchanged, total net profit remains at least 98% of run_029, and slow_12h stays zero."
+    }
+  ],
+  "strategy_plan_reference": {
+    "market_regime_read": "Short, high-win-rate, take-profit-only sample with 105 trades, 100% realized win rate, no slow >=12h trades, and low portfolio drawdown. The risk is hidden intratrade heat rathe...",
+    "new_strategy_ideas": [
+      {
+        "implementation_scope": "requires-code",
+        "name": "Charm Pin Early-Progress Tail Classifier",
+        "validation_metric": "Reduce charm_pin_pullback_long worst MAE toward <= -403 while retaining >=90% charm-pin PnL, >=95% protected fast extended-VWAP winners, total net profit >=98% of leader, and no..."
+      },
+      {
+        "implementation_scope": "new-profile-config",
+        "name": "1DTE Pullback Companion Profile",
+        "validation_metric": "Combined 1DTE PnL >= current $1311, 1DTE average MAE improves versus -124.1, total net profit >=98% of leader, and total score flat or better."
+      },
+      {
+        "implementation_scope": "config-only",
+        "name": "Charm Wall Pin Avoid Dormant Activation Probe",
+        "validation_metric": "Activated inactive profile has positive standalone PnL or reduces combined charm/pin worst MAE while total net profit remains >=98% of leader and protected fast-winner count is ..."
+      },
+      {
+        "implementation_scope": "requires-code",
+        "name": "Pullback Deep-Heat Companion Classifier",
+        "validation_metric": "Retain >=90% pullback_long PnL while improving pullback worst MAE from -379.8 toward <= -300 and keeping total PnL/exposure flat or better."
+      }
+    ],
+    "next_experiments": [
+      {
+        "config_bias": "Use narrow boundary nudges around the already-enabled extended-VWAP rejection family, prioritizing the single failed boundary that caught the -513.4 tail before considering mult...",
+        "experiment_type": "risk-reducer",
+        "name": "Extended-VWAP Tail Boundary Re-Test",
+        "primary_metric": "Worst MAE improvement with total net profit >=98.5% of run_029 and protected extended-VWAP winner retention >=95%.",
+        "target_profiles": [
+          "charm_pin_pullback_long"
+        ]
+      },
+      {
+        "config_bias": "Tighten only the charm-pin tail-risk box around high pullback-from-high, high rolling-high distance, weak/negative VWAP acceleration, low ADX/RSI, and profile match. Do not add ...",
+        "experiment_type": "risk-reducer",
+        "name": "Charm Pin Tail Box Specificity Probe",
+        "primary_metric": "charm_pin_pullback_long worst MAE, charm-pin PnL retention >=90%, total score flat or better.",
+        "target_profiles": [
+          "charm_pin_pullback_long"
+        ]
+      },
+      {
+        "config_bias": "Isolate stale no-0DTE behavior only. Favor mild quality or exposure-efficiency trimming of breakout_long_no_0dte stale fallback; avoid touching VALID_0DTE routes or the single p...",
+        "experiment_type": "risk-reducer",
+        "name": "Stale No-0DTE Fallback Efficiency Trim",
+        "primary_metric": "Fallback PnL/exposure improvement, fallback worst MAE not worse, total net profit >=98.5% of leader, VALID_0DTE PnL unchanged.",
+        "target_profiles": [
+          "breakout_long_no_0dte",
+          "pullback_long_no_0dte"
+        ]
+      },
+      {
+        "config_bias": "Freeze breakout_long_1dte thresholds. If legal, test adding pullback_long_1dte as a companion one-dte router split with minimal local tuning and attribution-first evaluation.",
+        "experiment_type": "new-strategy",
+        "name": "1DTE Companion Split Attribution Probe",
+        "primary_metric": "Combined 1DTE PnL >= current $1311, 1DTE average MAE improves, total score flat or better.",
+        "target_profiles": [
+          "breakout_long_1dte"
+        ]
+      },
+      {
+        "config_bias": "Keep charm_wall_breakaway_long exits and take-profit behavior stable. Only test small admission attribution/holdout if it does not broaden weak wall-chase entries.",
+        "experiment_type": "profile-specific",
+        "name": "Charm Wall Geometry Stability Holdout",
+        "primary_metric": "Profile PnL/exposure >=225, total worst MAE no worse than -513.4, total net profit >=98.5% of leader.",
+        "target_profiles": [
+          "charm_wall_breakaway_long"
+        ]
+      }
+    ],
+    "plan_label": "risk_reducer_surgical_tail_capture_after_rsi_boundary_reject",
+    "profiles_to_expand": [
+      "charm_pin_pullback_long",
+      "pullback_long",
+      "charm_wall_breakaway_long"
+    ],
+    "profiles_to_freeze": [
+      "breakout_long",
+      "wall_reclaim_long",
+      "wall_breakout_retest_long",
+      "late_day_pin_fade",
+      "negative_gamma_momentum_long",
+      "trend_day_pullback_long",
+      "call_wall_acceptance_long",
+      "squeeze_long_no_0dte"
+    ],
+    "run": "run_032",
+    "strategy_track": "risk-reducer"
+  },
+  "validated_changes": {
+    "profile.breakout_long_no_0dte.dynamic-take-profit.max": "4",
+    "profile.breakout_long_no_0dte.es-vwap.slope-min": "0.1",
+    "profile.breakout_long_no_0dte.take-profit.distance": "2.5"
+  }
+}

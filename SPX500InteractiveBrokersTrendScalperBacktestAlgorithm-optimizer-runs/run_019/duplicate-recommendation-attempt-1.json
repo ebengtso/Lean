@@ -1,0 +1,45 @@
+{
+  "changes": {
+    "__router.one-dte-profiles": "breakout_long_1dte,pullback_long_1dte"
+  },
+  "duplicate_of": "run_010",
+  "error": "duplicate experiment",
+  "iteration": 6,
+  "recommendation": {
+    "changes": [
+      {
+        "key": "__router.one-dte-profiles",
+        "reason": "Router/profile split experiment: add the existing pullback_long_1dte concept to the VALID_1DTE_ONLY fallback set without hardening breakout_long_1dte. Prior direct 1DTE tightening cut profitable insurance, so the cleaner test is whether the router can separate pullback/reclaim-like 1DTE entries instead of pruning them.",
+        "value": "breakout_long_1dte,pullback_long_1dte"
+      },
+      {
+        "key": "profile.pullback_long_1dte.enabled",
+        "reason": "Activate only the companion 1DTE pullback profile being added to the one-DTE router list. This keeps the experiment isolated to missing-0DTE/valid-1DTE routing and leaves VALID_0DTE profiles untouched.",
+        "value": "true"
+      }
+    ],
+    "expected_effect": "If the dormant 1DTE pullback companion is reachable, combined 1DTE fallback should retain the current profitable insurance while improving average MAE and exposure efficiency by moving reclaim-style entries away from breakout_long_1dte. Reject if total net profit falls below 98% of run_001, VALID_0DTE metrics change materially, or 1DTE PnL/exposure deteriorates.",
+    "label": "one-dte-pullback-companion-router-probe",
+    "rationale": "The next experiment should avoid repeating failed direct 1DTE quality tightening and avoid global veto/TP changes. breakout_long_1dte is profitable but heat-heavy: 20 VALID_1DTE_ONLY trades, $1304 PnL, -123.7 average MAE, and -375.7 worst MAE. Prior hardening reduced score and PnL, so this tests a config-only profile split using the dormant pullback_long_1dte profile rather than pruning the existing 1DTE breakout edge.",
+    "strategy_hypotheses": [
+      {
+        "evidence": "VALID_1DTE_ONLY contributed $1304 over 20 trades with no slow >=12h trades, but average MAE was -123.7. Prior breakout_long_1dte gates damaged PnL, implying the issue is likely regime mixing rather than insufficient strictness.",
+        "implementation_scope": "new-profile-config",
+        "name": "1DTE Pullback Companion",
+        "risk": "The added profile may be unreachable, or it may cannibalize profitable breakout_long_1dte trades if router/profile ordering favors it too broadly.",
+        "trigger": "0DTE unavailable, 1DTE map valid, and ES state resembles pullback/reclaim rather than breakout continuation.",
+        "validation_metric": "Combined 1DTE PnL remains at least current $1304, 1DTE average MAE improves versus -123.7, total net profit remains >=98% of run_001, and VALID_0DTE performance is unchanged."
+      },
+      {
+        "evidence": "pullback_long produced $2299.7 but owns the global worst MAE at -638.75. Broad structure pruning is unsafe because weak-structure buckets remain profitable.",
+        "implementation_scope": "requires-code",
+        "name": "Pullback Deep-Heat Companion Classifier",
+        "risk": "Config-only proxies may block profitable weak-structure pullbacks; early-path or normalized state features are likely needed.",
+        "trigger": "VALID_0DTE pullback entries with weak structure, low/negative VWAP acceleration, and delayed early profit.",
+        "validation_metric": "Retain >=90% of pullback_long PnL while improving pullback worst MAE toward <= -527 and improving total risk-adjusted score."
+      }
+    ]
+  },
+  "run": "run_019",
+  "signature": "[[\"__router.one-dte-profiles\",\"breakout_long_1dte,pullback_long_1dte\"]]"
+}

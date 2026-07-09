@@ -1,0 +1,45 @@
+{
+  "changes": {
+    "__router.one-dte-profiles": "breakout_long_1dte,pullback_long_1dte"
+  },
+  "duplicate_of": "run_010",
+  "error": "duplicate experiment",
+  "iteration": 9,
+  "recommendation": {
+    "changes": [
+      {
+        "key": "__router.one-dte-profiles",
+        "reason": "Config-only dormant companion probe: add pullback_long_1dte to the 1DTE router while preserving breakout_long_1dte. This tests whether existing pullback fallback logic can split VALID_1DTE_ONLY reclaim states instead of bluntly tightening the profitable breakout_long_1dte profile.",
+        "value": "breakout_long_1dte,pullback_long_1dte"
+      },
+      {
+        "key": "profile.pullback_long_1dte.enabled",
+        "reason": "Enable the dormant 1DTE pullback companion only after routing it. This is a discovery run, not a direct quality tighten on breakout_long_1dte, which prior experiments showed suppresses profit and worsens objective.",
+        "value": "true"
+      }
+    ],
+    "expected_effect": "Should reveal whether 1DTE pullback/reclaim states are reachable and can reduce the 1DTE average MAE without damaging the existing breakout fallback. Success requires combined 1DTE PnL at least current $1305, total net profit within 2% of run_001, trade count within 10%, and no increase in slow >=12h trades. Main tradeoff is router cannibalization of profitable breakout_long_1dte entries.",
+    "label": "one-dte-pullback-companion-probe",
+    "rationale": "The leader is plateaued, and repeated direct 1DTE tightening hurt score and net profit. VALID_1DTE_ONLY remains valuable with 20 trades and $1305 PnL, but has average MAE around -123.9 and worst MAE -375.7. A companion profile activation is the cleaner next experiment: it changes routing structure instead of adding another entry veto or compressing exits, and it is consistent with the strategist plan's new-regime track.",
+    "strategy_hypotheses": [
+      {
+        "evidence": "VALID_1DTE_ONLY breakout_long_1dte contributes $1305 over 20 trades, but direct 1DTE ES structure/VWAP/forward-DEX tightening previously lost $317 to $558.5 and worsened objective. A companion profile may split reclaim/pullback behavior without weakening breakout continuation.",
+        "implementation_scope": "new-profile-config",
+        "name": "1DTE Pullback Companion Profile",
+        "risk": "Router ordering may cannibalize profitable breakout_long_1dte trades, or pullback_long_1dte may be unreachable with current C# profile triggers.",
+        "trigger": "0DTE unavailable, 1DTE map valid, and ES state resembles pullback/reclaim rather than breakout continuation.",
+        "validation_metric": "Combined 1DTE PnL remains >= $1305, 1DTE average MAE improves versus -123.9, total net profit remains >=98% of run_001, and completed trades do not drop more than 10%."
+      },
+      {
+        "evidence": "charm_pin_pullback_long contributes $1237.7 with a 5.3 minute median hold but owns the -527 global MAE. Protected extended-VWAP winners are fast and profitable, so static config proxies have been flat or only marginal.",
+        "implementation_scope": "requires-code",
+        "name": "Charm Pin Early-Progress Tail Classifier",
+        "risk": "A path-aware classifier could overfit the single worst tail unless protected extended-VWAP winner retention is explicitly measured.",
+        "trigger": "charm_pin_pullback_long high-extension or recent-high-rejection entries that fail to print early positive progress after entry.",
+        "validation_metric": "Reduce charm_pin_pullback_long worst MAE toward <= -403 while retaining >=90% charm-pin PnL and >=95% protected fast extended-VWAP winners."
+      }
+    ]
+  },
+  "run": "run_028",
+  "signature": "[[\"__router.one-dte-profiles\",\"breakout_long_1dte,pullback_long_1dte\"]]"
+}

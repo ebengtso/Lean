@@ -1,0 +1,5 @@
+{
+  "profile.charm_wall_breakaway_long.es-vwap.max-distance": "22",
+  "profile.charm_wall_breakaway_long.take-profit.max-distance": "10",
+  "profile.charm_wall_breakaway_long.take-profit.multiplier": "1.15"
+}

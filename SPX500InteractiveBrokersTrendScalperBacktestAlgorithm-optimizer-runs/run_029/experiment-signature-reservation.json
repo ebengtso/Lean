@@ -1,0 +1,6 @@
+{
+  "changes": {
+    "entry-veto-extended-vwap-rejection-max-rsi-slope": "4.1"
+  },
+  "signature": "[[\"entry-veto-extended-vwap-rejection-max-rsi-slope\",\"4.1\"]]"
+}

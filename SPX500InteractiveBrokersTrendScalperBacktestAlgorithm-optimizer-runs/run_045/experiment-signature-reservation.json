@@ -1,0 +1,8 @@
+{
+  "changes": {
+    "option-call-volume.min-increase-pct": "0.05",
+    "profile.call_wall_acceptance_long.long-regime-filter.min-forward-dex-ratio-30m": "0.03",
+    "profile.call_wall_acceptance_long.long-regime-filter.min-net-dex-volume": "5e+08"
+  },
+  "signature": "[[\"option-call-volume.min-increase-pct\",\"0.05\"],[\"profile.call_wall_acceptance_long.long-regime-filter.min-forward-dex-ratio-30m\",\"0.03\"],[\"profile.call_wall_acceptance_long.long-regime-filter.min-net-dex-volume\",\"5e+08\"]]"
+}

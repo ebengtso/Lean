@@ -1,0 +1,5 @@
+{
+  "entry-veto-charm-pin-tail-risk-max-rolling-high-distance": "14.75",
+  "entry-veto-charm-pin-tail-risk-min-setup-quality-score": "60",
+  "entry-veto-charm-pin-tail-risk-min-vwap-distance": "20"
+}
