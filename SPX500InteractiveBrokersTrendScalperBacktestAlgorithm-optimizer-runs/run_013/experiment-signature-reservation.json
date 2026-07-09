@@ -1,8 +1,0 @@
-{
-  "changes": {
-    "profile.charm_wall_breakaway_long.es-structure.min-higher-high-distance": "1.5",
-    "profile.charm_wall_breakaway_long.es-structure.min-higher-low-distance": "1",
-    "profile.charm_wall_breakaway_long.long-regime-filter.max-distance-above-charm-wall": "15"
-  },
-  "signature": "[[\"profile.charm_wall_breakaway_long.es-structure.min-higher-high-distance\",\"1.5\"],[\"profile.charm_wall_breakaway_long.es-structure.min-higher-low-distance\",\"1\"],[\"profile.charm_wall_breakaway_long.long-regime-filter.max-distance-above-charm-wall\",\"15\"]]"
-}

@@ -1,9 +1,0 @@
-{
-  "attempt": 1,
-  "changes": {
-    "higher-timeframe-resolution": "30min"
-  },
-  "reason": "advisor repeated already-tested experiments for 3 attempt(s)",
-  "signature": "[[\"higher-timeframe-resolution\",\"30min\"]]",
-  "source": "threshold"
-}

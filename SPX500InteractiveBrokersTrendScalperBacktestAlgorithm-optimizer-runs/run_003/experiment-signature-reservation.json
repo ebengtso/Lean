@@ -1,9 +1,0 @@
-{
-  "changes": {
-    "profile.breakout_long_no_0dte.enabled": "false",
-    "profile.pullback_long_no_0dte.es-vwap.max-distance": "8",
-    "profile.pullback_long_no_0dte.take-profit.distance": "3",
-    "profile.squeeze_long_no_0dte.enabled": "false"
-  },
-  "signature": "[[\"profile.breakout_long_no_0dte.enabled\",\"false\"],[\"profile.pullback_long_no_0dte.es-vwap.max-distance\",\"8\"],[\"profile.pullback_long_no_0dte.take-profit.distance\",\"3\"],[\"profile.squeeze_long_no_0dte.enabled\",\"false\"]]"
-}

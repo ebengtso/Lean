@@ -1,9 +1,0 @@
-{
-  "applied_after_base_run": "run_001",
-  "changes": {
-    "profile.pullback_long.es-structure.min-score": "4",
-    "profile.pullback_long.es-vwap.max-distance": "8.5"
-  },
-  "source_changes": "/Users/erikbengtson/Lean2026/LeanCustom/LauncherBacktest/SPX500InteractiveBrokersTrendScalperBacktestAlgorithm-optimizer-runs/run_012/config-changes-applied.json",
-  "source_run": "run_012"
-}

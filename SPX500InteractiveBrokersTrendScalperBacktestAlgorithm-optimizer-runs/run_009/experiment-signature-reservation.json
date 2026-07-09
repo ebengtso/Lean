@@ -1,8 +1,0 @@
-{
-  "changes": {
-    "trade-risk-max-adverse-points": "12",
-    "use-stale-trade-exit": "true",
-    "use-trade-health-exit": "true"
-  },
-  "signature": "[[\"trade-risk-max-adverse-points\",\"12\"],[\"use-stale-trade-exit\",\"true\"],[\"use-trade-health-exit\",\"true\"]]"
-}

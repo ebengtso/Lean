@@ -1,8 +1,0 @@
-{
-  "changes": {
-    "entry-veto-extended-vwap-rejection-max-higher-high-distance": "7.5",
-    "entry-veto-extended-vwap-rejection-max-rsi-slope": "4.4",
-    "entry-veto-extended-vwap-rejection-min-pullback-from-high": "0"
-  },
-  "signature": "[[\"entry-veto-extended-vwap-rejection-max-higher-high-distance\",\"7.5\"],[\"entry-veto-extended-vwap-rejection-max-rsi-slope\",\"4.4\"],[\"entry-veto-extended-vwap-rejection-min-pullback-from-high\",\"0\"]]"
-}

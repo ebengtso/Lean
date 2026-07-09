@@ -1,5 +1,0 @@
-{
-  "option-call-volume.min-increase-pct": "0.15",
-  "profile.call_wall_acceptance_long.long-regime-filter.min-forward-dex-ratio-30m": "0.08",
-  "profile.call_wall_acceptance_long.long-regime-filter.min-net-dex-volume": "1.5e+09"
-}

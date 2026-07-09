@@ -1,7 +1,0 @@
-{
-  "changes": {
-    "__router.one-dte-profiles": "breakout_long_1dte,pullback_long_1dte",
-    "profile.breakout_long_1dte.take-profit.max-distance": "6"
-  },
-  "signature": "[[\"__router.one-dte-profiles\",\"breakout_long_1dte,pullback_long_1dte\"],[\"profile.breakout_long_1dte.take-profit.max-distance\",\"6\"]]"
-}

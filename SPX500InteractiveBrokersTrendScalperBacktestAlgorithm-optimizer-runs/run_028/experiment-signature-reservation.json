@@ -1,6 +1,0 @@
-{
-  "changes": {
-    "order-book-min-microprice-slope-points-per-second": "-0.003"
-  },
-  "signature": "[[\"order-book-min-microprice-slope-points-per-second\",\"-0.003\"]]"
-}

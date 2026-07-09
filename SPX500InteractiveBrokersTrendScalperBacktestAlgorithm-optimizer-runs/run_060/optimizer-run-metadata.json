@@ -1,8 +1,0 @@
-{
-  "candidate_base": "best-by-score",
-  "candidate_base_config": "before",
-  "iteration": 20,
-  "parallel_worker_count": 3,
-  "parallel_worker_id": 1,
-  "run_number": 60
-}

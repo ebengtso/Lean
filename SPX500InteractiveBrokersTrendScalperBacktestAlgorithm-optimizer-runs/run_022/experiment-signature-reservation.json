@@ -1,7 +1,0 @@
-{
-  "changes": {
-    "__router.valid-0dte-profiles": "breakout_long,pullback_long,squeeze_long,wall_reclaim_long,wall_breakout_retest_long,late_day_pin_fade,negative_gamma_momentum_long,trend_day_pullback_long,charm_pin_pullback_long,charm_wall_breakaway_long,call_wall_acceptance_long,charm_wall_pin_avoid_long",
-    "profile.charm_wall_pin_avoid_long.enabled": "true"
-  },
-  "signature": "[[\"__router.valid-0dte-profiles\",\"breakout_long,pullback_long,squeeze_long,wall_reclaim_long,wall_breakout_retest_long,late_day_pin_fade,negative_gamma_momentum_long,trend_day_pullback_long,charm_pin_pullback_long,charm_wall_breakaway_long,call_wall_acceptance_long,charm_wall_pin_avoid_long\"],[\"profile.charm_wall_pin_avoid_long.enabled\",\"true\"]]"
-}

@@ -1,6 +1,0 @@
-{
-  "changes": {
-    "profile.call_wall_acceptance_long.dynamic-take-profit.max": "5"
-  },
-  "signature": "[[\"profile.call_wall_acceptance_long.dynamic-take-profit.max\",\"5\"]]"
-}

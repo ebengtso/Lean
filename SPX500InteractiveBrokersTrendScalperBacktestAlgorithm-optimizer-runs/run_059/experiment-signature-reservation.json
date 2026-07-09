@@ -1,8 +1,0 @@
-{
-  "changes": {
-    "profile.breakout_long_no_0dte.es-structure.min-score": "5",
-    "profile.breakout_long_no_0dte.rsi-momentum.threshold": "52",
-    "profile.breakout_long_no_0dte.take-profit.distance": "2.5"
-  },
-  "signature": "[[\"profile.breakout_long_no_0dte.es-structure.min-score\",\"5\"],[\"profile.breakout_long_no_0dte.rsi-momentum.threshold\",\"52\"],[\"profile.breakout_long_no_0dte.take-profit.distance\",\"2.5\"]]"
-}

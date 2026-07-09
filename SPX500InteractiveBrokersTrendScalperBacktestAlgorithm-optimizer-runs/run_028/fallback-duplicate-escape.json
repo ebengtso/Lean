@@ -1,9 +1,0 @@
-{
-  "attempt": 1,
-  "changes": {
-    "order-book-min-microprice-slope-points-per-second": "-0.003"
-  },
-  "reason": "advisor repeated already-tested experiments for 3 attempt(s)",
-  "signature": "[[\"order-book-min-microprice-slope-points-per-second\",\"-0.003\"]]",
-  "source": "threshold"
-}

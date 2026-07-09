@@ -1,6 +1,0 @@
-{
-  "codex_bin": "/Users/erikbengtson/.vscode/extensions/openai.chatgpt-26.623.141536-darwin-arm64/bin/macos-aarch64/codex",
-  "codex_model": "gpt-5.5",
-  "codex_reasoning_effort": "low",
-  "schema": "/Users/erikbengtson/Lean2026/LeanCustom/LauncherBacktest/SPX500InteractiveBrokersTrendScalperBacktestAlgorithm-optimizer-runs/run_049/strategy-plan.schema.json"
-}

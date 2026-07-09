@@ -1,6 +1,0 @@
-{
-  "entry-veto-charm-pin-tail-risk-max-adx": "20",
-  "entry-veto-charm-pin-tail-risk-max-rolling-high-distance": "15",
-  "entry-veto-charm-pin-tail-risk-min-setup-quality-score": "60",
-  "use-entry-veto-charm-pin-tail-risk-signature": "true"
-}

@@ -1,9 +1,0 @@
-{
-  "attempt": 1,
-  "changes": {
-    "ema-period": "12"
-  },
-  "reason": "advisor repeated already-tested experiments for 3 attempt(s)",
-  "signature": "[[\"ema-period\",\"12\"]]",
-  "source": "threshold"
-}
