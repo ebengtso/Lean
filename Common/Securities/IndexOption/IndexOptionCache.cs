@@ -13,14 +13,13 @@
  * limitations under the License.
 */
 
-using System;
-
-namespace QuantConnect.Orders
+namespace QuantConnect.Securities.IndexOption
 {
     /// <summary>
-    /// FIX (Financial Information Exchange) order properties
+    /// Index option specific caching support
     /// </summary>
-    [Obsolete("FixOrderProperites is deprecated. Use FixOrderProperties instead.")]
-    public class FixOrderProperites : FixOrderProperties
-    { }
+    /// <seealso cref="SecurityCache"/>
+    public class IndexOptionCache : Option.OptionCache
+    {
+    }
 }
